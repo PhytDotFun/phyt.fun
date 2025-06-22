@@ -1,4 +1,6 @@
-import { nextJsConfig } from "@repo/eslint-config/next-js";
+//  @ts-check
 
-/** @type {import("eslint").Linter.Config} */
-export default nextJsConfig;
+import { tanstackConfigJs } from "@phyt/eslint-config/tanstack";
+
+/** @type {import("eslint").Linter.Config[]} */
+export default tanstackConfigJs;
