@@ -1,15 +1,42 @@
+@font-face {
+    font-family: 'DMSans';
+    src: url('$fonts/DMSans-VariableFont.ttf') format('truetype'),
+    url('$fonts/DMSans-VariableFont.ttf') format('truetype-variations');
+    font-weight: 100 1000;
+    font-style: normal;
+    font-display: swap;
+}
+
 @import "tailwindcss";
+
+@theme {
+    --font-family-dmsans: 'DMSans', sans-serif;
+
+    --font-weight-thin: 100;
+    --font-weight-extralight: 200;
+    --font-weight-light: 300;
+    --font-weight-normal: 400;
+    --font-weight-medium: 500;
+    --font-weight-semibold: 600;
+    --font-weight-bold: 700;
+    --font-weight-extrabold: 800;
+    --font-weight-black: 900;
+    --font-weight-extrablack: 1000;
+
+    --font-weight-450: 450;
+    --font-weight-550: 550;
+    --font-weight-650: 650;
+    --font-weight-750: 750;
+    --font-weight-850: 850;
+}
 
 body {
   @apply m-0;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
-    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
-    sans-serif;
+  font-family: 'DMSans', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
-    monospace;
+    font-family: 'DMSans', sans-serif;
 }
