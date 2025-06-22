@@ -1,10 +1,10 @@
 import js from "@eslint/js";
-import eslintConfigPrettier from "eslint-config-prettier";
-import tseslint from "typescript-eslint";
-import pluginReactHooks from "eslint-plugin-react-hooks";
-import pluginReact from "eslint-plugin-react";
-import globals from "globals";
 import { tanstackConfig } from "@tanstack/eslint-config";
+import eslintConfigPrettier from "eslint-config-prettier";
+import pluginReact from "eslint-plugin-react";
+import pluginReactHooks from "eslint-plugin-react-hooks";
+import globals from "globals";
+import tseslint from "typescript-eslint";
 import { config as baseConfig } from "./base.js";
 
 /**
@@ -13,13 +13,18 @@ import { config as baseConfig } from "./base.js";
  * @type {import("eslint").Linter.Config[]}
  * */
 export const tanstackConfigJs = [
+  eslintConfigPrettier,
   ...baseConfig,
   {
-    ignores: ["**/eslint.config.js", "**/vite.config.ts"],
+    ignores: [
+        "**/eslint.config.js", 
+        "**/vite.config.ts", 
+        // shadcn ui - can't be bothered to fix the linting on this
+        "**/ui/**/*.tsx"
+    ],
   },
   ...tanstackConfig,
   js.configs.recommended,
-  eslintConfigPrettier,
   ...tseslint.configs.recommended,
   {
     ...pluginReact.configs.flat.recommended,
