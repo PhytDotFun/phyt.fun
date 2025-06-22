@@ -22,8 +22,8 @@
     "tailwindcss": "^4.0.6"
   },
   "devDependencies": {
-    "@phyt/eslint-config": "workspace:*",
-    "@phyt/typescript-config": "workspace:*",
+    "@phyt/eslint": "workspace:*",
+    "@phyt/tsconfig": "workspace:*",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/react": "^16.2.0",
     "@types/react": "^19.0.8",
