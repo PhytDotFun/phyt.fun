@@ -1,15 +1,17 @@
 {
-  "name": "@repo/eslint-config",
+  "name": "@phyt/eslint",
   "version": "0.0.0",
   "type": "module",
   "private": true,
   "exports": {
     "./base": "./base.js",
     "./next-js": "./next.js",
-    "./react-internal": "./react-internal.js"
+    "./react-internal": "./react-internal.js",
+    "./tanstack": "./tanstack.js"
   },
   "devDependencies": {
     "@eslint/js": "^9.29.0",
+    "@tanstack/eslint-config": "^0.1.0",
     "@next/eslint-plugin-next": "^15.3.0",
     "eslint": "^9.29.0",
     "eslint-config-prettier": "^10.1.1",

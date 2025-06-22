@@ -1,3 +1,3 @@
-# `@turbo/eslint-config`
+# `@phyt/eslint`
 
 Collection of internal eslint configurations.
