@@ -6,11 +6,13 @@
     font-style: normal;
     font-display: swap;
 }
-
 @import "tailwindcss";
+@import "tw-animate-css";
 
 @theme {
-    --font-family-dmsans: 'DMSans', sans-serif;
+    --font-dmsans: 'DMSans', sans-serif;
+    --font-base: 'DMSans', sans-serif;
+    --font-heading: 'DMSans', sans-serif;
 
     --font-weight-thin: 100;
     --font-weight-extralight: 200;
@@ -30,13 +32,74 @@
     --font-weight-850: 850;
 }
 
-body {
-  @apply m-0;
-  font-family: 'DMSans', sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  --background: oklch(93.37% 0.0339 12.05);
+  --secondary-background: oklch(100% 0 0);
+  --foreground: oklch(0% 0 0);
+  --main-foreground: oklch(0% 0 0);
+  --main: oklch(0.8996 0.115 200.1);
+  --border: oklch(0% 0 0);
+  --ring: oklch(0% 0 0);
+  --overlay: oklch(0% 0 0 / 0.8);
+  --shadow: 4px 4px 0px 0px var(--border);
+  --chart-1: #FF6678;
+  --chart-2: #7A83FF;
+  --chart-3: #FACC00;
+  --chart-4: #00D696;
+  --chart-5: #5294FF;
+  --chart-active-dot: #000;
 }
 
-code {
-    font-family: 'DMSans', sans-serif;
+.dark {
+  --background: oklch(25.15% 0.0495 7.54);
+  --secondary-background: oklch(23.93% 0 0);
+  --foreground: oklch(92.49% 0 0);
+  --main-foreground: oklch(0% 0 0);
+  --main: oklch(67.58% 0.2135 18.63);
+  --border: oklch(0% 0 0);
+  --ring: oklch(100% 0 0);
+  --shadow: 4px 4px 0px 0px var(--border);
+  --chart-1: #FF4D61;
+  --chart-2: #7A83FF;
+  --chart-3: #E0B700;
+  --chart-4: #00BD84;
+  --chart-5: #5294FF;
+  --chart-active-dot: #fff;
+}
+
+@theme inline {
+  --color-main: var(--main);
+  --color-background: var(--background);
+  --color-secondary-background: var(--secondary-background);
+  --color-foreground: var(--foreground);
+  --color-main-foreground: var(--main-foreground);
+  --color-border: var(--border);
+  --color-overlay: var(--overlay);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+
+  --spacing-boxShadowX: 4px;
+  --spacing-boxShadowY: 4px;
+  --spacing-reverseBoxShadowX: -4px;
+  --spacing-reverseBoxShadowY: -4px;
+  --radius-base: 5px;
+  --shadow-shadow: var(--shadow);
+  --font-weight-base: 500;
+  --font-weight-heading: 900;
+}
+  
+@layer base {
+  body {
+    @apply text-foreground font-base bg-background;
+  }
+
+  h1, h2, h3, h4, h5, h6{
+    @apply font-heading;
+  }
 }
