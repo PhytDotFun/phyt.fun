@@ -2,6 +2,8 @@ import { defineConfig } from 'vite';
 import viteReact from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 
+import { resolve } from 'path';
+
 import { TanStackRouterVite } from '@tanstack/router-plugin/vite';
 
 // https://vitejs.dev/config/
@@ -11,4 +13,9 @@ export default defineConfig({
         viteReact(),
         tailwindcss(),
     ],
+    resolve: {
+        alias: {
+            $fonts: resolve(__dirname, 'src/assets/fonts')
+        }
+    }
 });
