@@ -2,13 +2,17 @@
 
 ![PHYT Banner](https://rsg5uys7zq.ufs.sh/f/AMgtrA9DGKkFdKPR1gckTPlRILfDrtYWge59yzhSjpFisE6v)
 
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.8-blue?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+<!-- [![TypeScript](https://img.shields.io/badge/TypeScript-5.8-blue?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Solidity](https://img.shields.io/badge/Solidity-0.8.30-363636?logo=solidity)](https://soliditylang.org/)
-[![pnpm](https://img.shields.io/badge/pnpm-10.12.1-F69220?logo=pnpm&logoColor=white)](https://pnpm.io/)
+[![pnpm](https://img.shields.io/badge/pnpm-10.12.1-F69220?logo=pnpm&logoColor=white)](https://pnpm.io/) -->
 
 <!-- [![Tests](https://github.com/yourusername/phyt/actions/workflows/test.yml/badge.svg)](https://github.com/yourusername/phyt/actions/workflows/test.yml) -->
+<!-- [![Coverage](https://codecov.io/gh/yourusername/phyt/branch/main/graph/badge.svg)](https://codecov.io/gh/yourusername/phyt) -->
 
-[![Coverage](https://codecov.io/gh/yourusername/phyt/branch/main/graph/badge.svg)](https://codecov.io/gh/yourusername/phyt)
+![Performance Metrics](https://img.shields.io/badge/Lighthouse-100%25-brightgreen?logo=lighthouse)
+![Bundle Size](https://img.shields.io/bundlephobia/minzip/@phyt/web?label=bundle%20size)
+![Uptime](https://img.shields.io/uptimerobot/ratio/m123456789-abcdef?label=uptime)
+
 [![Discord](https://img.shields.io/discord/123456789?color=7289da&logo=discord&logoColor=white)](https://discord.gg/phyt)
 [![Twitter Follow](https://img.shields.io/twitter/follow/phytdotfun?style=social)](https://twitter.com/phytdotfun)
 
@@ -16,11 +20,11 @@
 
 ## Fitness On-Chain
 
-PHYT is the Web3 fitness platform. Runners tokenize their performance and users invest in their favorite athletes. Connect fitness wearables, upload runs, and participate in competitions where token holders share in the rewards.
+Phyt is the Web3 fitness platform. Runners tokenize their performance and users invest in their favorite athletes. Connect fitness wearables, upload runs, and participate in competitions where token holders share in the rewards.
 
 <div align="center">
 
-**[Docs](https://docs.phyt.run)** • **[Blog](https://blog.phyt.run)**
+**[Docs](https://docs.phyt.fun)** • **[Blog](https://blog.phyt.fun)**
 
 </div>
 
@@ -33,53 +37,49 @@ PHYT is the Web3 fitness platform. Runners tokenize their performance and users 
 - ⚡ **Real-time Verification** - Oracle-verified fitness data
 - 💱 **Built-in DEX** - Swap PHYT for runner tokens
 
-## 🚀 Dev Setup
-
-```bash
-# Clone the repository
-git clone https://github.com/PhytDotFun/phyt.fun.git
-cd phyt
-
-# Install dependencies
-pnpm install
-
-# Set up environment
-cp .env.example .env
-
-# Start local development
-pnpm dev
-```
-
-## 🛠️ Tooling
+## 🛠️ Roadmap
 
 <div align="center">
 
-| Frontend | Backend | Blockchain   | Infrastructure |
-| -------- | ------- | ------------ | -------------- |
-| React 19 | Node.js | Solidity     | Docker         |
-| Vite     | tRPC    | Foundry      | PostgreSQL     |
-| TanStack | Fastify | Viem         | Redis          |
-| Wagmi    | Drizzle | OpenZeppelin | BullMQ         |
+### Now - Foundation 🏗️
 
-</div>
+- [x] Core smart contracts
+- [ ] AMM for PHYT/Runner token pair with bonding curves
+- [ ] Oracle network for run verification
+- [x] Social features and profiles
+- [x] Runner competitions
+- [x] Mobile on Apple Store w/ HealthKit
+- [ ] Web app beta launch
+- [ ] PHYT token launch
 
-## 📈 Performance
+### Next (2025) - Expansion 🚀
 
-<div align="center">
+- [ ] Garmin integration
+- [ ] Mobile on Android
+- [ ] Full health wearable support (publish open source library)
+- [ ] Expand competitions, elo ratings, and jackpots
+- [ ] Team based fantasy and leagues
+- [ ] Cross-sport expansion
 
-![Performance Metrics](https://img.shields.io/badge/Lighthouse-100%25-brightgreen?logo=lighthouse)
-![Bundle Size](https://img.shields.io/bundlephobia/minzip/@phyt/web?label=bundle%20size)
-![Uptime](https://img.shields.io/uptimerobot/ratio/m123456789-abcdef?label=uptime)
+### In The Air (2025/2026) - Not Yet Confirmed 🔮
+
+- [ ] Multi-chain deployment (Base, Arbitrum)
+- [ ] Individual betting and prize picks
+- [ ] Tokenize the world (routes, times, and more)
 
 </div>
 
 ## 🤝 Contributing
 
-To begin contributing, open a pull request and merge changes into the dev branch.
+- **If It Phyts**: If you find a bug or have an idea for a new feature, please create an [issue on GitHub](https://github.com/PhytDotFun/phyt.fun/issues). This will help us track and prioritize your request. **If its of serious security concern, please contact us directly on Discord or Twitter**
 
-**Current Maintainers**
+- **Get Phyt**: The best feedback comes from real world usage! If you have any requests, stumble across any glitches, have some cool ideas for the project, or simply want to yap with Phyt-minded people, do not hesitate to join us on Discord, or hit us up on Twitter/X.
 
-<div>
+- **Spread Phyt**: Please share it with your friends, colleagues, and on social media. It means the world!
+
+- **Current Maintainers**
+
+<div align="center">
   <a href="https://github.com/wkflanders/">
     <img src="https://contrib.rocks/image?repo=wkflanders/raffleleader" />
   </a>
