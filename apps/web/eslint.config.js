@@ -3,4 +3,9 @@
 import { tanstackConfigJs } from "@phyt/eslint/tanstack";
 
 /** @type {import("eslint").Linter.Config[]} */
-export default tanstackConfigJs;
+export default [
+  ...tanstackConfigJs,
+  {
+    ignores: ["src/components/**/*"],
+  },
+];
