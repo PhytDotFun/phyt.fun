@@ -4,6 +4,10 @@
       "mode": "auto"
     }
   ],
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+  "editor.formatOnSave": true,
   "files.watcherExclude": {
     "**/routeTree.gen.ts": true
   },
