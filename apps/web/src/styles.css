@@ -6,11 +6,22 @@
     font-style: normal;
     font-display: swap;
 }
+
+@font-face {
+    font-family: 'Lexend';
+    src: url('$fonts/Lexend-VariableFont.ttf') format('truetype'),
+    url('$fonts/Lexend-VariableFont.ttf') format('truetype-variations');
+    font-weight: 100 1000;
+    font-style: normal;
+    font-display: swap;
+}
+
 @import "tailwindcss";
 @import "tw-animate-css";
 
 @theme {
     --font-dmsans: 'DMSans', sans-serif;
+    --font-lexend: 'Lexend', sans-serif;
     --font-base: 'DMSans', sans-serif;
     --font-heading: 'DMSans', sans-serif;
 
