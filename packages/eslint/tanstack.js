@@ -20,7 +20,6 @@ export const tanstackConfigJs = [
         "**/eslint.config.js", 
         "**/vite.config.ts", 
         // shadcn ui - can't be bothered to fix the linting on this
-        "**/ui/**/*.tsx"
     ],
   },
   ...tanstackConfig,
