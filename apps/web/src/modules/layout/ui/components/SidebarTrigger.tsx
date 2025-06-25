@@ -20,6 +20,6 @@ export const SidebarTrigger = () => {
                 <Menu />
             </Button>
             <MobileSidebar items={menuItems} open={open} onOpenChange={setOpen} />
-        </div >
+        </div>
     );
 };
