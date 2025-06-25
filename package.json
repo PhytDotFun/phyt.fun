@@ -17,5 +17,8 @@
   "packageManager": "pnpm@10.12.3",
   "engines": {
     "node": ">=18"
+  },
+  "dependencies": {
+    "@t3-oss/env-core": "^0.13.8"
   }
 }
