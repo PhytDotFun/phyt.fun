@@ -8,7 +8,7 @@ import { WalletButton } from "@/modules/market/ui/components/WalletButton";
 export const Header = () => {
     return (
         <div className="fixed top-0 left-0 right-0 z-50 border-b-2 border-border bg-background">
-            <nav className="flex w-fullitems-center py-3 px-3">
+            <nav className="flex w-full items-center py-3 px-3">
                 <div className="flex items-center justify-between w-full gap-4">
                     <div className="flex items-center gap-1">
                         <SidebarTrigger />
