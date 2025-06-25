@@ -7,6 +7,6 @@ export const WalletButton = () => {
             <Button className="px-2 size-7">
                 <Wallet />
             </Button>
-        </div >
+        </div>
     );
 };
