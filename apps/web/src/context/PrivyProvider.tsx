@@ -4,8 +4,8 @@ import { env } from "@/env";
 export default function PrivyAppProvider({ children }: { children: React.ReactNode; }) {
     return (
         <PrivyProvider
-            appId={env.PUBLIC_PRIVY_APP_ID}
-            clientId={env.PUBLIC_PRIVY_CLIENT_ID}
+            appId={env.VITE_PRIVY_APP_ID}
+            clientId={env.VITE_PRIVY_CLIENT_ID}
             config={{
                 embeddedWallets: {
                     ethereum: {
