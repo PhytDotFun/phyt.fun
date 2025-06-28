@@ -1,5 +1,5 @@
 import { PrivyProvider } from "@privy-io/react-auth";
-import { env } from "@/env";
+import { env } from "@phyt/core";
 
 export default function PrivyAppProvider({ children }: { children: React.ReactNode; }) {
     return (
