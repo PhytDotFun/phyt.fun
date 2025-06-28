@@ -12,19 +12,23 @@
     }
   },
   "scripts": {
-    "build": "pnpm clean && tsc -b -v",
+    "build": "pnpm clean && pnpm install && tsc -b -v",
     "clean": "rimraf node_modules && rimraf dist",
     "test": "vitest run",
     "lint": "eslint",
     "lint:fix": "eslint --fix",
     "format": "prettier",
-    "check": "prettier --write . && eslint --fix"
+    "check": "prettier --write . && eslint --fix",
+    "check-types": "tsc --noEmit"
   },
   "dependencies": {
-    "@t3-oss/env-core": "^0.13.8"
+    "@t3-oss/env-core": "^0.13.8",
+    "zod": "^3.25.67"
   },
   "devDependencies": {
     "@phyt/eslint": "workspace:*",
-    "@phyt/tsconfig": "workspace:*"
+    "@phyt/tsconfig": "workspace:*",
+    "@types/node": "^24.0.7",
+    "vite": "^6.3.5"
   }
 }
