@@ -6,13 +6,15 @@
   "scripts": {
     "dev": "vite --port 3000",
     "start": "vite --port 3000",
-    "build": "vite build && tsc",
+    "clean": "rimraf node_modules && rimraf dist",
+    "build": "pnpm run clean && pnpm install && vite build && tsc",
     "serve": "vite preview",
     "test": "vitest run",
     "lint": "eslint",
     "lint:fix": "eslint --fix",
     "format": "prettier",
-    "check": "prettier --write . && eslint --fix"
+    "check": "prettier --write . && eslint --fix",
+    "check-types": "tsc --noEmit"
   },
   "dependencies": {
     "@phyt/core": "workspace:*",
