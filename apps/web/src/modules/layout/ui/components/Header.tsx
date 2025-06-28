@@ -1,5 +1,5 @@
 import { HeaderLogo } from "./Logo";
-import { SidebarTrigger } from "./SidebarTrigger";
+import { SidebarTrigger } from "./sidebar/SidebarTrigger";
 import { SearchButton } from "@/modules/search/ui/components/SearchButton";
 import { Searchbar } from "@/modules/search/ui/components/Searchbar";
 import { ProfileIcon } from "@/modules/profile/ui/components/ProfileIcon";
