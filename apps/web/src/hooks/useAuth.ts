@@ -1,24 +1,21 @@
-import { useLoginWithOAuth, usePrivy } from "@privy-io/react-auth";
+import { usePrivy } from "@privy-io/react-auth";
+import { useCallback, useMemo } from "react";
 
 export const useAuth = () => {
-    const { ready, authenticated, logout } = usePrivy();
-    const { state, loading, initOAuth } = useLoginWithOAuth();
+    const { ready, authenticated, user, logout } = usePrivy();
 
-    const signIn = async () => {
-        try {
-            if (!ready) return;
-            await initOAuth({ provider: 'twitter' });
-        } catch (error) {
-            console.error(error);
-        }
-    };
-
-    const signOut = () => {
+    const signOut = useCallback(async () => {
         if (!ready) return;
-        logout();
-    };
+        await logout();
+    }, [ready, logout]);
 
-    return { signIn, signOut, authenticated, loading, state };
+    return useMemo(() => ({
+        signOut,
+        authenticated,
+        user,
+        loading: !ready,
+        ready
+    }), [signOut, authenticated, user, ready]);
 };
 
 export type AuthContext = ReturnType<typeof useAuth>;
