@@ -4,7 +4,8 @@
         "baseUrl": ".",
         "rootDir": "src",
         "strict": true,
-        "outDir": "./dist"
+        "outDir": "./dist",
+        "types": ["node", "vite/client"]
     },
     "include": ["src/**/*"],
     "exclude": ["node_modules", "dist"]
