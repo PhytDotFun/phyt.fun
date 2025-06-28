@@ -11,10 +11,11 @@ export default function PrivyAppProvider({ children }: { children: React.ReactNo
                     ethereum: {
                         createOnLogin: "users-without-wallets"
                     }
-                }
+                },
+                loginMethods: ['twitter'],
             }}
         >
             {children}
-        </PrivyProvider>
+        </PrivyProvider >
     );
 }
