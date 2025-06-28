@@ -1,17 +1,30 @@
 {
   "$schema": "https://turborepo.com/schema.json",
+  "globalDependencies": ["**/.env.*", "**/.env"],
   "ui": "tui",
+  "globalEnv": [
+    "NODE_ENV",
+    "VITE_PRIVY_APP_ID",
+    "VITE_API_URL"
+  ],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
       "outputs": ["dist/**"]
     },
+    "clean": {
+      "cache": false
+    },
     "lint": {
-      "dependsOn": ["^lint"]
+      "dependsOn": ["check-types", "^lint"]
     },
     "lint:fix": {
       "dependsOn": ["^lint:fix"]
+    },
+    "test": {
+      "outputs": ["coverage/**"],
+      "dependsOn": ["lint","build"]
     },
     "check-types": {
       "dependsOn": ["^check-types"]
