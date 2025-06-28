@@ -1,11 +1,7 @@
 import { RouterProvider, createRouter } from '@tanstack/react-router';
-
 import { routeTree } from './routeTree.gen';
 
-import PrivyAppProvider from '@/context/PrivyProvider';
-import { useAuth } from '@/hooks/useAuth';
-
-const router = createRouter({
+export const router = createRouter({
     routeTree,
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     context: { authentication: undefined! },
@@ -21,21 +17,8 @@ declare module '@tanstack/react-router' {
     }
 }
 
-function AuthProvider() {
-    const auth = useAuth();
-    router.update({
-        context: { authentication: auth }
-    });
-
+function App() {
     return <RouterProvider router={router} />;
 }
-
-function App() {
-    return (
-        <PrivyAppProvider>
-            <AuthProvider />
-        </PrivyAppProvider>
-    );
-};
 
 export default App;
