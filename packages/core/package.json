@@ -1,0 +1,27 @@
+{
+  "name": "@phyt/core",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "pnpm clean && tsc -b -v",
+    "clean": "rimraf node_modules && rimraf dist",
+    "test": "vitest run",
+    "lint": "eslint",
+    "lint:fix": "eslint --fix",
+    "format": "prettier",
+    "check": "prettier --write . && eslint --fix"
+  },
+  "devDependencies": {
+    "@phyt/eslint": "workspace:*",
+    "@phyt/tsconfig": "workspace:*"
+  }
+}
