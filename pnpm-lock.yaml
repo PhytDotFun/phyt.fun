@@ -7,10 +7,6 @@ settings:
 importers:
 
   .:
-    dependencies:
-      '@t3-oss/env-core':
-        specifier: ^0.13.8
-        version: 0.13.8(typescript@5.8.2)(zod@3.25.67)
     devDependencies:
       eslint:
         specifier: ^9.30.0
@@ -225,6 +221,10 @@ importers:
         version: 4.2.4
 
   packages/core:
+    dependencies:
+      '@t3-oss/env-core':
+        specifier: ^0.13.8
+        version: 0.13.8(typescript@5.8.2)(zod@3.25.67)
     devDependencies:
       '@phyt/eslint':
         specifier: workspace:*
