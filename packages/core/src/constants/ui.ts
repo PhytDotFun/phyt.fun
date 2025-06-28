@@ -1,6 +1,8 @@
 export const SIDEBAR_ROUTES = [
     { href: '/', label: 'Home', iconName: 'Home' },
-    { href: '/competitions', label: 'Competitions', iconName: 'Trophy' },
     { href: '/market', label: 'Market', iconName: 'Store' },
-    { href: '/profile', label: 'Profile', iconName: 'User' },
+    { href: '/activity', label: 'Activity', iconName: 'Activity' },
+    { href: '/competitions', label: 'Competitions', iconName: 'Trophy' },
+    { href: '/leaderboard', label: 'Leaderboard', iconName: 'Leaderboard' },
+    { href: '/', label: 'Profile', iconName: 'User' },
 ] as const;
