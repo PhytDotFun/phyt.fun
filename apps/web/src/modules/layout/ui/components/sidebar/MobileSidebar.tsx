@@ -1,8 +1,8 @@
-import { Link } from "@tanstack/react-router";
-import type { SidebarRoute } from "@phyt/core";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Sheet, SheetContent } from "@/components/ui/sheet";
-import { getIconComponent } from "@/lib/utils";
+import { Link } from '@tanstack/react-router';
+import type { SidebarRoute } from '@phyt/core';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Sheet, SheetContent } from '@/components/ui/sheet';
+import { getIconComponent } from '@/lib/utils';
 
 interface MobileSidebarProps {
     items: ReadonlyArray<SidebarRoute>;
@@ -10,7 +10,11 @@ interface MobileSidebarProps {
     onOpenChange: (open: boolean) => void;
 }
 
-export const MobileSidebar = ({ items, open, onOpenChange }: MobileSidebarProps) => {
+export const MobileSidebar = ({
+    items,
+    open,
+    onOpenChange
+}: MobileSidebarProps) => {
     return (
         <Sheet open={open} onOpenChange={onOpenChange}>
             <SheetContent

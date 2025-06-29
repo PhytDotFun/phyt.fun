@@ -1,7 +1,7 @@
-import { Search } from "lucide-react";
-import { useState } from "react";
-import { SearchDialog } from "./SearchDialog";
-import { Button } from "@/components/ui/button";
+import { Search } from 'lucide-react';
+import { useState } from 'react';
+import { SearchDialog } from './SearchDialog';
+import { Button } from '@/components/ui/button';
 
 export const SearchButton = () => {
     const [open, setOpen] = useState<boolean>(false);

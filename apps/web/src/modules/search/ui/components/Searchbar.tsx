@@ -1,7 +1,7 @@
-import { Search } from "lucide-react";
-import { useState } from "react";
-import { SearchDialog } from "./SearchDialog";
-import { Input } from "@/components/ui/input";
+import { Search } from 'lucide-react';
+import { useState } from 'react';
+import { SearchDialog } from './SearchDialog';
+import { Input } from '@/components/ui/input';
 
 export const Searchbar = () => {
     const [open, setOpen] = useState<boolean>(false);
@@ -22,4 +22,4 @@ export const Searchbar = () => {
             <SearchDialog open={open} onOpenChange={setOpen} />
         </>
     );
-}; 
+};
