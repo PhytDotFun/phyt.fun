@@ -1,7 +1,7 @@
 import { createLazyFileRoute } from '@tanstack/react-router';
 
 export const Route = createLazyFileRoute('/leaderboard')({
-    component: RouteComponent,
+    component: RouteComponent
 });
 
 function RouteComponent() {

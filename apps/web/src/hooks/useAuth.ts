@@ -1,5 +1,5 @@
-import { usePrivy } from "@privy-io/react-auth";
-import { useCallback, useMemo } from "react";
+import { usePrivy } from '@privy-io/react-auth';
+import { useCallback, useMemo } from 'react';
 
 export const useAuth = () => {
     const { ready, authenticated, user, logout } = usePrivy();
@@ -9,13 +9,16 @@ export const useAuth = () => {
         await logout();
     }, [ready, logout]);
 
-    return useMemo(() => ({
-        signOut,
-        authenticated,
-        user,
-        loading: !ready,
-        ready
-    }), [signOut, authenticated, user, ready]);
+    return useMemo(
+        () => ({
+            signOut,
+            authenticated,
+            user,
+            loading: !ready,
+            ready
+        }),
+        [signOut, authenticated, user, ready]
+    );
 };
 
 export type AuthContext = ReturnType<typeof useAuth>;

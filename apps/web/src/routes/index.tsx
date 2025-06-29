@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router';
 
 export const Route = createFileRoute('/')({
-    component: HomePage,
+    component: HomePage
 });
 
 function HomePage() {
@@ -19,15 +19,21 @@ function HomePage() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
                     <div className="p-6 border-2 border-border rounded-base bg-secondary-background">
                         <h3 className="text-xl font-bold mb-2">Competitions</h3>
-                        <p className="text-foreground/70">Join fitness challenges and compete with others</p>
+                        <p className="text-foreground/70">
+                            Join fitness challenges and compete with others
+                        </p>
                     </div>
                     <div className="p-6 border-2 border-border rounded-base bg-secondary-background">
                         <h3 className="text-xl font-bold mb-2">Market</h3>
-                        <p className="text-foreground/70">Trade fitness NFTs and earn rewards</p>
+                        <p className="text-foreground/70">
+                            Trade fitness NFTs and earn rewards
+                        </p>
                     </div>
                     <div className="p-6 border-2 border-border rounded-base bg-secondary-background">
                         <h3 className="text-xl font-bold mb-2">Profile</h3>
-                        <p className="text-foreground/70">Track your progress and achievements</p>
+                        <p className="text-foreground/70">
+                            Track your progress and achievements
+                        </p>
                     </div>
                 </div>
             </div>

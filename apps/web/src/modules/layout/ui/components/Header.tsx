@@ -1,9 +1,9 @@
-import { HeaderLogo } from "./Logo";
-import { SidebarTrigger } from "./sidebar/SidebarTrigger";
-import { SearchButton } from "@/modules/search/ui/components/SearchButton";
-import { Searchbar } from "@/modules/search/ui/components/Searchbar";
-import { ProfileIcon } from "@/modules/profile/ui/components/ProfileIcon";
-import { WalletButton } from "@/modules/market/ui/components/WalletButton";
+import { HeaderLogo } from './Logo';
+import { SidebarTrigger } from './sidebar/SidebarTrigger';
+import { SearchButton } from '@/modules/search/ui/components/SearchButton';
+import { Searchbar } from '@/modules/search/ui/components/Searchbar';
+import { ProfileIcon } from '@/modules/profile/ui/components/ProfileIcon';
+import { WalletButton } from '@/modules/market/ui/components/WalletButton';
 
 export const Header = () => {
     return (
@@ -25,6 +25,5 @@ export const Header = () => {
                 </div>
             </nav>
         </div>
-
     );
 };

@@ -1,4 +1,9 @@
-import { Outlet, createRootRouteWithContext, redirect, useLocation } from '@tanstack/react-router';
+import {
+    Outlet,
+    createRootRouteWithContext,
+    redirect,
+    useLocation
+} from '@tanstack/react-router';
 import { TanStackRouterDevtools } from '@tanstack/react-router-devtools';
 import { useEffect } from 'react';
 import type { AuthContext } from '@/hooks/useAuth';
@@ -23,7 +28,7 @@ export const Route = createRootRouteWithContext<RouterContext>()({
             throw redirect({ to: '/login' });
         }
     },
-    component: RootComponent,
+    component: RootComponent
 });
 
 function RootComponent() {
@@ -63,7 +68,7 @@ function InnerRoot() {
             <GridBackground />
             <div className="relative z-10">
                 {!isLoginPage && <Header />}
-                <main className={!isLoginPage ? "pt-20" : ""}>
+                <main className={!isLoginPage ? 'pt-20' : ''}>
                     <Outlet />
                 </main>
             </div>

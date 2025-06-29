@@ -1,5 +1,12 @@
-import { Search } from "lucide-react";
-import { CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import { Search } from 'lucide-react';
+import {
+    CommandDialog,
+    CommandEmpty,
+    CommandGroup,
+    CommandInput,
+    CommandItem,
+    CommandList
+} from '@/components/ui/command';
 
 interface SearchDialogProps {
     open: boolean;

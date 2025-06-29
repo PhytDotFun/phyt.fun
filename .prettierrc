@@ -3,6 +3,5 @@
     "tabWidth": 4,
     "semi": true,
     "singleQuote": true,
-    "endOfLine": "lf",
-    "insertFinalNewline": true
+    "endOfLine": "lf"
 }

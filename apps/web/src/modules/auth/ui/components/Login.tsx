@@ -1,10 +1,10 @@
-import { useEffect, useState } from "react";
-import { BicepsFlexed, Dumbbell } from "lucide-react";
-import { useNavigate } from "@tanstack/react-router";
-import { useLoginWithOAuth } from "@privy-io/react-auth";
-import { Button } from "@/components/ui/button";
-import { useIsMobile } from "@/hooks/useMobile";
-import { useAuth } from "@/hooks/useAuth";
+import { useEffect, useState } from 'react';
+import { BicepsFlexed, Dumbbell } from 'lucide-react';
+import { useNavigate } from '@tanstack/react-router';
+import { useLoginWithOAuth } from '@privy-io/react-auth';
+import { Button } from '@/components/ui/button';
+import { useIsMobile } from '@/hooks/useMobile';
+import { useAuth } from '@/hooks/useAuth';
 
 export const Login = () => {
     const isMobile = useIsMobile();
@@ -15,8 +15,8 @@ export const Login = () => {
 
     const { loading, initOAuth } = useLoginWithOAuth({
         onError: (error) => {
-            console.error("Login failed:", error);
-        },
+            console.error('Login failed:', error);
+        }
     });
 
     useEffect(() => {
@@ -42,7 +42,10 @@ export const Login = () => {
                         transform: 'rotate(15deg)'
                     }}
                 >
-                    <Dumbbell size={isMobile ? 24 : 48} className="text-black" />
+                    <Dumbbell
+                        size={isMobile ? 24 : 48}
+                        className="text-black"
+                    />
                 </div>
 
                 <div
@@ -53,7 +56,10 @@ export const Login = () => {
                         transform: 'rotate(-20deg)'
                     }}
                 >
-                    <BicepsFlexed size={isMobile ? 20 : 32} className="text-black" />
+                    <BicepsFlexed
+                        size={isMobile ? 20 : 32}
+                        className="text-black"
+                    />
                 </div>
 
                 <div
@@ -64,16 +70,36 @@ export const Login = () => {
                         transform: 'rotate(10deg)'
                     }}
                 >
-                    <span className={`text-black font-black ${isMobile ? 'text-sm' : 'text-lg'}`}>REP</span>
+                    <span
+                        className={`text-black font-black ${isMobile ? 'text-sm' : 'text-lg'}`}
+                    >
+                        REP
+                    </span>
                 </div>
-                <div className={`absolute top-20 left-4 ${isMobile ? 'w-12 h-12' : 'w-16 h-16'} bg-neon-green border-4 border-black shadow-brutal animate-pulse flex items-center justify-center`}>
-                    <Dumbbell size={isMobile ? 16 : 24} className="text-black" />
+                <div
+                    className={`absolute top-20 left-4 ${isMobile ? 'w-12 h-12' : 'w-16 h-16'} bg-neon-green border-4 border-black shadow-brutal animate-pulse flex items-center justify-center`}
+                >
+                    <Dumbbell
+                        size={isMobile ? 16 : 24}
+                        className="text-black"
+                    />
                 </div>
-                <div className={`absolute top-40 right-4 ${isMobile ? 'w-10 h-10' : 'w-12 h-12'} bg-neon-purple border-4 border-black shadow-brutal animate-bounce flex items-center justify-center`}>
-                    <span className={`text-black font-black ${isMobile ? 'text-xs' : 'text-xs'}`}>💪</span>
+                <div
+                    className={`absolute top-40 right-4 ${isMobile ? 'w-10 h-10' : 'w-12 h-12'} bg-neon-purple border-4 border-black shadow-brutal animate-bounce flex items-center justify-center`}
+                >
+                    <span
+                        className={`text-black font-black ${isMobile ? 'text-xs' : 'text-xs'}`}
+                    >
+                        💪
+                    </span>
                 </div>
-                <div className={`absolute bottom-32 left-1/4 ${isMobile ? 'w-16 h-16' : 'w-20 h-20'} bg-neon-yellow border-4 border-black shadow-brutal animate-pulse flex items-center justify-center`}>
-                    <BicepsFlexed size={isMobile ? 20 : 28} className="text-black" />
+                <div
+                    className={`absolute bottom-32 left-1/4 ${isMobile ? 'w-16 h-16' : 'w-20 h-20'} bg-neon-yellow border-4 border-black shadow-brutal animate-pulse flex items-center justify-center`}
+                >
+                    <BicepsFlexed
+                        size={isMobile ? 20 : 28}
+                        className="text-black"
+                    />
                 </div>
                 {!isMobile && (
                     <>
@@ -88,20 +114,30 @@ export const Login = () => {
                         </div>
                     </>
                 )}
-                <div className={`absolute inset-0 ${isMobile ? 'opacity-5' : 'opacity-10'}`}>
-                    <div className={`grid ${isMobile ? 'grid-cols-8 grid-rows-6' : 'grid-cols-12 grid-rows-8'} h-full`}>
-                        {Array.from({ length: isMobile ? 48 : 96 }).map((_, i) => (
-                            <div key={i} className="border border-black" />
-                        ))}
+                <div
+                    className={`absolute inset-0 ${isMobile ? 'opacity-5' : 'opacity-10'}`}
+                >
+                    <div
+                        className={`grid ${isMobile ? 'grid-cols-8 grid-rows-6' : 'grid-cols-12 grid-rows-8'} h-full`}
+                    >
+                        {Array.from({ length: isMobile ? 48 : 96 }).map(
+                            (_, i) => (
+                                <div key={i} className="border border-black" />
+                            )
+                        )}
                     </div>
                 </div>
             </div>
             <div className="relative z-10 flex flex-col items-center justify-center min-h-screen px-4">
                 <div className="text-center mb-16 md:mb-32">
-                    <h1 className={`${isMobile ? 'text-5xl' : 'text-8xl'} font-black text-black mb-4 transform hover:scale-110 transition-transform duration-300`}>
+                    <h1
+                        className={`${isMobile ? 'text-5xl' : 'text-8xl'} font-black text-black mb-4 transform hover:scale-110 transition-transform duration-300`}
+                    >
                         PHYT
                     </h1>
-                    <p className={`${isMobile ? 'text-lg' : 'text-2xl'} font-bold text-black`}>
+                    <p
+                        className={`${isMobile ? 'text-lg' : 'text-2xl'} font-bold text-black`}
+                    >
                         FITNESS LAUNCHPAD
                     </p>
                     <div className="mt-6 flex justify-center space-x-4">
