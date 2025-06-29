@@ -20,7 +20,7 @@
       "dependsOn": ["check-types", "^lint"]
     },
     "lint:fix": {
-      "dependsOn": ["^lint:fix"]
+      "dependsOn": ["check-types","^lint:fix"]
     },
     "test": {
       "outputs": ["coverage/**"],
