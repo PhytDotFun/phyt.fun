@@ -1,3 +1,4 @@
 {
-    "**/*.{js,jsx,ts,tsx}": "pnpm format && pnpm lint:fix"
+    "*.{js,jsx,ts,tsx}": ["pnpm run format", "pnpm run lint:fix"],
+    "!src/components/ui/**": []
 }
