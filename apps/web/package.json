@@ -12,7 +12,7 @@
     "test": "vitest run",
     "lint": "eslint",
     "lint:fix": "eslint --fix",
-    "format": "prettier",
+    "format": "prettier --write . --ignore-unknown",
     "check": "prettier --write . && eslint --fix",
     "check-types": "tsc --noEmit"
   },
