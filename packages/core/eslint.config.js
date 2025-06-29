@@ -1,3 +1,3 @@
-import { config } from "@phyt/eslint/base";
+import { config } from '@phyt/eslint/base';
 
 export default config;

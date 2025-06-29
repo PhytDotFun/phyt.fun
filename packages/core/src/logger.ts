@@ -1,5 +1,5 @@
-import type { LoggerOptions } from "pino";
-import { env } from "./env.js";
+import type { LoggerOptions } from 'pino';
+import { env } from './env.js';
 
 // Define the transport based on the environment.
 // In development, use 'pino-pretty' for human-readable logs.
@@ -7,12 +7,12 @@ import { env } from "./env.js";
 const transport: LoggerOptions['transport'] =
     env.NODE_ENV === 'development'
         ? {
-            target: 'pino-pretty',
-            options: {
-                colorize: true,
-                ignore: 'pid,hostname',
-            },
-        }
+              target: 'pino-pretty',
+              options: {
+                  colorize: true,
+                  ignore: 'pid,hostname'
+              }
+          }
         : undefined;
 
 /**
@@ -27,7 +27,7 @@ export const PINO_LOGGER_OPTIONS: LoggerOptions = {
     formatters: {
         level: (label) => {
             return { severity: label.toUpperCase() };
-        },
+        }
     },
     // ISO 8601 timestamp
     timestamp: true // pino-http/hono-pino often handles this, but true is a safe default.

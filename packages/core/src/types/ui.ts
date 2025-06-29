@@ -1,3 +1,3 @@
-import { SIDEBAR_ROUTES } from "../constants/ui.js";
+import { SIDEBAR_ROUTES } from '../constants/ui.js';
 
 export type SidebarRoute = (typeof SIDEBAR_ROUTES)[number];
