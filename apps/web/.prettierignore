@@ -19,8 +19,8 @@ node_modules/
 # Ignore dependency lock
 pnpm-lock.yaml
 
-# Ignore shadcn ui components
-apps/web/src/components/ui/
+# Ignore shadcn ui 
+/src/components/ui/
 
 # Ignore all CSS files
 **/*.css
