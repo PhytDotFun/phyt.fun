@@ -6,6 +6,6 @@ import { tanstackConfigJs } from '@phyt/eslint/tanstack';
 export default [
     ...tanstackConfigJs,
     {
-        ignores: ['src/components/ui/**/*']
+        ignores: ['src/components/ui/**/*', '*.gen.ts']
     }
 ];

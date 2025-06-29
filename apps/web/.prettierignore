@@ -22,5 +22,8 @@ pnpm-lock.yaml
 # Ignore shadcn ui 
 /src/components/ui/
 
+# Ignore tanstack generated routeTree
+*.gen.ts
+
 # Ignore all CSS files
 **/*.css
