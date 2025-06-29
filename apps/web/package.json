@@ -1,19 +1,23 @@
 {
   "name": "@phyt/web",
+  "version": "0.0.0",
   "private": true,
   "type": "module",
   "scripts": {
     "dev": "vite --port 3000",
     "start": "vite --port 3000",
-    "build": "vite build && tsc",
+    "clean": "rimraf node_modules && rimraf dist",
+    "build": "pnpm run clean && pnpm install && vite build && tsc",
     "serve": "vite preview",
     "test": "vitest run",
     "lint": "eslint",
     "lint:fix": "eslint --fix",
     "format": "prettier",
-    "check": "prettier --write . && eslint --fix"
+    "check": "prettier --write . && eslint --fix",
+    "check-types": "tsc --noEmit"
   },
   "dependencies": {
+    "@phyt/core": "workspace:*",
     "@hookform/resolvers": "^5.1.1",
     "@privy-io/react-auth": "^2.17.1",
     "@radix-ui/react-accordion": "^1.2.11",
@@ -74,12 +78,9 @@
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
     "@vitejs/plugin-react": "^4.6.0",
-    "eslint": "^9.29.0",
     "jsdom": "^26.1.0",
     "tw-animate-css": "^1.3.4",
-    "typescript": "5.8.2",
     "vite": "^6.3.5",
-    "vitest": "^3.2.4",
     "web-vitals": "^4.2.4"
   },
   "overrides": {
