@@ -1,0 +1,29 @@
+services:
+    postgres:
+        image: postgres:16
+        container_name: phyt-postgres
+        environment:
+            POSTGRES_USER: phyt_user
+            POSTGRES_PASSWORD: phyt_password
+            POSTGRES_DB: phyt_db
+        ports:
+            - 5432:5432
+        volumes:
+            - phyt-postgres-data:/var/lib/postgresql/data
+        healthcheck:
+            test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER}']
+            interval: 5s
+            timeout: 5s
+            retries: 5
+    pgadmin:
+        image: dpage/pgadmin4
+        container_name: phyt-pgadmin
+        environment:
+            PGADMIN_DEFAULT_EMAIL: admin@phyt.com
+            PGADMIN_DEFAULT_PASSWORD: phyt_password
+        ports:
+            - 5050:80
+        depends_on:
+            - postgres
+volumes:
+    phyt-postgres-data:
