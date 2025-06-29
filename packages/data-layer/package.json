@@ -1,36 +1,36 @@
 {
-  "name": "@phyt/data-layer",
-  "version": "0.0.0",
-  "private": true,
-  "type": "module",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
+    "name": "@phyt/data-layer",
+    "version": "0.0.0",
+    "private": true,
+    "type": "module",
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "exports": {
+        ".": {
+            "types": "./dist/index.d.ts",
+            "import": "./dist/index.js"
+        }
+    },
+    "scripts": {
+        "build": "pnpm clean && pnpm install && tsc -b -v",
+        "clean": "rimraf node_modules && rimraf dist",
+        "test": "vitest run",
+        "lint": "eslint",
+        "lint:fix": "eslint --fix",
+        "format": "prettier --write . --ignore-unknown",
+        "check-types": "tsc --noEmit"
+    },
+    "dependencies": {
+        "@phyt/core": "workspace:*",
+        "@types/pg": "^8.15.4",
+        "drizzle-kit": "^0.31.4",
+        "drizzle-orm": "^0.44.2",
+        "pg": "^8.16.3",
+        "tsx": "^4.20.3",
+        "zod": "^3.25.67"
+    },
+    "devDependencies": {
+        "@phyt/eslint": "workspace:*",
+        "@phyt/tsconfig": "workspace:*"
     }
-  },
-  "scripts": {
-    "build": "pnpm clean && pnpm install && tsc -b -v",
-    "clean": "rimraf node_modules && rimraf dist",
-    "test": "vitest run",
-    "lint": "eslint",
-    "lint:fix": "eslint --fix",
-    "format": "prettier",
-    "check": "prettier --write . && eslint --fix",
-    "check-types": "tsc --noEmit"
-  },
-  "dependencies": {
-    "@types/pg": "^8.15.4",
-    "drizzle-kit": "^0.31.4",
-    "drizzle-orm": "^0.44.2",
-    "pg": "^8.16.3",
-    "tsx": "^4.20.3",
-    "zod": "^3.25.67"
-  },
-  "devDependencies": {
-    "@phyt/eslint": "workspace:*",
-    "@phyt/tsconfig": "workspace:*"
-  }
 }
