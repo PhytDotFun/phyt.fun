@@ -12,8 +12,9 @@
         }
     },
     "scripts": {
-        "build": "pnpm clean && pnpm install && tsc -b -v",
-        "clean": "rimraf node_modules && rimraf dist",
+        "build": "tsup",
+        "dev": "tsup --watch",
+        "clean": "pnpm rimraf dist && pnpm rimraf node_modules",
         "test": "vitest run",
         "lint": "eslint",
         "lint:fix": "eslint --fix",
