@@ -5,3 +5,4 @@ packages:
 onlyBuiltDependencies:
   - '@tailwindcss/oxide'
   - unrs-resolver
+  - '@reown/appkit'
