@@ -1,5 +1,5 @@
 import type { LoggerOptions } from 'pino';
-import { env } from './env.js';
+import { env } from './env';
 
 // Define the transport based on the environment.
 // In development, use 'pino-pretty' for human-readable logs.

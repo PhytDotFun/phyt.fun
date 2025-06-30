@@ -1,4 +1,4 @@
-export * from './env.js';
+export * from './env';
 
-export * from './constants/ui.js';
-export * from './types/ui.js';
+export * from './constants/ui';
+export * from './types/ui';
