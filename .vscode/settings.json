@@ -1,20 +1,39 @@
 {
-  "eslint.workingDirectories": [
-    {
-      "mode": "auto"
+    "eslint.workingDirectories": [
+        {
+            "mode": "auto"
+        }
+    ],
+
+    "editor.codeActionsOnSave": {
+        "source.fixAll.eslint": "explicit"
+    },
+
+    "editor.formatOnSave": true,
+
+    "files.watcherExclude": {
+        "**/routeTree.gen.ts": true
+    },
+
+    "search.exclude": {
+        "**/routeTree.gen.ts": true
+    },
+
+    "files.readonlyInclude": {
+        "**/routeTree.gen.ts": true
+    },
+
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+
+    "[typescript]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+
+    "[typescriptreact]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+
+    "[javascript]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
     }
-  ],
-  "editor.codeActionsOnSave": {
-    "source.fixAll": "explicit",
-  },
-  "editor.formatOnSave": true,
-  "files.watcherExclude": {
-    "**/routeTree.gen.ts": true
-  },
-  "search.exclude": {
-    "**/routeTree.gen.ts": true
-  },
-  "files.readonlyInclude": {
-    "**/routeTree.gen.ts": true
-  }
 }
