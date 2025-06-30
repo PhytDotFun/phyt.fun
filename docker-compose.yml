@@ -11,7 +11,7 @@ services:
         volumes:
             - phyt-postgres-data:/var/lib/postgresql/data
         healthcheck:
-            test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER}']
+            test: ['CMD-SHELL', 'pg_isready -U phyt_user -d phyt_db']
             interval: 5s
             timeout: 5s
             retries: 5
