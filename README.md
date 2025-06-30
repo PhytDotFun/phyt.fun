@@ -1,6 +1,8 @@
 <div align="center">
 
-![PHYT Banner](https://rsg5uys7zq.ufs.sh/f/AMgtrA9DGKkFJke5KabGk0seB2TFDV4a6fNSUX8ojznCH9lt)
+  <a href="https://phyt.fun">
+    <img src="https://rsg5uys7zq.ufs.sh/f/AMgtrA9DGKkFUwXgOm4E6ySthNuLs5WiFPfOGvoMI7ValHjB" height="210" />
+  </a>
 
 <!-- [![TypeScript](https://img.shields.io/badge/TypeScript-5.8-blue?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Solidity](https://img.shields.io/badge/Solidity-0.8.30-363636?logo=solidity)](https://soliditylang.org/)
@@ -9,94 +11,26 @@
 <!-- [![Tests](https://github.com/yourusername/phyt/actions/workflows/test.yml/badge.svg)](https://github.com/yourusername/phyt/actions/workflows/test.yml) -->
 <!-- [![Coverage](https://codecov.io/gh/yourusername/phyt/branch/main/graph/badge.svg)](https://codecov.io/gh/yourusername/phyt) -->
 
-![Performance Metrics](https://img.shields.io/badge/Lighthouse-100%25-brightgreen?logo=lighthouse)
-![Bundle Size](https://img.shields.io/bundlephobia/minzip/@phyt/web?label=bundle%20size)
-![Uptime](https://img.shields.io/uptimerobot/ratio/m123456789-abcdef?label=uptime)
+### Find us on
 
-[![Discord](https://img.shields.io/discord/123456789?color=7289da&logo=discord&logoColor=white)](https://discord.gg/phyt)
-[![Twitter Follow](https://img.shields.io/twitter/follow/phytdotfun?style=social)](https://twitter.com/phytdotfun)
+[![X](https://img.shields.io/badge/X-%23000000.svg?style=for-the-badge&logo=X&logoColor=white)](https://twitter.com/phytdotfun) &nbsp; [![Discord](https://img.shields.io/badge/Discord-%235865F2.svg?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/bdVmWMtrZ8)
 
 </div>
 
 ## Fitness On-Chain
 
-Phyt is the Web3 fitness platform. Runners tokenize their performance and users invest in their favorite athletes. Connect fitness wearables, upload runs, and participate in competitions where token holders share in the rewards.
-
-<div align="center">
-
-**[Docs](https://docs.phyt.fun)** • **[Blog](https://blog.phyt.fun)**
-
-</div>
-
-## ✨ Features
-
-- 🏃 **Athlete Tokens** - Each runner has their own ERC20 token
-- 📊 **Performance-Based Value** - Token value tied to athlete performance
-- 🏆 **Competitions** - Stake tokens on athletes in competitions
-- 📱 **Wearable Integration** - Strava, Garmin, Apple Health support
-- ⚡ **Real-time Verification** - Oracle-verified fitness data
-- 💱 **Built-in DEX** - Swap PHYT for runner tokens
-
-## 🛠️ Roadmap
-
-<div align="center">
-
-### Now - Foundation 🏗️
-
-- [x] Core smart contracts
-- [ ] AMM for PHYT/Runner token pair with bonding curves
-- [ ] Oracle network for run verification
-- [x] Social features and profiles
-- [x] Runner competitions
-- [x] Mobile on Apple Store w/ HealthKit
-- [ ] Web app beta launch
-- [ ] PHYT token launch
-
-### Next (2025) - Expansion 🚀
-
-- [ ] Garmin integration
-- [ ] Mobile on Android
-- [ ] Full health wearable support (publish open source library)
-- [ ] Expand competitions, elo ratings, and jackpots
-- [ ] Team based fantasy and leagues
-- [ ] Cross-sport expansion
-
-### In The Air (2025/2026) - Not Yet Confirmed 🔮
-
-- [ ] Multi-chain deployment (Base, Arbitrum)
-- [ ] Individual betting and prize picks
-- [ ] Tokenize the world (routes, times, and more)
-
-</div>
-
-## 🤝 Contributing
-
-- **If It Phyts**: If you find a bug or have an idea for a new feature, please create an [issue on GitHub](https://github.com/PhytDotFun/phyt.fun/issues). This will help us track and prioritize your request. **If its of serious security concern, please contact us directly on Discord or Twitter**
-
-- **Get Phyt**: The best feedback comes from real world usage! If you have any requests, stumble across any glitches, have some cool ideas for the project, or simply want to yap with Phyt-minded people, do not hesitate to join us on Discord, or hit us up on Twitter/X.
-
-- **Spread Phyt**: Please share it with your friends, colleagues, and on social media. It means the world!
-
-- **Current Maintainers**
-
-<div align="center">
-  <a href="https://github.com/wkflanders/">
-    <img src="https://contrib.rocks/image?repo=wkflanders/raffleleader" />
-  </a>
-</div>
-
-## 🔒 Security
-
-- Not yet audited
-- Bug bounty program on [Immunefi](https://immunefi.com/) coming soon
-- Security contact: william@phyt.fun
+Phyt is the web3 fitness platform. Runners tokenize their performance and users invest in their favorite athletes. Connect a fitness wearable, upload runs, and participate in competitions where token holders share in the rewards.
 
 ---
 
-<div align="center">
+#### Built with 💪 and &nbsp; <span ><a href="https://app.uniswap.org/"><img src="https://rsg5uys7zq.ufs.sh/f/AMgtrA9DGKkFERDl6wfUBum8Mgfo1FYyXsrLc3tahDp4Q2JS" style="vertical-align: middle;" /></a></span> &nbsp; **on** &nbsp; <span ><a href="https://base.org"><img src="https://img.shields.io/badge/Base-0052FF?style=for-the-badge&logo=data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTExIiBoZWlnaHQ9IjExMSIgdmlld0JveD0iMCAwIDExMSAxMTEiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxwYXRoIGQ9Ik01NC45MjEgMTEwLjAzNEM4NS4zNTkgMTEwLjAzNCAxMTAuMDM0IDg1LjQwMiAxMTAuMDM0IDU1LjAxN0MxMTAuMDM0IDI0LjYzMTkgODUuMzU5IDAgNTQuOTIxIDBDMjYuMDQzMiAwIDIuMzUyODEgMjIuMTcxNCAwIDUwLjM5MjNINzIuODQ2N1Y1OS42NDE2SDMuOTU2NWUtMDdDMi4zNTI4MSA4Ny44NjI1IDI2LjA0MzIgMTEwLjAzNCA1NC45MjEgMTEwLjAzNFoiIGZpbGw9IndoaXRlIi8+Cjwvc3ZnPg==" style="vertical-align: middle;" /></a></span> &nbsp;
 
-**Built with ❤️ by the Phyt.fun team**
+<!-- MARKDOWN LINKS & IMAGES -->
+<!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
+<!-- [![Uniswap][Uniswap.org]][Uniswap-url] -->
+<!-- [![Base][Base.org]][Base-url] -->
 
-[Website](https://phyt.fun) • [Discord](https://discord.gg/phyt.fun) • [Twitter](https://twitter.com/phytdotfun)
-
-</div>
+[Base.org]: https://img.shields.io/badge/Base-0052FF?style=for-the-badge&logo=data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTExIiBoZWlnaHQ9IjExMSIgdmlld0JveD0iMCAwIDExMSAxMTEiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxwYXRoIGQ9Ik01NC45MjEgMTEwLjAzNEM4NS4zNTkgMTEwLjAzNCAxMTAuMDM0IDg1LjQwMiAxMTAuMDM0IDU1LjAxN0MxMTAuMDM0IDI0LjYzMTkgODUuMzU5IDAgNTQuOTIxIDBDMjYuMDQzMiAwIDIuMzUyODEgMjIuMTcxNCAwIDUwLjM5MjNINzIuODQ2N1Y1OS42NDE2SDMuOTU2NWUtMDdDMi4zNTI4MSA4Ny44NjI1IDI2LjA0MzIgMTEwLjAzNCA1NC45MjEgMTEwLjAzNFoiIGZpbGw9IndoaXRlIi8+Cjwvc3ZnPg==
+[Base-url]: https://base.org
+[Uniswap.org]: https://rsg5uys7zq.ufs.sh/f/AMgtrA9DGKkFERDl6wfUBum8Mgfo1FYyXsrLc3tahDp4Q2JS
+[Uniswap-url]: https://app.uniswap.org/
