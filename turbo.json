@@ -3,14 +3,15 @@
   "globalDependencies": ["**/.env.*", "**/.env"],
   "ui": "tui",
   "globalEnv": [
-    "NODE_ENV",
-    "VITE_PRIVY_APP_ID",
-    "VITE_API_URL"
+    "NODE_ENV", 
+    "VITE_PRIVY_CLIENT_ID",
+    "VITE_PRIVY_APP_ID"
   ],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
+      "env": ["DATABASE_URL", "VITE_PRIVY_CLIENT_ID", "VITE_PRIVY_APP_ID"],
       "outputs": ["dist/**"]
     },
     "clean": {
