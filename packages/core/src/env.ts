@@ -5,7 +5,8 @@ export const env = createEnv({
     server: {
         NODE_ENV: z
             .enum(['development', 'production', 'test'])
-            .default('development')
+            .default('development'),
+        DATABASE_URL: z.string().url()
     },
     clientPrefix: 'VITE_',
     client: {
@@ -14,6 +15,7 @@ export const env = createEnv({
     },
     runtimeEnv: {
         NODE_ENV: process.env.NODE_ENV,
+        DATABASE_URL: process.env.DATABASE_URL,
 
         VITE_PRIVY_CLIENT_ID: import.meta.env.VITE_PRIVY_CLIENT_ID,
         VITE_PRIVY_APP_ID: import.meta.env.VITE_PRIVY_APP_ID
