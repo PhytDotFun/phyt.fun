@@ -1,9 +1,9 @@
 import { HeaderLogo } from './Logo';
 import { SidebarTrigger } from './sidebar/SidebarTrigger';
-import { SearchButton } from '@/modules/search/ui/components/SearchButton';
-import { Searchbar } from '@/modules/search/ui/components/Searchbar';
-import { ProfileIcon } from '@/modules/profile/ui/components/ProfileIcon';
-import { WalletButton } from '@/modules/market/ui/components/WalletButton';
+import { SearchButton } from '@/features/search/ui/components/SearchButton';
+import { Searchbar } from '@/features/search/ui/components/Searchbar';
+import { ProfileIcon } from '@/features/profile/ui/components/ProfileIcon';
+import { WalletButton } from '@/features/market/ui/components/WalletButton';
 
 export const Header = () => {
     return (
