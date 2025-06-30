@@ -1,7 +1,11 @@
-import { PrivyProvider } from "@privy-io/react-auth";
-import { env } from "@/env";
+import { PrivyProvider } from '@privy-io/react-auth';
+import { env } from '@phyt/core';
 
-export default function PrivyAppProvider({ children }: { children: React.ReactNode; }) {
+export default function PrivyAppProvider({
+    children
+}: {
+    children: React.ReactNode;
+}) {
     return (
         <PrivyProvider
             appId={env.VITE_PRIVY_APP_ID}
@@ -9,13 +13,13 @@ export default function PrivyAppProvider({ children }: { children: React.ReactNo
             config={{
                 embeddedWallets: {
                     ethereum: {
-                        createOnLogin: "users-without-wallets"
+                        createOnLogin: 'users-without-wallets'
                     }
                 },
-                loginMethods: ['twitter'],
+                loginMethods: ['twitter']
             }}
         >
             {children}
-        </PrivyProvider >
+        </PrivyProvider>
     );
 }

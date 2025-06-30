@@ -11,13 +11,17 @@ export default defineConfig({
     plugins: [
         TanStackRouterVite({ autoCodeSplitting: true }),
         viteReact(),
-        tailwindcss(),
+        tailwindcss()
     ],
     resolve: {
         alias: {
             $fonts: resolve(__dirname, './src/assets/fonts'),
-            '@': resolve(__dirname, './src'),
-
+            '@': resolve(__dirname, './src')
         }
+    },
+    define: {
+        'process.env.NODE_ENV': JSON.stringify(
+            process.env.NODE_ENV || 'development'
+        )
     }
 });

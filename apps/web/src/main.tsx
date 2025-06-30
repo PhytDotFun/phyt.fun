@@ -16,7 +16,7 @@ if (rootElement && !rootElement.innerHTML) {
             <ErrorBoundary>
                 <App />
             </ErrorBoundary>
-        </StrictMode>,
+        </StrictMode>
     );
 } else if (!rootElement) {
     console.error('Root element with id "app" not found');

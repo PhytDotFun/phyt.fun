@@ -8,10 +8,39 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
+import { createFileRoute } from '@tanstack/react-router'
+
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as IndexRouteImport } from './routes/index'
 
+const LeaderboardLazyRouteImport = createFileRoute('/leaderboard')()
+const CompetitionsLazyRouteImport = createFileRoute('/competitions')()
+const ActivityLazyRouteImport = createFileRoute('/activity')()
+const ProfileIdLazyRouteImport = createFileRoute('/$profileId')()
+const MarketIndexLazyRouteImport = createFileRoute('/market/')()
+const MarketTokenIdLazyRouteImport = createFileRoute('/market/$tokenId')()
+
+const LeaderboardLazyRoute = LeaderboardLazyRouteImport.update({
+  id: '/leaderboard',
+  path: '/leaderboard',
+  getParentRoute: () => rootRouteImport,
+} as any).lazy(() => import('./routes/leaderboard.lazy').then((d) => d.Route))
+const CompetitionsLazyRoute = CompetitionsLazyRouteImport.update({
+  id: '/competitions',
+  path: '/competitions',
+  getParentRoute: () => rootRouteImport,
+} as any).lazy(() => import('./routes/competitions.lazy').then((d) => d.Route))
+const ActivityLazyRoute = ActivityLazyRouteImport.update({
+  id: '/activity',
+  path: '/activity',
+  getParentRoute: () => rootRouteImport,
+} as any).lazy(() => import('./routes/activity.lazy').then((d) => d.Route))
+const ProfileIdLazyRoute = ProfileIdLazyRouteImport.update({
+  id: '/$profileId',
+  path: '/$profileId',
+  getParentRoute: () => rootRouteImport,
+} as any).lazy(() => import('./routes/$profileId.lazy').then((d) => d.Route))
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
@@ -22,35 +51,124 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MarketIndexLazyRoute = MarketIndexLazyRouteImport.update({
+  id: '/market/',
+  path: '/market/',
+  getParentRoute: () => rootRouteImport,
+} as any).lazy(() => import('./routes/market/index.lazy').then((d) => d.Route))
+const MarketTokenIdLazyRoute = MarketTokenIdLazyRouteImport.update({
+  id: '/market/$tokenId',
+  path: '/market/$tokenId',
+  getParentRoute: () => rootRouteImport,
+} as any).lazy(() =>
+  import('./routes/market/$tokenId.lazy').then((d) => d.Route),
+)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/$profileId': typeof ProfileIdLazyRoute
+  '/activity': typeof ActivityLazyRoute
+  '/competitions': typeof CompetitionsLazyRoute
+  '/leaderboard': typeof LeaderboardLazyRoute
+  '/market/$tokenId': typeof MarketTokenIdLazyRoute
+  '/market': typeof MarketIndexLazyRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/$profileId': typeof ProfileIdLazyRoute
+  '/activity': typeof ActivityLazyRoute
+  '/competitions': typeof CompetitionsLazyRoute
+  '/leaderboard': typeof LeaderboardLazyRoute
+  '/market/$tokenId': typeof MarketTokenIdLazyRoute
+  '/market': typeof MarketIndexLazyRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/$profileId': typeof ProfileIdLazyRoute
+  '/activity': typeof ActivityLazyRoute
+  '/competitions': typeof CompetitionsLazyRoute
+  '/leaderboard': typeof LeaderboardLazyRoute
+  '/market/$tokenId': typeof MarketTokenIdLazyRoute
+  '/market/': typeof MarketIndexLazyRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login'
+  fullPaths:
+    | '/'
+    | '/login'
+    | '/$profileId'
+    | '/activity'
+    | '/competitions'
+    | '/leaderboard'
+    | '/market/$tokenId'
+    | '/market'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login'
-  id: '__root__' | '/' | '/login'
+  to:
+    | '/'
+    | '/login'
+    | '/$profileId'
+    | '/activity'
+    | '/competitions'
+    | '/leaderboard'
+    | '/market/$tokenId'
+    | '/market'
+  id:
+    | '__root__'
+    | '/'
+    | '/login'
+    | '/$profileId'
+    | '/activity'
+    | '/competitions'
+    | '/leaderboard'
+    | '/market/$tokenId'
+    | '/market/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   LoginRoute: typeof LoginRoute
+  ProfileIdLazyRoute: typeof ProfileIdLazyRoute
+  ActivityLazyRoute: typeof ActivityLazyRoute
+  CompetitionsLazyRoute: typeof CompetitionsLazyRoute
+  LeaderboardLazyRoute: typeof LeaderboardLazyRoute
+  MarketTokenIdLazyRoute: typeof MarketTokenIdLazyRoute
+  MarketIndexLazyRoute: typeof MarketIndexLazyRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/leaderboard': {
+      id: '/leaderboard'
+      path: '/leaderboard'
+      fullPath: '/leaderboard'
+      preLoaderRoute: typeof LeaderboardLazyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/competitions': {
+      id: '/competitions'
+      path: '/competitions'
+      fullPath: '/competitions'
+      preLoaderRoute: typeof CompetitionsLazyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/activity': {
+      id: '/activity'
+      path: '/activity'
+      fullPath: '/activity'
+      preLoaderRoute: typeof ActivityLazyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/$profileId': {
+      id: '/$profileId'
+      path: '/$profileId'
+      fullPath: '/$profileId'
+      preLoaderRoute: typeof ProfileIdLazyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login': {
       id: '/login'
       path: '/login'
@@ -65,12 +183,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/market/': {
+      id: '/market/'
+      path: '/market'
+      fullPath: '/market'
+      preLoaderRoute: typeof MarketIndexLazyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/market/$tokenId': {
+      id: '/market/$tokenId'
+      path: '/market/$tokenId'
+      fullPath: '/market/$tokenId'
+      preLoaderRoute: typeof MarketTokenIdLazyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   LoginRoute: LoginRoute,
+  ProfileIdLazyRoute: ProfileIdLazyRoute,
+  ActivityLazyRoute: ActivityLazyRoute,
+  CompetitionsLazyRoute: CompetitionsLazyRoute,
+  LeaderboardLazyRoute: LeaderboardLazyRoute,
+  MarketTokenIdLazyRoute: MarketTokenIdLazyRoute,
+  MarketIndexLazyRoute: MarketIndexLazyRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

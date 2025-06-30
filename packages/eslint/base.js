@@ -2,6 +2,8 @@ import js from "@eslint/js";
 import eslintConfigPrettier from "eslint-config-prettier";
 import turboPlugin from "eslint-plugin-turbo";
 import tseslint from "typescript-eslint";
+import globals from "globals";
+import importPlugin from "eslint-plugin-import";
 
 /**
  * A shared ESLint configuration for the repository.
@@ -13,11 +15,32 @@ export const config = [
   eslintConfigPrettier,
   ...tseslint.configs.strict,
   {
+    languageOptions: {
+      globals: {
+        ...globals.node,
+      },
+    },
+  },
+  {
     plugins: {
       turbo: turboPlugin,
     },
     rules: {
       "turbo/no-undeclared-env-vars": "warn",
+    },
+  },
+  {
+    plugins: {
+      import: importPlugin,
+    },
+    rules: {
+      "import/extensions": [
+        "error",
+        "never",
+        {
+          json: "always",
+        },
+      ],
     },
   },
 //   {

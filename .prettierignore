@@ -1,0 +1,26 @@
+# Ignore artifacts
+build/
+coverage/
+dist/
+.turbo/
+
+# Ignore VSCode settings
+.vscode/
+
+# Ignore public assets
+public/
+
+# Ignore all HTML files
+**/*.html
+
+# Ignore node_modules (NOTE: Prettier does this by default, but safe to be explicit)
+node_modules/
+
+# Ignore dependency lock
+pnpm-lock.yaml
+
+# Ignore shadcn ui components
+apps/web/src/components/ui/
+
+# Ignore all CSS files
+**/*.css
