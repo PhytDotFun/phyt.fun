@@ -10,7 +10,7 @@ import importPlugin from "eslint-plugin-import";
  *
  * @type {import("eslint").Linter.Config[]}
  * */
-export const config = [
+export const baseConfig = [
   js.configs.recommended,
   eslintConfigPrettier,
   ...tseslint.configs.strict,
@@ -52,3 +52,38 @@ export const config = [
     ignores: ["dist/**"],
   },
 ];
+
+
+/**
+ * A shared ESLint configuration for the repository.
+ *
+ * @type {import("eslint").Linter.Config[]}
+ * */
+export const baseConfigWithoutImport = [
+    js.configs.recommended,
+    eslintConfigPrettier,
+    ...tseslint.configs.strict,
+    {
+      languageOptions: {
+        globals: {
+          ...globals.node,
+        },
+      },
+    },
+    {
+      plugins: {
+        turbo: turboPlugin,
+      },
+      rules: {
+        "turbo/no-undeclared-env-vars": "warn",
+      },
+    },
+//   {
+//     plugins: {
+//       onlyWarn,
+//     },
+//   },
+    {
+      ignores: ["dist/**"],
+    },
+  ];
