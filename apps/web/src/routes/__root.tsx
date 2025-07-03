@@ -9,8 +9,8 @@ import { useEffect } from 'react';
 import type { AuthContext } from '@/hooks/useAuth';
 import PrivyAppProvider from '@/providers/PrivyProvider';
 import { useAuth } from '@/hooks/useAuth';
-import { Header } from '@/features/layout/ui/components/Header';
-import { GridBackground } from '@/features/layout/ui/components/Background';
+import { Header } from '@/components/Header';
+import { GridBackground } from '@/components/GridBackground';
 import { router } from '@/App';
 
 type RouterContext = {
