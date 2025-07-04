@@ -1,0 +1,26 @@
+# Ignore artifacts
+build/
+coverage/
+dist/
+.turbo/
+
+# Ignore VSCode settings
+# .vscode/
+
+# Ignore public assets
+public/
+
+# Ignore all HTML files
+**/*.html
+
+# Ignore node_modules (NOTE: Prettier does this by default, but safe to be explicit)
+node_modules/
+
+# Ignore shadcn ui components
+src/components/ui/
+
+# Ignore tanstack generated routeTree
+**/routeTree.gen.ts
+
+# Ignore all CSS files
+**/*.css
