@@ -1,24 +1,36 @@
-import { RouterProvider, createRouter } from '@tanstack/react-router';
-import { routeTree } from './routeTree.gen';
+import { RouterProvider } from '@tanstack/react-router';
+import { Loader } from 'lucide-react';
+import PrivyAppProvider from './providers/PrivyProvider';
+import { router } from './router';
+import { useAuth } from './hooks/useAuth';
 
-export const router = createRouter({
-    routeTree,
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    context: { authentication: undefined! },
-    defaultPreload: 'intent',
-    scrollRestoration: true,
-    defaultStructuralSharing: true,
-    defaultPreloadStaleTime: 0
-});
+function Loading() {
+    return (
+        <div className="min-h-screen flex items-center justify-center bg-background">
+            <div className="text-center">
+                <Loader className="animate-spin rounded-full h-12 w-12 border-b-2 border-main mx-auto mb-4" />
+                <p className="text-foreground font-main">Loading...</p>
+            </div>
+        </div>
+    );
+}
 
-declare module '@tanstack/react-router' {
-    interface Register {
-        router: typeof router;
+function InnerApp() {
+    const authentication = useAuth();
+
+    if (!authentication.ready) {
+        return <Loading />;
     }
+
+    return <RouterProvider router={router} context={{ authentication }} />;
 }
 
 function App() {
-    return <RouterProvider router={router} />;
+    return (
+        <PrivyAppProvider>
+            <InnerApp />
+        </PrivyAppProvider>
+    );
 }
 
 export default App;
