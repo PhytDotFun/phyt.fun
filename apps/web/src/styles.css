@@ -46,15 +46,19 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --background: oklch(95.08% 0.0481 184.07);
-  --secondary-background: oklch(100% 0 0);
-  --foreground: oklch(0% 0 0);
-  --main-foreground: oklch(0% 0 0);
-  --main: oklch(0.8996 0.115 200.1);
+  --background: oklch(1 0 0);
+  --secondary-background: #E5E7EB;
+  --foreground: oklch(0 0 0);
+  --main-foreground: oklch(0 0 0);
+  --main: oklch(0.6627 0.180979 277.1274);
   --border: oklch(0% 0 0);
   --ring: oklch(0% 0 0);
   --overlay: oklch(0% 0 0 / 0.8);
-  --shadow: 4px 4px 0px 0px var(--border);
+  --shadow: 2px 2px 0px 0px var(--border);
+  --accent-1: oklch(0.8699 0.0622 274.04);
+  --accent-2: oklch(0.7106 0.1661 22.22);
+  --accent-3: oklch(0.8662 0.06 303.56);
+  --accent-4: oklch(0.8606 0.1731 91.94);
   --chart-1: #FF6678;
   --chart-2: #7A83FF;
   --chart-3: #FACC00;
@@ -71,7 +75,7 @@
   --main: oklch(67.58% 0.2135 18.63);
   --border: oklch(0% 0 0);
   --ring: oklch(100% 0 0);
-  --shadow: 4px 4px 0px 0px var(--border);
+  --shadow: 2px 2px 0px 0px var(--border);
   --chart-1: #FF4D61;
   --chart-2: #7A83FF;
   --chart-3: #E0B700;
@@ -95,10 +99,10 @@
   --color-chart-4: var(--chart-4);
   --color-chart-5: var(--chart-5);
 
-  --spacing-boxShadowX: 4px;
-  --spacing-boxShadowY: 4px;
-  --spacing-reverseBoxShadowX: -4px;
-  --spacing-reverseBoxShadowY: -4px;
+  --spacing-boxShadowX: 2px;
+  --spacing-boxShadowY: 2px;
+  --spacing-reverseBoxShadowX: -2px;
+  --spacing-reverseBoxShadowY: -2px;
   --radius-base: 5px;
   --shadow-shadow: var(--shadow);
   --font-weight-base: 500;
