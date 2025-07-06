@@ -5,11 +5,12 @@ import {
     SidebarContent,
     SidebarGroup,
     SidebarGroupContent,
-    SidebarGroupLabel,
     SidebarMenu,
     SidebarMenuButton,
-    SidebarMenuItem
+    SidebarMenuItem,
+    useSidebar
 } from '@/components/ui/sidebar';
+import { SearchForm } from '@/features/search/ui/components/Search';
 
 const menuItems = [
     {
@@ -45,16 +46,15 @@ const menuItems = [
 ];
 
 export function AppSidebar() {
+    const { state } = useSidebar();
     return (
         <Sidebar
-            className="hidden md:block group-hover/sidebar-wrapper:translate-x-0 -translate-x-full transition-transform duration-300 ease-in-out hover:translate-x-0"
-            collapsible="offcanvas"
+            collapsible="icon"
+            className="top-[80px] bg-background transition-all duration-200 ease-in-out z-50"
         >
-            <SidebarContent>
+            <SidebarContent className="">
+                <SearchForm collapsed={state === 'collapsed'} />
                 <SidebarGroup>
-                    <SidebarGroupLabel className="text-foreground font-mono text-lg font-bold">
-                        NAVIGATION
-                    </SidebarGroupLabel>
                     <SidebarGroupContent>
                         <SidebarMenu>
                             {menuItems.map((item) => (
@@ -62,7 +62,7 @@ export function AppSidebar() {
                                     <SidebarMenuButton asChild>
                                         <Link
                                             to={item.url}
-                                            className="font-mono font-bold"
+                                            className="font-bold"
                                         >
                                             <item.icon className="size-5" />
                                             <span>{item.title}</span>
