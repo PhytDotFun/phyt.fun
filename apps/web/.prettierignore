@@ -23,4 +23,4 @@ src/components/ui/
 **/routeTree.gen.ts
 
 # Ignore all CSS files
-**/*.css
+# **/*.css

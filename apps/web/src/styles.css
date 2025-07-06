@@ -1,7 +1,8 @@
 @font-face {
     font-family: 'DMSans';
-    src: url('$fonts/DMSans-VariableFont.ttf') format('truetype'),
-    url('$fonts/DMSans-VariableFont.ttf') format('truetype-variations');
+    src:
+        url('$fonts/DMSans-VariableFont.ttf') format('truetype'),
+        url('$fonts/DMSans-VariableFont.ttf') format('truetype-variations');
     font-weight: 100 1000;
     font-style: normal;
     font-display: swap;
@@ -9,15 +10,16 @@
 
 @font-face {
     font-family: 'Lexend';
-    src: url('$fonts/Lexend-VariableFont.ttf') format('truetype'),
-    url('$fonts/Lexend-VariableFont.ttf') format('truetype-variations');
+    src:
+        url('$fonts/Lexend-VariableFont.ttf') format('truetype'),
+        url('$fonts/Lexend-VariableFont.ttf') format('truetype-variations');
     font-weight: 100 1000;
     font-style: normal;
     font-display: swap;
 }
 
-@import "tailwindcss";
-@import "tw-animate-css";
+@import 'tailwindcss';
+@import 'tw-animate-css';
 
 @theme {
     --font-dmsans: 'DMSans', sans-serif;
@@ -46,75 +48,187 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --background: oklch(1 0 0);
-  --secondary-background: #E5E7EB;
-  --foreground: oklch(0 0 0);
-  --main-foreground: oklch(0 0 0);
-  --main: oklch(0.6627 0.180979 277.1274);
-  --border: oklch(0% 0 0);
-  --ring: oklch(0% 0 0);
-  --overlay: oklch(0% 0 0 / 0.8);
-  --shadow: 2px 2px 0px 0px var(--border);
-  --accent-1: oklch(0.8699 0.0622 274.04);
-  --accent-2: oklch(0.7106 0.1661 22.22);
-  --accent-3: oklch(0.8662 0.06 303.56);
-  --accent-4: oklch(0.8606 0.1731 91.94);
-  --chart-1: #FF6678;
-  --chart-2: #7A83FF;
-  --chart-3: #FACC00;
-  --chart-4: #00D696;
-  --chart-5: #5294FF;
-  --chart-active-dot: #000;
+    --background: oklch(1 0 0);
+    --secondary-background: #e5e7eb;
+    --foreground: oklch(0 0 0);
+    --main-foreground: oklch(0 0 0);
+    --main: oklch(0.6627 0.180979 277.1274);
+    --border: oklch(0% 0 0);
+    --ring: oklch(0% 0 0);
+    --overlay: oklch(0% 0 0 / 0.8);
+    --shadow: 2px 2px 0px 0px var(--border);
+    --accent-1: oklch(70.4% 0.191 22.216);
+    --accent-2: oklch(71.4% 0.203 305.504);
+    --accent-3: oklch(90.5% 0.182 98.111);
+    --accent-4: oklch(86.5% 0.127 207.078);
+    --chart-1: #ff6678;
+    --chart-2: #7a83ff;
+    --chart-3: #facc00;
+    --chart-4: #00d696;
+    --chart-5: #5294ff;
+    --chart-active-dot: #000;
 }
 
 .dark {
-  --background: oklch(25.15% 0.0495 7.54);
-  --secondary-background: oklch(23.93% 0 0);
-  --foreground: oklch(92.49% 0 0);
-  --main-foreground: oklch(0% 0 0);
-  --main: oklch(67.58% 0.2135 18.63);
-  --border: oklch(0% 0 0);
-  --ring: oklch(100% 0 0);
-  --shadow: 2px 2px 0px 0px var(--border);
-  --chart-1: #FF4D61;
-  --chart-2: #7A83FF;
-  --chart-3: #E0B700;
-  --chart-4: #00BD84;
-  --chart-5: #5294FF;
-  --chart-active-dot: #fff;
+    --background: oklch(25.15% 0.0495 7.54);
+    --secondary-background: oklch(23.93% 0 0);
+    --foreground: oklch(92.49% 0 0);
+    --main-foreground: oklch(0% 0 0);
+    --main: oklch(67.58% 0.2135 18.63);
+    --border: oklch(0% 0 0);
+    --ring: oklch(100% 0 0);
+    --shadow: 2px 2px 0px 0px var(--border);
+    --chart-1: #ff4d61;
+    --chart-2: #7a83ff;
+    --chart-3: #e0b700;
+    --chart-4: #00bd84;
+    --chart-5: #5294ff;
+    --chart-active-dot: #fff;
 }
 
 @theme inline {
-  --color-main: var(--main);
-  --color-background: var(--background);
-  --color-secondary-background: var(--secondary-background);
-  --color-foreground: var(--foreground);
-  --color-main-foreground: var(--main-foreground);
-  --color-border: var(--border);
-  --color-overlay: var(--overlay);
-  --color-ring: var(--ring);
-  --color-chart-1: var(--chart-1);
-  --color-chart-2: var(--chart-2);
-  --color-chart-3: var(--chart-3);
-  --color-chart-4: var(--chart-4);
-  --color-chart-5: var(--chart-5);
+    --color-main: var(--main);
+    --color-background: var(--background);
+    --color-secondary-background: var(--secondary-background);
+    --color-foreground: var(--foreground);
+    --color-main-foreground: var(--main-foreground);
+    --color-border: var(--border);
+    --color-overlay: var(--overlay);
+    --color-ring: var(--ring);
+    --color-accent-1: var(--accent-1);
+    --color-accent-2: var(--accent-2);
+    --color-accent-3: var(--accent-3);
+    --color-accent-4: var(--accent-4);
+    --color-chart-1: var(--chart-1);
+    --color-chart-2: var(--chart-2);
+    --color-chart-3: var(--chart-3);
+    --color-chart-4: var(--chart-4);
+    --color-chart-5: var(--chart-5);
 
-  --spacing-boxShadowX: 2px;
-  --spacing-boxShadowY: 2px;
-  --spacing-reverseBoxShadowX: -2px;
-  --spacing-reverseBoxShadowY: -2px;
-  --radius-base: 5px;
-  --shadow-shadow: var(--shadow);
-  --font-weight-base: 500;
-  --font-weight-heading: 900;
+    --spacing-boxShadowX: 2px;
+    --spacing-boxShadowY: 2px;
+    --spacing-reverseBoxShadowX: -2px;
+    --spacing-reverseBoxShadowY: -2px;
+    --radius-base: 5px;
+    --shadow-shadow: var(--shadow);
+    --font-weight-base: 500;
+    --font-weight-heading: 900;
 }
-  
-@layer base {
-  body {
-    @apply text-foreground font-base bg-background;
-  }
 
-  h1, h2, h3, h4, h5, h6{
-    @apply font-heading;
-  }
+@layer base {
+    body {
+        @apply text-foreground font-base bg-background;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+        @apply font-heading;
+    }
+}
+
+/* Grid Background Animation */
+@keyframes snake-pulse {
+    0%,
+    100% {
+        background-color: transparent;
+        opacity: 0;
+    }
+
+    5% {
+        background-color: var(--accent-1);
+        opacity: 1;
+    }
+
+    10% {
+        background-color: var(--accent-1);
+        opacity: 0.8;
+    }
+
+    15% {
+        background-color: var(--accent-1);
+        opacity: 0.6;
+    }
+
+    20% {
+        background-color: var(--accent-1);
+        opacity: 0.4;
+    }
+
+    25% {
+        background-color: var(--accent-1);
+        opacity: 0.2;
+    }
+
+    30% {
+        background-color: transparent;
+        opacity: 0;
+    }
+
+    35% {
+        background-color: var(--accent-2);
+        opacity: 1;
+    }
+
+    40% {
+        background-color: var(--accent-2);
+        opacity: 0.8;
+    }
+
+    45% {
+        background-color: var(--accent-2);
+        opacity: 0.6;
+    }
+
+    50% {
+        background-color: var(--accent-2);
+        opacity: 0.4;
+    }
+
+    55% {
+        background-color: var(--accent-2);
+        opacity: 0.2;
+    }
+
+    60% {
+        background-color: transparent;
+        opacity: 0;
+    }
+
+    65% {
+        background-color: var(--accent-3);
+        opacity: 1;
+    }
+
+    70% {
+        background-color: var(--accent-3);
+        opacity: 0.8;
+    }
+
+    75% {
+        background-color: var(--accent-3);
+        opacity: 0.6;
+    }
+
+    80% {
+        background-color: var(--accent-3);
+        opacity: 0.4;
+    }
+
+    85% {
+        background-color: var(--accent-3);
+        opacity: 0.2;
+    }
+
+    90% {
+        background-color: transparent;
+        opacity: 0;
+    }
+}
+
+.snake-animation {
+    animation: snake-pulse var(--snake-animation-duration, 15s) infinite linear;
 }
