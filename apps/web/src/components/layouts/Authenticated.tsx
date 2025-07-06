@@ -1,6 +1,7 @@
 import { Header } from '../Header';
 import { AppSidebar } from '@/components/AppSidebar';
-import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
+import { SidebarProvider } from '@/components/ui/sidebar';
+import { SearchProvider } from '@/features/search/ui/components/Search';
 
 interface AuthenticatedLayoutProps {
     children: React.ReactNode;
@@ -9,15 +10,11 @@ interface AuthenticatedLayoutProps {
 export const AuthenticatedLayout = ({ children }: AuthenticatedLayoutProps) => {
     return (
         <SidebarProvider>
-            <div className="flex min-h-screen w-full group/sidebar-wrapper">
-                <div className="hidden md:block fixed left-0 top-0 w-4 h-full z-40 hover:w-8 transition-all duration-300" />
-
+            <SearchProvider>
+                <Header />
                 <AppSidebar />
-                <SidebarInset className="flex-1">
-                    <Header />
-                    <div className="flex-1 pt-20">{children}</div>
-                </SidebarInset>
-            </div>
+                <main>{children}</main>
+            </SearchProvider>
         </SidebarProvider>
     );
 };
