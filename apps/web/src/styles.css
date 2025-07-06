@@ -129,3 +129,106 @@
         @apply font-heading;
     }
 }
+
+/* Grid Background Animation */
+@keyframes snake-pulse {
+    0%,
+    100% {
+        background-color: transparent;
+        opacity: 0;
+    }
+
+    5% {
+        background-color: var(--accent-1);
+        opacity: 1;
+    }
+
+    10% {
+        background-color: var(--accent-1);
+        opacity: 0.8;
+    }
+
+    15% {
+        background-color: var(--accent-1);
+        opacity: 0.6;
+    }
+
+    20% {
+        background-color: var(--accent-1);
+        opacity: 0.4;
+    }
+
+    25% {
+        background-color: var(--accent-1);
+        opacity: 0.2;
+    }
+
+    30% {
+        background-color: transparent;
+        opacity: 0;
+    }
+
+    35% {
+        background-color: var(--accent-2);
+        opacity: 1;
+    }
+
+    40% {
+        background-color: var(--accent-2);
+        opacity: 0.8;
+    }
+
+    45% {
+        background-color: var(--accent-2);
+        opacity: 0.6;
+    }
+
+    50% {
+        background-color: var(--accent-2);
+        opacity: 0.4;
+    }
+
+    55% {
+        background-color: var(--accent-2);
+        opacity: 0.2;
+    }
+
+    60% {
+        background-color: transparent;
+        opacity: 0;
+    }
+
+    65% {
+        background-color: var(--accent-3);
+        opacity: 1;
+    }
+
+    70% {
+        background-color: var(--accent-3);
+        opacity: 0.8;
+    }
+
+    75% {
+        background-color: var(--accent-3);
+        opacity: 0.6;
+    }
+
+    80% {
+        background-color: var(--accent-3);
+        opacity: 0.4;
+    }
+
+    85% {
+        background-color: var(--accent-3);
+        opacity: 0.2;
+    }
+
+    90% {
+        background-color: transparent;
+        opacity: 0;
+    }
+}
+
+.snake-animation {
+    animation: snake-pulse var(--snake-animation-duration, 15s) infinite linear;
+}
