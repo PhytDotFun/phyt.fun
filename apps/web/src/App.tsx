@@ -1,15 +1,15 @@
 import { RouterProvider } from '@tanstack/react-router';
-import { Loader } from 'lucide-react';
 import PrivyAppProvider from './providers/PrivyProvider';
 import { router } from './router';
 import { useAuth } from './hooks/useAuth';
+import { Loader } from './components/Loading';
 
 function Loading() {
     return (
         <div className="min-h-screen flex items-center justify-center bg-background">
             <div className="text-center">
-                <Loader className="animate-spin rounded-full h-12 w-12 border-b-2 border-main mx-auto mb-4" />
-                <p className="text-foreground font-main">Loading...</p>
+                <Loader />
+                <p className="text-black">LOADING</p>
             </div>
         </div>
     );
