@@ -7,7 +7,6 @@ import './styles.css';
 import App from './App.tsx';
 import { ErrorBoundary } from './ErrorBoundary.tsx';
 
-// Render the app
 const rootElement = document.getElementById('app');
 if (rootElement && !rootElement.innerHTML) {
     const root = ReactDOM.createRoot(rootElement);

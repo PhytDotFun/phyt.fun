@@ -246,3 +246,58 @@
 .snake-animation {
     animation: snake-pulse var(--snake-animation-duration, 15s) infinite linear;
 }
+
+/* Accent Color Hover Animation */
+@keyframes accent-color-cycle {
+    0%,
+    22% {
+        background-color: var(--accent-1);
+    }
+
+    23%,
+    24% {
+        background-color: var(--accent-2);
+    }
+
+    25%,
+    47% {
+        background-color: var(--accent-2);
+    }
+
+    48%,
+    49% {
+        background-color: var(--accent-3);
+    }
+
+    50%,
+    72% {
+        background-color: var(--accent-3);
+    }
+
+    73%,
+    74% {
+        background-color: var(--accent-4);
+    }
+
+    75%,
+    97% {
+        background-color: var(--accent-4);
+    }
+
+    98%,
+    99% {
+        background-color: var(--accent-1);
+    }
+
+    100% {
+        background-color: var(--accent-1);
+    }
+}
+
+.accent-color-hover {
+    transition: background-color 0.1s linear;
+}
+
+.accent-color-hover:hover {
+    animation: accent-color-cycle 5s infinite ease-in-out;
+}
