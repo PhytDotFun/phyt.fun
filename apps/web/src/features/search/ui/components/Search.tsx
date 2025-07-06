@@ -145,7 +145,7 @@ export const SearchButton = ({ className, variant }: SearchButtonProps) => {
                 className={cn('size-7 px-2', className)}
                 onClick={() => (isMobile ? setOpenMobile(true) : setOpen(true))}
             >
-                <Search />
+                <SearchIcon />
             </Button>
         </div>
     );
