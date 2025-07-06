@@ -24,8 +24,8 @@
 @theme {
     --font-dmsans: 'DMSans', sans-serif;
     --font-lexend: 'Lexend', sans-serif;
-    --font-base: 'DMSans', sans-serif;
-    --font-heading: 'DMSans', sans-serif;
+    --font-base: 'Lexend', sans-serif;
+    --font-heading: 'Lexend', sans-serif;
 
     --font-weight-thin: 100;
     --font-weight-extralight: 200;
