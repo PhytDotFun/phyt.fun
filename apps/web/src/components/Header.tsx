@@ -1,4 +1,4 @@
-import { HeaderLogo } from './Logo';
+import { Logo } from './Logo';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { SearchButton } from '@/features/search/ui/components/SearchButton';
 import { Searchbar } from '@/features/search/ui/components/Searchbar';
@@ -14,7 +14,7 @@ export const Header = () => {
                         <div className="md:hidden">
                             <SidebarTrigger />
                         </div>
-                        <HeaderLogo />
+                        <Logo type="header" hasDotFun={true} />
                     </div>
                     <div className="hidden md:block flex-1 max-w-3xl mx-auto">
                         <Searchbar />
