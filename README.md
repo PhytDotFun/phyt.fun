@@ -1,7 +1,7 @@
 <div align="center">
 
   <a href="https://phyt.fun">
-    <img src="https://rsg5uys7zq.ufs.sh/f/AMgtrA9DGKkFUwXgOm4E6ySthNuLs5WiFPfOGvoMI7ValHjB" height="210" />
+    <img src="https://rsg5uys7zq.ufs.sh/f/AMgtrA9DGKkFJ1CvzVbGk0seB2TFDV4a6fNSUX8ojznCH9lt" height="210" />
   </a>
 
 <!-- [![TypeScript](https://img.shields.io/badge/TypeScript-5.8-blue?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)

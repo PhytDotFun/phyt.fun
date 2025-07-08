@@ -10,8 +10,17 @@ import {
     DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
 import { useAuth } from '@/hooks/useAuth';
+import { useIsMobile } from '@/hooks/useMobile';
 
-export const ProfileIcon = () => {
+interface ProfileIconProps {
+    variant?: 'default' | 'reverse' | 'neutral' | 'noShadow' | 'ghost';
+}
+
+export const ProfileIcon = ({ variant }: ProfileIconProps) => {
+    const isMobile = useIsMobile();
+
+    const effectiveVariant = variant ?? (isMobile ? 'noShadow' : 'default');
+
     const { signOut } = useAuth();
     const navigate = useNavigate();
 
@@ -23,7 +32,10 @@ export const ProfileIcon = () => {
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="h-9 w-9 rounded-full p-0">
+                <Button
+                    variant={effectiveVariant}
+                    className="h-9 w-9 rounded-full p-0"
+                >
                     <Avatar className="size-9">
                         <AvatarImage src="" />
                         <AvatarFallback>P</AvatarFallback>

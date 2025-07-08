@@ -24,8 +24,8 @@
 @theme {
     --font-dmsans: 'DMSans', sans-serif;
     --font-lexend: 'Lexend', sans-serif;
-    --font-base: 'DMSans', sans-serif;
-    --font-heading: 'DMSans', sans-serif;
+    --font-base: 'Lexend', sans-serif;
+    --font-heading: 'Lexend', sans-serif;
 
     --font-weight-thin: 100;
     --font-weight-extralight: 200;
@@ -52,21 +52,30 @@
     --secondary-background: #e5e7eb;
     --foreground: oklch(0 0 0);
     --main-foreground: oklch(0 0 0);
-    --main: oklch(0.6627 0.180979 277.1274);
+    --main: oklch(1 0 0);
     --border: oklch(0% 0 0);
     --ring: oklch(0% 0 0);
     --overlay: oklch(0% 0 0 / 0.8);
     --shadow: 2px 2px 0px 0px var(--border);
-    --accent-1: oklch(70.4% 0.191 22.216);
-    --accent-2: oklch(71.4% 0.203 305.504);
-    --accent-3: oklch(90.5% 0.182 98.111);
-    --accent-4: oklch(86.5% 0.127 207.078);
+    --accent-1: oklch(0.6627 0.180979 277.1274);
+    --accent-2: oklch(70.4% 0.191 22.216);
+    --accent-3: oklch(71.4% 0.203 305.504);
+    --accent-4: oklch(90.5% 0.182 98.111);
+    --accent-5: oklch(86.5% 0.127 207.078);
     --chart-1: #ff6678;
     --chart-2: #7a83ff;
     --chart-3: #facc00;
     --chart-4: #00d696;
     --chart-5: #5294ff;
     --chart-active-dot: #000;
+    --sidebar: oklch(1 0 0);
+    --sidebar-foreground: oklch(0 0 0);
+    /* --sidebar-main: oklch(0.205 0 0);
+    --sidebar-main-foreground: oklch(0.985 0 0); */
+    /* --sidebar-accent: oklch(0.97 0 0);
+    --sidebar-accent-foreground: oklch(0.205 0 0); */
+    --sidebar-border: oklch(0 0 0);
+    --sidebar-ring: oklch(0 0 0);
 }
 
 .dark {
@@ -104,6 +113,11 @@
     --color-chart-3: var(--chart-3);
     --color-chart-4: var(--chart-4);
     --color-chart-5: var(--chart-5);
+
+    --color-sidebar: var(--sidebar);
+    --color-sidebar-foreground: var(--sidebar-foreground);
+    --color-sidebar-border: var(--sidebar-border);
+    --color-sidebar-ring: var(--sidebar-ring);
 
     --spacing-boxShadowX: 2px;
     --spacing-boxShadowY: 2px;
@@ -231,4 +245,59 @@
 
 .snake-animation {
     animation: snake-pulse var(--snake-animation-duration, 15s) infinite linear;
+}
+
+/* Accent Color Hover Animation */
+@keyframes accent-color-cycle {
+    0%,
+    22% {
+        background-color: var(--accent-1);
+    }
+
+    23%,
+    24% {
+        background-color: var(--accent-2);
+    }
+
+    25%,
+    47% {
+        background-color: var(--accent-2);
+    }
+
+    48%,
+    49% {
+        background-color: var(--accent-3);
+    }
+
+    50%,
+    72% {
+        background-color: var(--accent-3);
+    }
+
+    73%,
+    74% {
+        background-color: var(--accent-4);
+    }
+
+    75%,
+    97% {
+        background-color: var(--accent-4);
+    }
+
+    98%,
+    99% {
+        background-color: var(--accent-1);
+    }
+
+    100% {
+        background-color: var(--accent-1);
+    }
+}
+
+.accent-color-hover {
+    transition: background-color 0.1s linear;
+}
+
+.accent-color-hover:hover {
+    animation: accent-color-cycle 5s infinite ease-in-out;
 }
