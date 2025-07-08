@@ -26,5 +26,13 @@ export default defineConfig({
         'process.env.NODE_ENV': JSON.stringify(
             process.env.NODE_ENV || 'development'
         )
+    },
+    server: {
+        proxy: {
+            '/api': {
+                target: 'http://localhost:3000',
+                changeOrigin: true
+            }
+        }
     }
 });
