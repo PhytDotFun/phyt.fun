@@ -1,0 +1,38 @@
+{
+    "name": "@phyt/api",
+    "version": "0.0.0",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "dev": "tsx watch src/index.ts",
+        "clean": "rimraf node_modules && rimraf dist",
+        "build": "tsup",
+        "start": "node dist/index.js",
+        "test": "vitest run",
+        "lint": "eslint",
+        "lint:fix": "eslint --fix",
+        "format": "prettier --write . --ignore-unknown",
+        "check-types": "tsc --noEmit"
+    },
+    "dependencies": {
+        "@hono/node-server": "^1.15.0",
+        "@hono/trpc-server": "^0.4.0",
+        "@hono/zod-validator": "^0.7.0",
+        "@phyt/core": "workspace:*",
+        "@privy-io/server-auth": "^1.28.2",
+        "@t3-oss/env-core": "^0.13.8",
+        "@trpc/server": "^11.4.3",
+        "dotenv": "^17.1.0",
+        "hono": "^4.8.4",
+        "zod": "^3.25.67"
+    },
+    "devDependencies": {
+        "@phyt/eslint": "workspace:*",
+        "@phyt/tsconfig": "workspace:*",
+        "@types/node": "^24.0.7",
+        "eslint": "^9.30.0",
+        "tsup": "^8.5.0",
+        "typescript": "^5.8.3",
+        "vitest": "^3.2.4"
+    }
+}
