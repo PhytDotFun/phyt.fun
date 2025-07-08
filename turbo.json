@@ -25,7 +25,7 @@
             "cache": false
         },
         "lint": {
-            "dependsOn": ["check-types", "^lint"]
+            "dependsOn": ["check-rc", "check-types", "^lint"]
         },
         "lint:fix": {
             "dependsOn": ["check-types", "^lint:fix"]
