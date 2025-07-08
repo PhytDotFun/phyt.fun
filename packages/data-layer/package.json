@@ -3,8 +3,6 @@
     "version": "0.0.0",
     "private": true,
     "type": "module",
-    "main": "./dist/index.js",
-    "types": "./dist/index.d.ts",
     "exports": {
         ".": {
             "types": "./dist/index.d.ts",
@@ -21,18 +19,18 @@
     },
     "scripts": {
         "build": "tsup",
-        "dev": "tsup --watch",
+        "check-types": "tsc --noEmit",
         "clean": "pnpm rimraf dist && pnpm rimraf node_modules",
-        "test": "vitest run",
+        "db:check": "pnpm drizzle-kit check --config=./src/db/drizzle.config.js",
+        "db:generate": "pnpm drizzle-kit generate --config=./src/db/drizzle.config.js",
+        "db:migrate": "pnpm drizzle-kit migrate --config=./src/db/drizzle.config.js",
+        "db:push": "pnpm drizzle-kit push --config=./src/db/drizzle.config.js",
+        "db:studio": "pnpm drizzle-kit studio --config=./src/db/drizzle.config.js",
+        "dev": "tsup --watch",
+        "format": "prettier --write . --ignore-unknown",
         "lint": "eslint",
         "lint:fix": "eslint --fix",
-        "format": "prettier --write . --ignore-unknown",
-        "check-types": "tsc --noEmit",
-        "db:generate": "pnpm drizzle-kit generate --config=./src/db/drizzle.config.js",
-        "db:push": "pnpm drizzle-kit push --config=./src/db/drizzle.config.js",
-        "db:migrate": "pnpm drizzle-kit migrate --config=./src/db/drizzle.config.js",
-        "db:studio": "pnpm drizzle-kit studio --config=./src/db/drizzle.config.js",
-        "db:check": "pnpm drizzle-kit check --config=./src/db/drizzle.config.js"
+        "test": "vitest run"
     },
     "dependencies": {
         "@phyt/core": "workspace:*",
@@ -53,5 +51,7 @@
         "tsup": "^8.5.0",
         "typescript": "^5.8.3",
         "vitest": "^3.2.4"
-    }
+    },
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts"
 }

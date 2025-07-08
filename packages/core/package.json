@@ -3,8 +3,6 @@
     "version": "0.0.0",
     "private": true,
     "type": "module",
-    "main": "./dist/index.js",
-    "types": "./dist/index.d.ts",
     "exports": {
         ".": {
             "types": "./dist/index.d.ts",
@@ -13,13 +11,13 @@
     },
     "scripts": {
         "build": "tsup",
-        "dev": "tsup --watch",
+        "check-types": "tsc --noEmit",
         "clean": "pnpm rimraf dist && pnpm rimraf node_modules",
-        "test": "vitest run",
+        "dev": "tsup --watch",
+        "format": "prettier --write . --ignore-unknown",
         "lint": "eslint",
         "lint:fix": "eslint --fix",
-        "format": "prettier --write . --ignore-unknown",
-        "check-types": "tsc --noEmit"
+        "test": "vitest run"
     },
     "dependencies": {
         "@t3-oss/env-core": "^0.13.8",
@@ -36,5 +34,7 @@
         "typescript": "^5.8.3",
         "vite": "^6.3.5",
         "vitest": "^3.2.4"
-    }
+    },
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts"
 }

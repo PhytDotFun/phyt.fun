@@ -4,16 +4,16 @@
     "private": true,
     "type": "module",
     "scripts": {
-        "dev": "vite",
-        "clean": "rimraf node_modules && rimraf dist",
         "build": "pnpm run clean && pnpm install && vite build && tsc",
-        "serve": "vite preview",
-        "test": "vitest run",
+        "check-rc": "pnpm dlx react-compiler-healthcheck@latest",
+        "check-types": "tsc --noEmit",
+        "clean": "rimraf node_modules && rimraf dist",
+        "dev": "vite",
+        "format": "prettier --write . --ignore-unknown",
         "lint": "eslint",
         "lint:fix": "eslint --fix",
-        "format": "prettier --write . --ignore-unknown",
-        "check-rc": "pnpm dlx react-compiler-healthcheck@latest",
-        "check-types": "tsc --noEmit"
+        "serve": "vite preview",
+        "test": "vitest run"
     },
     "dependencies": {
         "@hookform/resolvers": "^5.1.1",
@@ -81,8 +81,8 @@
         "@types/react": "^19.1.8",
         "@types/react-dom": "^19.1.6",
         "@vitejs/plugin-react": "^4.6.0",
-        "eslint": "^9.30.0",
         "babel-plugin-react-compiler": "19.1.0-rc.2",
+        "eslint": "^9.30.0",
         "jsdom": "^26.1.0",
         "tsup": "^8.5.0",
         "tw-animate-css": "^1.3.4",
