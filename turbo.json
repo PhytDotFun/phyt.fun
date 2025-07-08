@@ -10,7 +10,10 @@
             "env": [
                 "DATABASE_URL",
                 "VITE_PRIVY_CLIENT_ID",
-                "VITE_PRIVY_APP_ID"
+                "VITE_PRIVY_APP_ID",
+                "PRIVY_APP_ID",
+                "PRIVY_SECRET_KEY",
+                "PRIVY_VERIFICATION_KEY"
             ],
             "outputs": ["dist/**"]
         },
