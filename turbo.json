@@ -17,6 +17,10 @@
         "clean": {
             "cache": false
         },
+        "check-rc": {
+            "dependsOn": ["check-types", "^check-rc"],
+            "cache": false
+        },
         "lint": {
             "dependsOn": ["check-types", "^lint"]
         },

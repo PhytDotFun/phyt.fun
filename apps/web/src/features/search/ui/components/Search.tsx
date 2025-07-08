@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Search as SearchIcon } from 'lucide-react';
 import {
     CommandDialog,
@@ -66,12 +66,14 @@ export function SearchProvider({
             } else {
                 _setOpen(openState);
             }
-
-            // This sets the cookie to keep the search state.
-            document.cookie = `${SEARCH_COOKIE_NAME}=${openState}; path=/; max-age=${SEARCH_COOKIE_MAX_AGE}`;
         },
         [setOpenProp, open]
     );
+
+    // Set cookie when open state changes
+    useEffect(() => {
+        document.cookie = `${SEARCH_COOKIE_NAME}=${open}; path=/; max-age=${SEARCH_COOKIE_MAX_AGE}`;
+    }, [open]);
 
     const contextValue = React.useMemo<SearchContextProps>(
         () => ({
@@ -143,7 +145,7 @@ export const SearchButton = ({ className, variant }: SearchButtonProps) => {
                 className={cn('size-7 px-2', className)}
                 onClick={() => (isMobile ? setOpenMobile(true) : setOpen(true))}
             >
-                <Search />
+                <SearchIcon />
             </Button>
         </div>
     );
