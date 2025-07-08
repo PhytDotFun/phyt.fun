@@ -4,13 +4,21 @@
     "private": true,
     "type": "module",
     "exports": {
-        ".": {
-            "types": "./dist/index.d.ts",
-            "import": "./dist/index.js"
+        "./contracts": {
+            "types": "./dist/contracts/index.d.ts",
+            "import": "./dist/contracts/index.js"
         },
-        "./db": {
-            "types": "./dist/db/index.d.ts",
-            "import": "./dist/db/index.js"
+        "./db/client": {
+            "types": "./dist/db/client.d.ts",
+            "import": "./dist/db/client.js"
+        },
+        "./db/schema": {
+            "types": "./dist/db/schema.d.ts",
+            "import": "./dist/db/schema.js"
+        },
+        "./db/validation": {
+            "types": "./dist/db/validation.d.ts",
+            "import": "./dist/db/validation.js"
         },
         "./redis": {
             "types": "./dist/redis/index.d.ts",
@@ -51,7 +59,5 @@
         "tsup": "^8.5.0",
         "typescript": "^5.8.3",
         "vitest": "^3.2.4"
-    },
-    "main": "./dist/index.js",
-    "types": "./dist/index.d.ts"
+    }
 }
