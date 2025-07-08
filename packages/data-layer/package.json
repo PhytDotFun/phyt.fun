@@ -1,57 +1,57 @@
 {
-  "name": "@phyt/data-layer",
-  "version": "0.0.0",
-  "private": true,
-  "type": "module",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
+    "name": "@phyt/data-layer",
+    "version": "0.0.0",
+    "private": true,
+    "type": "module",
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "exports": {
+        ".": {
+            "types": "./dist/index.d.ts",
+            "import": "./dist/index.js"
+        },
+        "./db": {
+            "types": "./dist/db/index.d.ts",
+            "import": "./dist/db/index.js"
+        },
+        "./redis": {
+            "types": "./dist/redis/index.d.ts",
+            "import": "./dist/redis/index.js"
+        }
     },
-    "./db": {
-      "types": "./dist/db/index.d.ts",
-      "import": "./dist/db/index.js"
+    "scripts": {
+        "build": "tsup",
+        "dev": "tsup --watch",
+        "clean": "pnpm rimraf dist && pnpm rimraf node_modules",
+        "test": "vitest run",
+        "lint": "eslint",
+        "lint:fix": "eslint --fix",
+        "format": "prettier --write . --ignore-unknown",
+        "check-types": "tsc --noEmit",
+        "db:generate": "pnpm drizzle-kit generate --config=./src/db/drizzle.config.js",
+        "db:push": "pnpm drizzle-kit push --config=./src/db/drizzle.config.js",
+        "db:migrate": "pnpm drizzle-kit migrate --config=./src/db/drizzle.config.js",
+        "db:studio": "pnpm drizzle-kit studio --config=./src/db/drizzle.config.js",
+        "db:check": "pnpm drizzle-kit check --config=./src/db/drizzle.config.js"
     },
-    "./redis": {
-      "types": "./dist/redis/index.d.ts",
-      "import": "./dist/redis/index.js"
+    "dependencies": {
+        "@phyt/core": "workspace:*",
+        "@t3-oss/env-core": "^0.13.8",
+        "@types/pg": "^8.15.4",
+        "drizzle-kit": "^0.31.4",
+        "drizzle-orm": "^0.44.2",
+        "drizzle-zod": "^0.8.2",
+        "pg": "^8.16.3",
+        "tsx": "^4.20.3",
+        "zod": "^3.25.67"
+    },
+    "devDependencies": {
+        "@phyt/eslint": "workspace:*",
+        "@phyt/tsconfig": "workspace:*",
+        "@types/node": "^24.0.7",
+        "eslint": "^9.30.0",
+        "tsup": "^8.5.0",
+        "typescript": "^5.8.3",
+        "vitest": "^3.2.4"
     }
-  },
-  "scripts": {
-    "build": "tsup",
-    "dev": "tsup --watch",
-    "clean": "pnpm rimraf dist && pnpm rimraf node_modules",
-    "test": "vitest run",
-    "lint": "eslint",
-    "lint:fix": "eslint --fix",
-    "format": "prettier --write . --ignore-unknown",
-    "check-types": "tsc --noEmit",
-    "db:generate": "pnpm drizzle-kit generate --config=./src/db/drizzle.config.js",
-    "db:push": "pnpm drizzle-kit push --config=./src/db/drizzle.config.js",
-    "db:migrate": "pnpm drizzle-kit migrate --config=./src/db/drizzle.config.js",
-    "db:studio": "pnpm drizzle-kit studio --config=./src/db/drizzle.config.js",
-    "db:check": "pnpm drizzle-kit check --config=./src/db/drizzle.config.js"
-  },
-  "dependencies": {
-    "@phyt/core": "workspace:*",
-    "@t3-oss/env-core": "^0.13.8",
-    "@types/pg": "^8.15.4",
-    "drizzle-kit": "^0.31.4",
-    "drizzle-orm": "^0.44.2",
-    "drizzle-zod": "^0.8.2",
-    "pg": "^8.16.3",
-    "tsx": "^4.20.3",
-    "zod": "^3.25.67"
-  },
-  "devDependencies": {
-    "@phyt/eslint": "workspace:*",
-    "@phyt/tsconfig": "workspace:*",
-    "@types/node": "^24.0.7",
-    "eslint": "^9.30.0",
-    "tsup": "^8.5.0",
-    "typescript": "^5.8.3",
-    "vitest": "^3.2.4"
-  }
 }
