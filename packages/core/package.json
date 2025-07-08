@@ -22,9 +22,7 @@
         "check-types": "tsc --noEmit"
     },
     "dependencies": {
-        "@t3-oss/env-core": "^0.13.8",
-        "pino": "^9.7.0",
-        "zod": "^3.25.67"
+        "pino": "^9.7.0"
     },
     "devDependencies": {
         "@phyt/eslint": "workspace:*",
