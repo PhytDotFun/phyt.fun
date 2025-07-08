@@ -1,5 +1,5 @@
 import { PrivyProvider } from '@privy-io/react-auth';
-import { env } from '@phyt/core';
+import { env } from '../env';
 
 export default function PrivyAppProvider({
     children
