@@ -1,27 +1,29 @@
 {
-    "name": "@phyt/core",
+    "name": "@phyt/api",
     "version": "0.0.0",
     "private": true,
     "type": "module",
-    "exports": {
-        ".": {
-            "types": "./dist/index.d.ts",
-            "import": "./dist/index.js"
-        }
-    },
     "scripts": {
         "build": "tsup",
         "check-types": "tsc --noEmit",
-        "clean": "pnpm rimraf dist && pnpm rimraf node_modules",
-        "dev": "tsup --watch",
+        "clean": "rimraf node_modules && rimraf dist",
+        "dev": "tsx watch src/index.ts",
         "format": "prettier --write . --ignore-unknown",
         "lint": "eslint",
         "lint:fix": "eslint --fix",
+        "start": "node dist/index.js",
         "test": "vitest run"
     },
     "dependencies": {
+        "@hono/node-server": "^1.15.0",
+        "@hono/trpc-server": "^0.4.0",
+        "@hono/zod-validator": "^0.7.0",
+        "@phyt/core": "workspace:*",
+        "@privy-io/server-auth": "^1.28.2",
         "@t3-oss/env-core": "^0.13.8",
-        "pino": "^9.7.0",
+        "@trpc/server": "^11.4.3",
+        "dotenv": "^17.1.0",
+        "hono": "^4.8.4",
         "zod": "^3.25.67"
     },
     "devDependencies": {
@@ -29,12 +31,8 @@
         "@phyt/tsconfig": "workspace:*",
         "@types/node": "^24.0.7",
         "eslint": "^9.30.0",
-        "pino-pretty": "^13.0.0",
         "tsup": "^8.5.0",
         "typescript": "^5.8.3",
-        "vite": "^6.3.5",
         "vitest": "^3.2.4"
-    },
-    "main": "./dist/index.js",
-    "types": "./dist/index.d.ts"
+    }
 }

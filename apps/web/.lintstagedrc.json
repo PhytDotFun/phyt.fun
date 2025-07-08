@@ -1,4 +1,4 @@
 {
-    "*.{js,jsx,ts,tsx}": ["pnpm run format", "pnpm run lint:fix"],
+    "*.{js,jsx,ts,tsx}": ["prettier --write", "eslint --fix"],
     "!src/components/ui/**": []
 }

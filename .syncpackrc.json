@@ -1,0 +1,13 @@
+{
+    "sortFirst": [
+        "name",
+        "description",
+        "version",
+        "author",
+        "private",
+        "type",
+        "exports",
+        "scripts"
+    ],
+    "indent": "    "
+}

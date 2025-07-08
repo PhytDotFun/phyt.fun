@@ -1,36 +1,36 @@
 {
-  "name": "phyt.fun",
-  "private": true,
-  "scripts": {
-    "build": "turbo run build",
-    "dev": "turbo run dev",
-    "lint": "syncpack lint --dependency-types prod,dev && turbo run lint",
-    "lint:fix": "syncpack fix --dependency-types prod,dev &&turbo run lint:fix",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\" --ignore-unknown",
-    "check-types": "turbo run check-types",
-    "db:up": "docker compose up -d",
-    "db:down": "docker compose down",
-    "db:start": "docker compose start",
-    "db:stop": "docker compose stop",
-    "db:clean": "docker compose down -v",
-    "db:logs": "docker compose logs -f",
-    "db:generate": "pnpm --filter @phyt/data-layer db:generate",
-    "db:push": "pnpm --filter @phyt/data-layer db:push",
-    "db:migrate": "pnpm --filter @phyt/data-layer db:migrate",
-    "db:studio": "pnpm --filter @phyt/data-layer db:studio",
-    "db:check": "pnpm --filter @phyt/data-layer db:check",
-    "prepare": "husky"
-  },
-  "devDependencies": {
-    "husky": "^9.1.7",
-    "lint-staged": "^16.1.2",
-    "prettier": "^3.5.3",
-    "rimraf": "^6.0.1",
-    "syncpack": "14.0.0-alpha.18",
-    "turbo": "^2.5.4"
-  },
-  "packageManager": "pnpm@10.12.4",
-  "engines": {
-    "node": ">=18"
-  }
+    "name": "phyt.fun",
+    "private": true,
+    "scripts": {
+        "build": "turbo run build",
+        "check-types": "turbo run check-types",
+        "db:check": "pnpm --filter @phyt/data-layer db:check",
+        "db:clean": "docker compose down -v",
+        "db:down": "docker compose down",
+        "db:generate": "pnpm --filter @phyt/data-layer db:generate",
+        "db:logs": "docker compose logs -f",
+        "db:migrate": "pnpm --filter @phyt/data-layer db:migrate",
+        "db:push": "pnpm --filter @phyt/data-layer db:push",
+        "db:start": "docker compose start",
+        "db:stop": "docker compose stop",
+        "db:studio": "pnpm --filter @phyt/data-layer db:studio",
+        "db:up": "docker compose up -d",
+        "dev": "turbo run dev",
+        "format": "prettier --write \"**/*.{ts,tsx,md}\" --ignore-unknown",
+        "lint": "syncpack lint --dependency-types prod,dev && turbo run lint",
+        "lint:fix": "syncpack fix --dependency-types prod,dev &&turbo run lint:fix",
+        "prepare": "husky"
+    },
+    "devDependencies": {
+        "husky": "^9.1.7",
+        "lint-staged": "^16.1.2",
+        "prettier": "^3.5.3",
+        "rimraf": "^6.0.1",
+        "syncpack": "14.0.0-alpha.18",
+        "turbo": "^2.5.4"
+    },
+    "engines": {
+        "node": ">=18"
+    },
+    "packageManager": "pnpm@10.12.4"
 }
