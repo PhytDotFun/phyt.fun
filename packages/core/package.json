@@ -4,9 +4,29 @@
     "private": true,
     "type": "module",
     "exports": {
-        ".": {
-            "types": "./dist/index.d.ts",
-            "import": "./dist/index.js"
+        "./env": {
+            "types": "./dist/env.d.ts",
+            "import": "./dist/env.js"
+        },
+        "./logger": {
+            "types": "./dist/logger.d.ts",
+            "import": "./dist/logger.js"
+        },
+        "./constants/ui": {
+            "types": "./dist/constants/ui.d.ts",
+            "import": "./dist/constants/ui.js"
+        },
+        "./types/api": {
+            "types": "./dist/types/api.d.ts",
+            "import": "./dist/types/api.js"
+        },
+        "./types/ui": {
+            "types": "./dist/types/ui.d.ts",
+            "import": "./dist/types/ui.js"
+        },
+        "./validation/users": {
+            "types": "./dist/validation/users.d.ts",
+            "import": "./dist/validation/users.js"
         }
     },
     "scripts": {
@@ -34,7 +54,5 @@
         "typescript": "^5.8.3",
         "vite": "^6.3.5",
         "vitest": "^3.2.4"
-    },
-    "main": "./dist/index.js",
-    "types": "./dist/index.d.ts"
+    }
 }
