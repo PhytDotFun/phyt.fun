@@ -4,8 +4,8 @@
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev",
-    "lint": "turbo run lint",
-    "lint:fix": "turbo run lint:fix",
+    "lint": "syncpack lint --dependency-types prod,dev && turbo run lint",
+    "lint:fix": "syncpack fix --dependency-types prod,dev &&turbo run lint:fix",
     "format": "prettier --write \"**/*.{ts,tsx,md}\" --ignore-unknown",
     "check-types": "turbo run check-types",
     "db:up": "docker compose up -d",
