@@ -9,7 +9,7 @@ import {
     CommandList
 } from '@/components/ui/command';
 import { Button } from '@/components/ui/button';
-import { useIsMobile } from '@/hooks/useMobile';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
 
 import {
