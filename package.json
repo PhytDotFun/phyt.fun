@@ -3,7 +3,9 @@
     "private": true,
     "scripts": {
         "build": "turbo run build",
-        "check-types": "turbo run check-types",
+        "check:compiler": "turbo run check:compiler",
+        "check:types": "turbo run check:types",
+        "clean": "turbo run clean",
         "db:check": "pnpm --filter @phyt/data-layer db:check",
         "db:clean": "docker compose down -v",
         "db:down": "docker compose down",
@@ -16,9 +18,9 @@
         "db:studio": "pnpm --filter @phyt/data-layer db:studio",
         "db:up": "docker compose up -d",
         "dev": "turbo run dev",
-        "format": "prettier --write \"**/*.{ts,tsx,md}\" --ignore-unknown",
-        "lint": "syncpack lint --dependency-types prod,dev && turbo run lint",
-        "lint:fix": "syncpack fix --dependency-types prod,dev &&turbo run lint:fix",
+        "format": "turbo run format",
+        "lint": "pnpm syncpack lint --dependency-types prod,dev && turbo run lint",
+        "lint:fix": "pnpm syncpack fix --dependency-types prod,dev && turbo run lint:fix",
         "prepare": "husky"
     },
     "devDependencies": {

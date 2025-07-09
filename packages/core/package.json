@@ -31,7 +31,7 @@
     },
     "scripts": {
         "build": "tsup",
-        "check-types": "tsc --noEmit",
+        "check:types": "tsc --noEmit",
         "clean": "pnpm rimraf dist && pnpm rimraf node_modules",
         "dev": "tsup --watch",
         "format": "prettier --write . --ignore-unknown",
