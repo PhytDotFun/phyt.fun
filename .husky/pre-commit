@@ -1,9 +1,1 @@
-echo "=== DEBUG INFO ==="
-echo "PWD: $PWD"
-echo "PATH: $PATH"
-echo "Node version: $(node --version)"
-echo "pnpm version: $(pnpm --version)"
-echo "TypeScript version: $(pnpm exec tsc --version)"
-echo "=================="
-
 pnpm exec lint-staged && pnpm syncpack fix --dependency-types prod,dev && pnpm syncpack format
