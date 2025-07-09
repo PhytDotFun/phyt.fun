@@ -1,4 +1,8 @@
 {
-    "*.{js,jsx,ts,tsx}": ["prettier --write", "eslint --fix"],
+    "*.{js,jsx,ts,tsx}": [
+        "pnpm dlx react-compiler-healthcheck@latest",
+        "prettier --write",
+        "eslint --fix"
+    ],
     "!src/components/ui/**": []
 }
