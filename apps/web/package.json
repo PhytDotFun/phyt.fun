@@ -4,12 +4,12 @@
     "private": true,
     "type": "module",
     "scripts": {
-        "build": "pnpm run clean && pnpm install && vite build && tsc",
-        "check-rc": "pnpm dlx react-compiler-healthcheck@latest",
-        "check-types": "tsc --noEmit",
+        "build": "vite build",
+        "check:compiler": "pnpm dlx react-compiler-healthcheck@latest",
+        "check:types": "tsc --noEmit",
         "clean": "rimraf node_modules && rimraf dist",
         "dev": "vite",
-        "format": "prettier --write . --ignore-unknown",
+        "format": "prettier --ignore-path ../../.prettierignore --write .",
         "lint": "eslint",
         "lint:fix": "eslint --fix",
         "serve": "vite preview",
@@ -92,6 +92,6 @@
         "web-vitals": "^4.2.4"
     },
     "overrides": {
-        "@tanstack/react-router": "^1.121.2"
+        "@tanstack/react-router": "^1.121.40"
     }
 }

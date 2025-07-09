@@ -11,7 +11,7 @@ dist/
 public/
 
 # Ignore all HTML files
-**/*.html
+# **/*.html
 
 # Ignore node_modules (NOTE: Prettier does this by default, but safe to be explicit)
 node_modules/
@@ -20,7 +20,7 @@ node_modules/
 pnpm-lock.yaml
 
 # Ignore shadcn ui components
-apps/web/src/components/ui/
+**/apps/web/src/components/ui/
 
 # Ignore tanstack generated routeTree
 **/routeTree.gen.ts

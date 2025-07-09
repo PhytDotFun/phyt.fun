@@ -34,5 +34,50 @@ export default defineConfig({
                 changeOrigin: true
             }
         }
+    },
+    build: {
+        rollupOptions: {
+            output: {
+                manualChunks(id) {
+                    // Create a chunk for the Privy vendor files
+                    if (id.includes('@privy-io')) {
+                        return 'privy-vendor';
+                    }
+                    // Create a chunk for the TanStack vendor files
+                    if (id.includes('@tanstack')) {
+                        return 'tanstack-vendor';
+                    }
+                    // Create a chunk for the main UI libraries
+                    if (
+                        id.includes('@radix-ui') ||
+                        id.includes('cmdk') ||
+                        id.includes('vaul') ||
+                        id.includes('lucide-react')
+                    ) {
+                        return 'ui-vendor';
+                    }
+                    // Create a chunk for charting libraries
+                    if (id.includes('recharts')) {
+                        return 'chart-vendor';
+                    }
+                    // Create a chunk for React itself
+                    if (id.includes('react') || id.includes('react-dom')) {
+                        return 'react-vendor';
+                    }
+                    // All other node_modules go to a general vendor chunk
+                    if (id.includes('node_modules')) {
+                        return 'vendor';
+                    }
+                }
+            },
+            onwarn(warning, warn) {
+                // Suppress all 'INVALID_ANNOTATION' warnings, regardless of the package
+                if (warning.code === 'INVALID_ANNOTATION') {
+                    return;
+                }
+                // Use the default Rollup warner for all other warnings
+                warn(warning);
+            }
+        }
     }
 });

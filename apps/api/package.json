@@ -5,7 +5,7 @@
     "type": "module",
     "scripts": {
         "build": "tsup",
-        "check-types": "tsc --noEmit",
+        "check:types": "tsc --noEmit",
         "clean": "rimraf node_modules && rimraf dist",
         "dev": "tsx watch src/index.ts",
         "format": "prettier --write . --ignore-unknown",

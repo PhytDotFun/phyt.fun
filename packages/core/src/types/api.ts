@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { getUserSchema, getMultipleUsersSchema } from '../validation';
+import { getUserSchema, getMultipleUsersSchema } from '../validation/users';
 
 export type GetUser = z.infer<typeof getUserSchema>;
 

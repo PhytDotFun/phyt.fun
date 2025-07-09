@@ -1,2 +1,1 @@
-pnpm exec lint-staged &&
-pnpm exec syncpack fix --dependency-types prod,dev
+pnpm exec lint-staged && pnpm syncpack fix --dependency-types prod,dev && pnpm syncpack format
