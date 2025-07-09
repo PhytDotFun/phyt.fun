@@ -17,29 +17,31 @@
             ],
             "outputs": ["dist/**"]
         },
+        "dev": {
+            "cache": false,
+            "persistent": true
+        },
+        "lint": {
+            "dependsOn": ["^lint"]
+        },
+        "lint:fix": {
+            "dependsOn": ["^lint:fix"]
+        },
+        "check:types": {
+            "dependsOn": ["^check:types"]
+        },
+        "check:compiler": {
+            "cache": false
+        },
         "clean": {
             "cache": false
         },
-        "check-rc": {
-            "dependsOn": ["check-types", "^check-rc"],
+        "format": {
             "cache": false
-        },
-        "lint": {
-            "dependsOn": ["check-rc", "check-types", "^lint"]
-        },
-        "lint:fix": {
-            "dependsOn": ["check-types", "^lint:fix"]
         },
         "test": {
             "outputs": ["coverage/**"],
             "dependsOn": ["lint", "build"]
-        },
-        "check-types": {
-            "dependsOn": ["^check-types"]
-        },
-        "dev": {
-            "cache": false,
-            "persistent": true
         }
     }
 }
