@@ -1,4 +1,4 @@
-import { useIsMobile } from '@/hooks/useMobile';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 export const GridBackground = () => {
     const isMobile = useIsMobile();

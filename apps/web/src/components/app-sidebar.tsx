@@ -10,7 +10,7 @@ import {
     SidebarMenuItem,
     useSidebar
 } from '@/components/ui/sidebar';
-import { SearchForm } from '@/features/search/ui/components/Search';
+import { SearchForm } from '@/features/search/ui/components/search';
 
 const menuItems = [
     {

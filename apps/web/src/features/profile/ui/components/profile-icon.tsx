@@ -9,8 +9,8 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
-import { useAuth } from '@/hooks/useAuth';
-import { useIsMobile } from '@/hooks/useMobile';
+import { useAuth } from '@/hooks/use-auth';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface ProfileIconProps {
     variant?: 'default' | 'reverse' | 'neutral' | 'noShadow' | 'ghost';

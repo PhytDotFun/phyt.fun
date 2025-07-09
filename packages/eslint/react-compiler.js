@@ -32,7 +32,8 @@ export const reactCompilerConfig = [
         rules: {
             ...pluginReactHooks.configs.recommended.rules,
             // React scope no longer necessary with new JSX transform.
-            'react/react-in-jsx-scope': 'off'
+            'react/react-in-jsx-scope': 'off',
+            'react/jsx-pascal-case': 'error'
         }
     },
     {

@@ -3,10 +3,10 @@ import { Dumbbell } from 'lucide-react';
 import { useNavigate } from '@tanstack/react-router';
 import { useLoginWithOAuth } from '@privy-io/react-auth';
 import { Button } from '@/components/ui/button';
-import { useIsMobile } from '@/hooks/useMobile';
-import { useAuth } from '@/hooks/useAuth';
-import { Logo } from '@/components/Logo';
-import { GridBackground } from '@/components/GridBackground';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { useAuth } from '@/hooks/use-auth';
+import { Logo } from '@/components/logo';
+import { GridBackground } from '@/components/grid-background';
 
 export const Login = () => {
     const isMobile = useIsMobile();
