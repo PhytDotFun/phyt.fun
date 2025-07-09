@@ -1,8 +1,8 @@
 import { RouterProvider } from '@tanstack/react-router';
-import PrivyAppProvider from './providers/PrivyProvider';
+import PrivyAppProvider from './providers/privy-provider';
 import { router } from './router';
-import { useAuth } from './hooks/useAuth';
-import { Loader } from './components/Loading';
+import { useAuth } from './hooks/use-auth';
+import { Loader } from './components/loading';
 
 function Loading() {
     return (
