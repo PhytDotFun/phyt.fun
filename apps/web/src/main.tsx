@@ -5,7 +5,7 @@ import reportWebVitals from './reportWebVitals.ts';
 import './styles.css';
 
 import App from './App.tsx';
-import { ErrorBoundary } from './ErrorBoundary.tsx';
+import { ErrorBoundary } from './error-boundary.tsx';
 
 const rootElement = document.getElementById('app');
 if (rootElement && !rootElement.innerHTML) {

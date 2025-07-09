@@ -1,5 +1,5 @@
 import { Outlet, createFileRoute, redirect } from '@tanstack/react-router';
-import { ProfileLayout } from '@/components/layouts/ProfileLayout';
+import { ProfileLayout } from '@/components/layouts/profile-layout';
 
 export const Route = createFileRoute('/_profile')({
     beforeLoad: ({ context }) => {
