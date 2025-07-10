@@ -33,7 +33,6 @@ export const users = pgTable(
     },
     (table) => [
         uniqueIndex('privy_did_idx').on(table.privyDID),
-        uniqueIndex('email_idx').on(table.email),
         uniqueIndex('username_idx').on(table.username),
         uniqueIndex('wallet_address_idx').on(table.walletAddress)
     ]
