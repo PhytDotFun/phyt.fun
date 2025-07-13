@@ -35,6 +35,18 @@ export class UserRepository {
         // Turns out upsert is a word for an insert/update combo
         const validated: NewUser = InsertUserSchema.parse(data);
         const existing = await this.findByPrivyDID(validated.privyDID);
-        return existing ?? this.insert(validated);
+
+        if (existing) {
+            // Update existing user
+            const [updated] = await this.db
+                .update(users)
+                .set(validated)
+                .where(eq(users.privyDID, validated.privyDID))
+                .returning();
+            return updated as User;
+        } else {
+            // Insert new user
+            return await this.insert(validated);
+        }
     }
 }
