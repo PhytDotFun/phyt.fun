@@ -5,12 +5,14 @@ import type { ApiRouter } from '@phyt/hono-gate/router';
 import superjson from 'superjson';
 import { getAccessToken } from '@privy-io/react-auth';
 
+import { env } from '@/env';
+
 export const queryClient = new QueryClient();
 
 const trpcClient = createTRPCClient<ApiRouter>({
     links: [
         httpBatchLink({
-            url: 'http://localhost:5173',
+            url: env.VITE_BASE_URL,
             async headers() {
                 return {
                     Authroization: `Bearer ${(await getAccessToken()) || ''}`
