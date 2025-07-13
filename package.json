@@ -25,15 +25,16 @@
         "prepare": "husky"
     },
     "devDependencies": {
-        "husky": "^9.1.7",
-        "lint-staged": "^16.1.2",
-        "prettier": "^3.5.3",
-        "rimraf": "^6.0.1",
-        "syncpack": "14.0.0-alpha.18",
-        "turbo": "^2.5.4"
+        "@turbo/gen": "catalog:",
+        "husky": "catalog:",
+        "lint-staged": "catalog:",
+        "prettier": "catalog:",
+        "rimraf": "catalog:",
+        "syncpack": "catalog:",
+        "turbo": "catalog:"
     },
     "engines": {
-        "node": ">=20"
+        "node": ">=22"
     },
     "packageManager": "pnpm@10.13.1"
 }

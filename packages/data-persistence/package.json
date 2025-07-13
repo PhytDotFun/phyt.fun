@@ -41,23 +41,23 @@
         "test": "vitest run"
     },
     "dependencies": {
-        "@t3-oss/env-core": "^0.13.8",
-        "drizzle-orm": "^0.44.2",
-        "drizzle-zod": "^0.8.2",
-        "pg": "^8.16.3",
-        "zod": "^3.25.67"
+        "@t3-oss/env-core": "catalog:",
+        "drizzle-orm": "catalog:",
+        "drizzle-zod": "catalog:",
+        "pg": "catalog:",
+        "zod": "catalog:"
     },
     "devDependencies": {
         "@phyt/core": "workspace:*",
         "@phyt/eslint": "workspace:*",
         "@phyt/tsconfig": "workspace:*",
-        "@types/node": "^24.0.7",
-        "@types/pg": "^8.15.4",
-        "drizzle-kit": "^0.31.4",
-        "eslint": "^9.30.0",
-        "tsup": "^8.5.0",
-        "tsx": "^4.20.3",
-        "typescript": "^5.8.3",
-        "vitest": "^3.2.4"
+        "@types/node": "catalog:",
+        "@types/pg": "catalog:",
+        "drizzle-kit": "catalog:",
+        "eslint": "catalog:",
+        "tsup": "catalog:",
+        "tsx": "catalog:",
+        "typescript": "catalog:",
+        "vitest": "catalog:"
     }
 }

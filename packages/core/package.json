@@ -12,11 +12,11 @@
     },
     "devDependencies": {
         "@phyt/tsconfig": "workspace:*",
-        "@types/node": "^24.0.7",
-        "@types/pg": "^8.15.4",
-        "drizzle-kit": "^0.31.4",
-        "drizzle-orm": "^0.44.2",
-        "tsup": "^8.5.0",
-        "typescript": "^5.8.3"
+        "@types/node": "catalog:",
+        "@types/pg": "catalog:",
+        "drizzle-kit": "catalog:",
+        "drizzle-orm": "catalog:",
+        "tsup": "catalog:",
+        "typescript": "catalog:"
     }
 }

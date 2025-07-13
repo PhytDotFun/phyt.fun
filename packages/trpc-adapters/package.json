@@ -33,21 +33,21 @@
     },
     "dependencies": {
         "@phyt/data-persistence": "workspace:*",
-        "@privy-io/server-auth": "^1.28.2",
-        "@t3-oss/env-core": "^0.13.8",
-        "@trpc/server": "^11.4.3",
-        "dotenv": "^17.1.0",
-        "drizzle-orm": "^0.44.2",
-        "superjson": "^2.2.2",
-        "zod": "^3.25.67"
+        "@privy-io/server-auth": "catalog:",
+        "@t3-oss/env-core": "catalog:",
+        "@trpc/server": "catalog:",
+        "dotenv": "catalog:",
+        "drizzle-orm": "catalog:",
+        "superjson": "catalog:",
+        "zod": "catalog:"
     },
     "devDependencies": {
         "@phyt/core": "workspace:*",
         "@phyt/eslint": "workspace:*",
         "@phyt/tsconfig": "workspace:*",
-        "eslint": "^9.30.0",
-        "tsup": "^8.5.0",
-        "typescript": "^5.8.3",
-        "vitest": "^3.2.4"
+        "eslint": "catalog:",
+        "tsup": "catalog:",
+        "typescript": "catalog:",
+        "vitest": "catalog:"
     }
 }

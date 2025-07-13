@@ -26,28 +26,28 @@
         "validate-env": "node -e \"require('./src/env.ts')\""
     },
     "dependencies": {
-        "@hono/node-server": "^1.15.0",
-        "@hono/trpc-server": "^0.4.0",
-        "@hono/zod-validator": "^0.7.0",
+        "@hono/node-server": "catalog:",
+        "@hono/trpc-server": "catalog:",
+        "@hono/zod-validator": "catalog:",
         "@phyt/data-persistence": "workspace:*",
         "@phyt/trpc-adapters": "workspace:*",
-        "@privy-io/server-auth": "^1.28.2",
-        "@t3-oss/env-core": "^0.13.8",
-        "@trpc/server": "^11.4.3",
-        "dotenv": "^17.1.0",
-        "hono": "^4.8.4",
-        "superjson": "^2.2.2",
-        "viem": "^2.31.7",
-        "zod": "^3.25.67"
+        "@privy-io/server-auth": "catalog:",
+        "@t3-oss/env-core": "catalog:",
+        "@trpc/server": "catalog:",
+        "dotenv": "catalog:",
+        "hono": "catalog:",
+        "superjson": "catalog:",
+        "viem": "catalog:",
+        "zod": "catalog:"
     },
     "devDependencies": {
         "@phyt/core": "workspace:*",
         "@phyt/eslint": "workspace:*",
         "@phyt/tsconfig": "workspace:*",
-        "@types/node": "^24.0.7",
-        "eslint": "^9.30.0",
-        "tsup": "^8.5.0",
-        "typescript": "^5.8.3",
-        "vitest": "^3.2.4"
+        "@types/node": "catalog:",
+        "eslint": "catalog:",
+        "tsup": "catalog:",
+        "typescript": "catalog:",
+        "vitest": "catalog:"
     }
 }
