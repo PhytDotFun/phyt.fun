@@ -1,5 +1,7 @@
 import { PrivyProvider } from '@privy-io/react-auth';
-import { env } from '../env';
+import { baseSepolia } from 'viem/chains';
+
+import { env } from '@/env';
 
 export default function PrivyAppProvider({
     children
@@ -11,10 +13,9 @@ export default function PrivyAppProvider({
             appId={env.VITE_PRIVY_APP_ID}
             clientId={env.VITE_PRIVY_CLIENT_ID}
             config={{
+                defaultChain: baseSepolia,
                 embeddedWallets: {
-                    ethereum: {
-                        createOnLogin: 'users-without-wallets'
-                    }
+                    showWalletUIs: false
                 },
                 loginMethods: ['twitter']
             }}
