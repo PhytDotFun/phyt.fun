@@ -5,17 +5,18 @@
         "build": "turbo run build",
         "check:compiler": "turbo run check:compiler",
         "check:types": "turbo run check:types",
-        "clean": "turbo run clean",
-        "db:check": "pnpm --filter @phyt/data-layer db:check",
+        "clean:root": "rm -rf node_modules && rm -rf .turbo && pnpm store prune",
+        "clean:workspaces": "turbo run clean",
+        "db:check": "pnpm --filter @phyt/data-persistence db:check",
         "db:clean": "docker compose down -v",
         "db:down": "docker compose down",
-        "db:generate": "pnpm --filter @phyt/data-layer db:generate",
+        "db:generate": "pnpm --filter @phyt/data-persistence db:generate",
         "db:logs": "docker compose logs -f",
-        "db:migrate": "pnpm --filter @phyt/data-layer db:migrate",
-        "db:push": "pnpm --filter @phyt/data-layer db:push",
+        "db:migrate": "pnpm --filter @phyt/data-persistence db:migrate",
+        "db:push": "pnpm --filter @phyt/data-persistence db:push",
         "db:start": "docker compose start",
         "db:stop": "docker compose stop",
-        "db:studio": "pnpm --filter @phyt/data-layer db:studio",
+        "db:studio": "pnpm --filter @phyt/data-persistence db:studio",
         "db:up": "docker compose up -d",
         "dev": "turbo run dev",
         "format": "turbo run format",
@@ -32,7 +33,7 @@
         "turbo": "^2.5.4"
     },
     "engines": {
-        "node": ">=18"
+        "node": ">=20"
     },
-    "packageManager": "pnpm@10.12.4"
+    "packageManager": "pnpm@10.13.1"
 }
