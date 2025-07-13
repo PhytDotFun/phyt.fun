@@ -7,7 +7,7 @@
         "build": "vite build",
         "check:compiler": "pnpm dlx react-compiler-healthcheck@latest",
         "check:types": "tsc --noEmit",
-        "clean": "rimraf node_modules && rimraf dist",
+        "clean": "pnpm rimraf dist && pnpm rimraf node_modules && pnpm rimraf .turbo && rimraf .tanstack",
         "dev": "vite",
         "format": "prettier --ignore-path ../../.prettierignore --write .",
         "lint": "eslint",
@@ -72,10 +72,12 @@
         "tailwind-merge": "^3.3.1",
         "tailwindcss": "^4.1.11",
         "vaul": "^1.1.2",
+        "viem": "^2.31.7",
         "zod": "^3.25.67"
     },
     "devDependencies": {
         "@phyt/eslint": "workspace:*",
+        "@phyt/hono-gate": "workspace:*",
         "@phyt/tsconfig": "workspace:*",
         "@testing-library/dom": "^10.4.0",
         "@testing-library/react": "^16.3.0",
