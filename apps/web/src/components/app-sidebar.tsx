@@ -1,5 +1,6 @@
 import { Activity, BarChart3, Home, Store, Trophy, User } from 'lucide-react';
 import { Link } from '@tanstack/react-router';
+
 import {
     Sidebar,
     SidebarContent,

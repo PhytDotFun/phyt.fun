@@ -1,11 +1,10 @@
 import { StrictMode } from 'react';
 import ReactDOM from 'react-dom/client';
-import reportWebVitals from './reportWebVitals.ts';
 
+import reportWebVitals from './reportWebVitals';
 import './styles.css';
-
-import App from './App.tsx';
-import { ErrorBoundary } from './error-boundary.tsx';
+import App from './App';
+import { ErrorBoundary } from './error-boundary';
 
 const rootElement = document.getElementById('app');
 if (rootElement && !rootElement.innerHTML) {

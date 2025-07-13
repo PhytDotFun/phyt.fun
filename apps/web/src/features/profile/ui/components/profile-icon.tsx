@@ -1,5 +1,6 @@
 import { LogOut } from 'lucide-react';
 import { useNavigate } from '@tanstack/react-router';
+
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import {
@@ -26,7 +27,7 @@ export const ProfileIcon = ({ variant }: ProfileIconProps) => {
 
     const handleLogout = async () => {
         await signOut();
-        navigate({ to: '/login' });
+        await navigate({ to: '/login' });
     };
 
     return (
@@ -52,7 +53,7 @@ export const ProfileIcon = ({ variant }: ProfileIconProps) => {
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                     className="cursor-pointer text-red-600 focus:text-red-600"
-                    onClick={handleLogout}
+                    onClick={() => void handleLogout()}
                 >
                     <LogOut className="mr-2 h-4 w-4" />
                     Log out

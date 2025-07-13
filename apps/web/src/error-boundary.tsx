@@ -40,7 +40,11 @@ export class ErrorBoundary extends React.Component<
                             {this.state.error?.stack}
                         </pre>
                     </details>
-                    <button onClick={() => window.location.reload()}>
+                    <button
+                        onClick={() => {
+                            window.location.reload();
+                        }}
+                    >
                         Reload page
                     </button>
                 </div>

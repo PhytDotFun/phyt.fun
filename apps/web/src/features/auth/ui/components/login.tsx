@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react';
 import { Dumbbell } from 'lucide-react';
 import { useNavigate } from '@tanstack/react-router';
 import { useLoginWithOAuth } from '@privy-io/react-auth';
+import { useEffect, useState } from 'react';
+
 import { Button } from '@/components/ui/button';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useAuth } from '@/hooks/use-auth';
@@ -15,6 +16,10 @@ export const Login = () => {
     const navigate = useNavigate();
     const [hasLoggedIn, setHasLoggedIn] = useState(false);
     const { loading, initOAuth } = useLoginWithOAuth({
+        onComplete: ({ user }) => {
+            console.log('User logged in:', user);
+            void navigate({ to: '/' });
+        },
         onError: (error) => {
             console.error('Login failed:', error);
         }
@@ -24,12 +29,16 @@ export const Login = () => {
         if (authenticated && user && !hasLoggedIn) {
             console.log('Existing user logged in:', user);
             setHasLoggedIn(true);
-            navigate({ to: '/' });
+            void navigate({ to: '/' });
         }
     }, [authenticated, user, navigate, hasLoggedIn]);
 
     const handleLogin = async () => {
-        await initOAuth({ provider: 'twitter' });
+        try {
+            await initOAuth({ provider: 'twitter' });
+        } catch (error) {
+            console.error('OAuth failed:', error);
+        }
     };
 
     return (
@@ -46,7 +55,7 @@ export const Login = () => {
                         className="hover:scale-110 hover:cursor-default transition-transform duration-300 mb-3"
                     />
                     <Button
-                        onClick={handleLogin}
+                        onClick={() => void handleLogin()}
                         disabled={loading}
                         className="bg-black text-white font-bold text-lg hover:cursor-pointer"
                         variant={isMobile ? 'noShadow' : 'reverse'}

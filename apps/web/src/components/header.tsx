@@ -1,9 +1,9 @@
-import { Logo } from './logo';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { SearchButton } from '@/features/search/ui/components/search';
 import { ProfileIcon } from '@/features/profile/ui/components/profile-icon';
 import { WalletButton } from '@/features/market/ui/components/wallet-button';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { Logo } from '@/components/logo';
 
 export const Header = () => {
     const isMobile = useIsMobile();
