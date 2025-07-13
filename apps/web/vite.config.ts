@@ -20,7 +20,8 @@ export default defineConfig({
         alias: {
             $fonts: resolve(__dirname, './src/assets/fonts'),
             '@': resolve(__dirname, './src')
-        }
+        },
+        extensions: ['.mjs', '.js', '.ts', '.jsx', '.tsx', '.json']
     },
     define: {
         'process.env.NODE_ENV': JSON.stringify(
