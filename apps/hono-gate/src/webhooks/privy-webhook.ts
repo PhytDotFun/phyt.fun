@@ -26,7 +26,8 @@ export const privyWebhook = new Hono().post('/', async (c) => {
         env.PRIVY_WEBHOOK_SECRET
     )) as PrivyWebhookEvent;
 
-    if (ev.type !== 'user.created' && ev.type !== 'user.authenticated') return;
+    if (ev.type !== 'user.created' && ev.type !== 'user.authenticated')
+        return c.json({ ok: true });
 
     const user = ev.user;
 
