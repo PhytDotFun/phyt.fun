@@ -1,0 +1,15 @@
+{
+    "extends": "@phyt/tsconfig/base.json",
+    "compilerOptions": {
+        "rootDir": "src",
+        "strict": true,
+        "outDir": "./dist",
+        "types": ["node"],
+        "baseUrl": ".",
+        "paths": {
+            "@/*": ["./src/*"]
+        }
+    },
+    "include": ["src/**/*"],
+    "exclude": ["node_modules", "dist"]
+}

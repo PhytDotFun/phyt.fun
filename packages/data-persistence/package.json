@@ -1,0 +1,63 @@
+{
+    "name": "@phyt/data-persistence",
+    "version": "0.0.0",
+    "private": true,
+    "type": "module",
+    "exports": {
+        "./contracts": {
+            "types": "./dist/contracts/index.d.ts",
+            "import": "./dist/contracts/index.js"
+        },
+        "./db/client": {
+            "types": "./dist/db/client.d.ts",
+            "import": "./dist/db/client.js"
+        },
+        "./db/schema": {
+            "types": "./dist/db/schema.d.ts",
+            "import": "./dist/db/schema.js"
+        },
+        "./db/models/users": {
+            "types": "./dist/db/models/users.d.ts",
+            "import": "./dist/db/models/users.js"
+        },
+        "./redis": {
+            "types": "./dist/redis/index.d.ts",
+            "import": "./dist/redis/index.js"
+        }
+    },
+    "scripts": {
+        "build": "tsup",
+        "check:types": "tsc --noEmit",
+        "clean": "pnpm rimraf dist && pnpm rimraf node_modules && pnpm rimraf .turbo",
+        "db:check": "pnpm drizzle-kit check --config=./src/db/drizzle.config.js",
+        "db:generate": "pnpm drizzle-kit generate --config=./src/db/drizzle.config.js",
+        "db:migrate": "pnpm drizzle-kit migrate --config=./src/db/drizzle.config.js",
+        "db:push": "pnpm drizzle-kit push --config=./src/db/drizzle.config.js",
+        "db:studio": "pnpm drizzle-kit studio --config=./src/db/drizzle.config.js",
+        "dev": "tsup --watch",
+        "format": "prettier --write . --ignore-unknown",
+        "lint": "eslint",
+        "lint:fix": "eslint --fix",
+        "test": "vitest run"
+    },
+    "dependencies": {
+        "@t3-oss/env-core": "^0.13.8",
+        "drizzle-orm": "^0.44.2",
+        "drizzle-zod": "^0.8.2",
+        "pg": "^8.16.3",
+        "zod": "^3.25.67"
+    },
+    "devDependencies": {
+        "@phyt/core": "workspace:*",
+        "@phyt/eslint": "workspace:*",
+        "@phyt/tsconfig": "workspace:*",
+        "@types/node": "^24.0.7",
+        "@types/pg": "^8.15.4",
+        "drizzle-kit": "^0.31.4",
+        "eslint": "^9.30.0",
+        "tsup": "^8.5.0",
+        "tsx": "^4.20.3",
+        "typescript": "^5.8.3",
+        "vitest": "^3.2.4"
+    }
+}
