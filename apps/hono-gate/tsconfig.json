@@ -1,0 +1,18 @@
+{
+    "extends": "@phyt/tsconfig/base.json",
+    "compilerOptions": {
+        "strict": true,
+        "verbatimModuleSyntax": true,
+        "skipLibCheck": true,
+        "types": ["node"],
+        "jsx": "react-jsx",
+        "jsxImportSource": "hono/jsx",
+        "outDir": "./dist",
+        "baseUrl": ".",
+        "paths": {
+            "@/*": ["./src/*"]
+        }
+    },
+    "include": ["src/**/*", "src/privy.ts"],
+    "exclude": ["node_modules", "dist"]
+}

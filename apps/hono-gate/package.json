@@ -1,0 +1,53 @@
+{
+    "name": "@phyt/hono-gate",
+    "version": "0.0.0",
+    "private": true,
+    "type": "module",
+    "exports": {
+        ".": {
+            "types": "./dist/index.d.ts",
+            "default": "./dist/index.js"
+        },
+        "./router": {
+            "types": "./dist/router.d.ts"
+        }
+    },
+    "scripts": {
+        "build": "pnpm run validate-env && tsup",
+        "build:types": "tsup src/types.ts --dts-only --out-dir dist/types",
+        "check:types": "tsc --noEmit",
+        "clean": "pnpm rimraf dist && pnpm rimraf node_modules && pnpm rimraf .turbo",
+        "dev": "tsx watch src/index.ts",
+        "format": "prettier --write . --ignore-unknown",
+        "lint": "eslint",
+        "lint:fix": "eslint --fix",
+        "start": "node dist/index.js",
+        "test": "vitest run",
+        "validate-env": "node -e \"require('./src/env.ts')\""
+    },
+    "dependencies": {
+        "@hono/node-server": "^1.15.0",
+        "@hono/trpc-server": "^0.4.0",
+        "@hono/zod-validator": "^0.7.0",
+        "@phyt/data-persistence": "workspace:*",
+        "@phyt/trpc-adapters": "workspace:*",
+        "@privy-io/server-auth": "^1.28.2",
+        "@t3-oss/env-core": "^0.13.8",
+        "@trpc/server": "^11.4.3",
+        "dotenv": "^17.1.0",
+        "hono": "^4.8.4",
+        "superjson": "^2.2.2",
+        "viem": "^2.31.7",
+        "zod": "^3.25.67"
+    },
+    "devDependencies": {
+        "@phyt/core": "workspace:*",
+        "@phyt/eslint": "workspace:*",
+        "@phyt/tsconfig": "workspace:*",
+        "@types/node": "^24.0.7",
+        "eslint": "^9.30.0",
+        "tsup": "^8.5.0",
+        "typescript": "^5.8.3",
+        "vitest": "^3.2.4"
+    }
+}
