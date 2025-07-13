@@ -1,6 +1,7 @@
 import { Dumbbell } from 'lucide-react';
 import { useNavigate } from '@tanstack/react-router';
 import { useLoginWithOAuth } from '@privy-io/react-auth';
+import { useEffect, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -13,6 +14,7 @@ export const Login = () => {
 
     const { authenticated, user } = useAuth();
     const navigate = useNavigate();
+    const [hasLoggedIn, setHasLoggedIn] = useState(false);
     const { loading, initOAuth } = useLoginWithOAuth({
         onComplete: ({ user }) => {
             console.log('User logged in:', user);
@@ -23,13 +25,13 @@ export const Login = () => {
         }
     });
 
-    // useEffect(() => {
-    //     if (authenticated && user && !hasLoggedIn) {
-    //         console.log('Existing user logged in:', user);
-    //         setHasLoggedIn(true);
-    //         navigate({ to: '/' });
-    //     }
-    // }, [authenticated, user, navigate, hasLoggedIn]);
+    useEffect(() => {
+        if (authenticated && user && !hasLoggedIn) {
+            console.log('Existing user logged in:', user);
+            setHasLoggedIn(true);
+            void navigate({ to: '/' });
+        }
+    }, [authenticated, user, navigate, hasLoggedIn]);
 
     const handleLogin = async () => {
         try {
@@ -38,11 +40,6 @@ export const Login = () => {
             console.error('OAuth failed:', error);
         }
     };
-
-    if (authenticated && user) {
-        void navigate({ to: '/' });
-        return null; // or a loading spinner
-    }
 
     return (
         <div
