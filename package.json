@@ -7,6 +7,7 @@
         "check:types": "turbo run check:types",
         "clean:root": "rm -rf node_modules && rm -rf .turbo && pnpm store prune",
         "clean:workspaces": "turbo run clean",
+        "flush": "pnpm run clean:workspaces && pnpm run clean:root",
         "db:check": "pnpm --filter @phyt/data-persistence db:check",
         "db:clean": "docker compose down -v",
         "db:down": "docker compose down",
