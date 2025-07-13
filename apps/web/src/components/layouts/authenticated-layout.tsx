@@ -1,7 +1,7 @@
-import { Header } from '../header';
 import { AppSidebar } from '@/components/app-sidebar';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { SearchProvider } from '@/features/search/ui/components/search';
+import { Header } from '@/components/header';
 
 interface AuthenticatedLayoutProps {
     children: React.ReactNode;

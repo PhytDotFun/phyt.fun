@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Clock, Filter, MapPin } from 'lucide-react';
+
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -103,7 +104,9 @@ export function Feed() {
                                 activeFilter === filter ? 'default' : 'neutral'
                             }
                             size="sm"
-                            onClick={() => setActiveFilter(filter)}
+                            onClick={() => {
+                                setActiveFilter(filter);
+                            }}
                             className="font-mono font-bold"
                         >
                             {filter}
