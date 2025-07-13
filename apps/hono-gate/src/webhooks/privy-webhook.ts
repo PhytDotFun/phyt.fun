@@ -40,7 +40,7 @@ export const privyWebhook = new Hono().post('/', async (c) => {
         ).address;
 
     const record = {
-        privyUserId: user.id,
+        privyDID: user.id,
         username: user.twitter?.username ?? `user_${user.id.slice(0, 6)}`,
         profilePictureUrl: user.twitter?.profilePictureUrl ?? '',
         walletAddress: walletAddress,
