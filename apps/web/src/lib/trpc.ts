@@ -15,7 +15,7 @@ const trpcClient = createTRPCClient<ApiRouter>({
             url: env.VITE_BASE_URL,
             async headers() {
                 return {
-                    Authroization: `Bearer ${(await getAccessToken()) || ''}`
+                    Authorization: `Bearer ${(await getAccessToken()) || ''}`
                 };
             },
             transformer: superjson
