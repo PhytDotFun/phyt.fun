@@ -1,0 +1,27 @@
+{
+  "name": "@phyt/{{ name }}",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "build": "tsc",
+    "check:types": "tsc --noEmit",
+    "clean": "pnpm rimraf dist && pnpm rimraf node_modules && pnpm rimraf .turbo",
+    "dev": "tsup --watch",
+    "format": "prettier --write . --ignore-unknown",
+    "lint": "eslint",
+    "lint:fix": "eslint --fix",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@phyt/eslint": "workspace:*",
+    "@phyt/tsconfig": "workspace:*",
+    "tsup": "catalog:",
+    "prettier": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}
