@@ -1,0 +1,38 @@
+{
+    "name": "@phyt/redis",
+    "version": "0.0.0",
+    "private": true,
+    "type": "module",
+    "exports": {
+        ".": {
+            "types": "./dist/index.d.ts",
+            "import": "./dist/index.js"
+        }
+    },
+    "scripts": {
+        "build": "tsup",
+        "check:types": "tsc --noEmit",
+        "clean": "pnpm rimraf dist && pnpm rimraf node_modules && pnpm rimraf .turbo",
+        "dev": "tsup --watch",
+        "format": "prettier --write . --ignore-unknown",
+        "lint": "eslint",
+        "lint:fix": "eslint --fix",
+        "test": "vitest run"
+    },
+    "dependencies": {
+        "@t3-oss/env-core": "catalog:",
+        "ioredis": "catalog:",
+        "zod": "catalog:"
+    },
+    "devDependencies": {
+        "@phyt/core": "workspace:^",
+        "@phyt/eslint": "workspace:*",
+        "@phyt/tsconfig": "workspace:*",
+        "@types/node": "catalog:",
+        "eslint": "catalog:",
+        "prettier": "catalog:",
+        "tsup": "catalog:",
+        "typescript": "catalog:",
+        "vitest": "catalog:"
+    }
+}
