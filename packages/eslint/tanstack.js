@@ -1,50 +1,52 @@
-import js from '@eslint/js';
 import { tanstackConfig } from '@tanstack/eslint-config';
 import eslintConfigPrettier from 'eslint-config-prettier';
 import pluginReact from 'eslint-plugin-react';
 import pluginReactHooks from 'eslint-plugin-react-hooks';
 import globals from 'globals';
-import tseslint from 'typescript-eslint';
-import { baseConfigWithoutImport } from './base.js';
-import { reactCompilerConfig } from './react-compiler.js';
+import baseConfig from './base.js';
+import reactCompilerConfig from './react-compiler.js';
 
 /**
  * A custom ESLint configuration for libraries that use Next.js.
  *
  * @type {import("eslint").Linter.Config[]}
  * */
-export const tanstackConfigJs = [
-    ...reactCompilerConfig,
-    eslintConfigPrettier,
-    ...baseConfigWithoutImport,
+const tanstackViteConfig = [
     {
         ignores: [
+            ...(baseConfig[0].ignores ?? []),
             '**/eslint.config.js',
             '**/vite.config.ts'
-            // shadcn ui - can't be bothered to fix the linting on this
         ]
     },
-    ...tanstackConfig,
-    js.configs.recommended,
-    ...tseslint.configs.recommended,
+    ...baseConfig.filter((config) => !config.ignores),
+    ...tanstackConfig.filter((config) => !config.plugins?.import),
     {
-        ...pluginReact.configs.flat.recommended,
-        languageOptions: {
-            ...pluginReact.configs.flat.recommended.languageOptions,
-            globals: {
-                ...globals.serviceworker
-            }
-        }
-    },
-    {
+        files: ['**/*.{jsx,tsx}'], // IMPORTANT: Only apply to JSX/TSX files
         plugins: {
+            react: pluginReact,
             'react-hooks': pluginReactHooks
         },
-        settings: { react: { version: 'detect' } },
+        languageOptions: {
+            globals: {
+                ...globals.browser // Use browser globals for React components
+            }
+        },
+        settings: {
+            react: {
+                version: 'detect'
+            }
+        },
         rules: {
-            ...pluginReactHooks.configs.recommended.rules,
-            // React scope no longer necessary with new JSX transform.
-            'react/react-in-jsx-scope': 'off'
+            ...pluginReact.configs.recommended.rules,
+            ...pluginReactHooks.configs['recommended-latest'].rules,
+
+            'react/react-in-jsx-scope': 'off', // Not needed with new JSX transform
+            'react/prop-types': 'off' // Better handled by TypeScript
         }
-    }
+    },
+    ...reactCompilerConfig,
+    eslintConfigPrettier
 ];
+
+export default tanstackViteConfig;

@@ -15,7 +15,7 @@ export const users = pgTable(
     'users',
     {
         id: serial('id').primaryKey(),
-        privyDID: char('privy_did', { length: 35 }).notNull(),
+        privyDID: char('privy_did', { length: 35 }).unique().notNull(),
         email: varchar('email', { length: 255 }).unique(),
         username: char('username', { length: 15 }).notNull(),
         role: role('role').notNull().default('user'),
@@ -26,7 +26,9 @@ export const users = pgTable(
             .default(
                 'https://rsg5uys7zq.ufs.sh/f/AMgtrA9DGKkFTTUitgzI9xWiHtmo3wu4PcnYaCGO1jX0bRBQ'
             ),
-        walletAddress: char('wallet_address', { length: 42 }).notNull(),
+        walletAddress: char('wallet_address', { length: 42 })
+            .unique()
+            .notNull(),
         createdAt: timestamp('created_at').notNull().defaultNow(),
         updatedAt: timestamp('updated_at').notNull().defaultNow(),
         deletedAt: timestamp('deleted_at')

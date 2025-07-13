@@ -2,11 +2,10 @@ import { defineConfig } from 'tsup';
 
 export default defineConfig({
     entry: [
-        'src/contracts/index.ts',
-        'src/db/client.ts',
-        'src/db/schema.ts',
-        'src/db/validation.ts',
-        'src/redis/index.ts'
+        'src/trpc.ts',
+        'src/users/procedures.ts',
+        'src/users/repository.ts',
+        'src/users/service.ts'
     ],
     format: ['esm'],
     dts: true,
