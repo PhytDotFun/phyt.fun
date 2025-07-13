@@ -13,17 +13,16 @@
         }
     },
     "scripts": {
-        "build": "pnpm run validate-env && tsup",
+        "build": "tsup",
         "build:types": "tsup src/types.ts --dts-only --out-dir dist/types",
         "check:types": "tsc --noEmit",
         "clean": "pnpm rimraf dist && pnpm rimraf node_modules && pnpm rimraf .turbo",
-        "dev": "tsx watch src/index.ts",
+        "dev": "tsup --watch src/index.ts",
         "format": "prettier --write . --ignore-unknown",
         "lint": "eslint",
         "lint:fix": "eslint --fix",
         "start": "node dist/index.js",
-        "test": "vitest run",
-        "validate-env": "node -e \"require('./src/env.ts')\""
+        "test": "vitest run"
     },
     "dependencies": {
         "@hono/node-server": "catalog:",
