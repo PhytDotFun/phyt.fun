@@ -1,5 +1,6 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Search as SearchIcon } from 'lucide-react';
+
 import {
     CommandDialog,
     CommandEmpty,
@@ -11,7 +12,6 @@ import {
 import { Button } from '@/components/ui/button';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
-
 import {
     SidebarGroup,
     SidebarGroupContent,
@@ -20,9 +20,6 @@ import {
     SidebarMenuButton,
     SidebarMenuItem
 } from '@/components/ui/sidebar';
-
-const SEARCH_COOKIE_NAME = 'search_state';
-const SEARCH_COOKIE_MAX_AGE = 60 * 60 * 24 * 7;
 
 type SearchContextProps = {
     open: boolean;
@@ -69,11 +66,6 @@ export function SearchProvider({
         },
         [setOpenProp, open]
     );
-
-    // Set cookie when open state changes
-    useEffect(() => {
-        document.cookie = `${SEARCH_COOKIE_NAME}=${open}; path=/; max-age=${SEARCH_COOKIE_MAX_AGE}`;
-    }, [open]);
 
     const contextValue = React.useMemo<SearchContextProps>(
         () => ({
@@ -139,11 +131,17 @@ export const SearchButton = ({ className, variant }: SearchButtonProps) => {
     const effectiveVariant = variant ?? (isMobile ? 'noShadow' : 'default');
 
     return (
-        <div className={`${isMobile ? '' : 'hidden'}`}>
+        <div className={isMobile ? '' : 'hidden'}>
             <Button
                 variant={effectiveVariant}
                 className={cn('size-7 px-2', className)}
-                onClick={() => (isMobile ? setOpenMobile(true) : setOpen(true))}
+                onClick={() => {
+                    if (isMobile) {
+                        setOpenMobile(true);
+                    } else {
+                        setOpen(true);
+                    }
+                }}
             >
                 <SearchIcon />
             </Button>
@@ -175,9 +173,11 @@ export function SearchForm({
                                         id="search"
                                         placeholder="Search runners, tokens..."
                                         className="group-data-[collapsible=icon]:hidden cursor-default bg-transaprent border-0 outline-0 pointer-events-none"
-                                        onClick={() =>
-                                            !collapsed && setOpen(true)
-                                        }
+                                        onClick={() => {
+                                            if (!collapsed) {
+                                                setOpen(true);
+                                            }
+                                        }}
                                     />
                                 </div>
                             </SidebarMenuButton>
