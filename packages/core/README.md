@@ -1,3 +1,3 @@
 # `@phyt/core`
 
-Core monorepo constants, types, env schema with zod validation, and logger instance (pino).
+Lightweight interface package for defining dependency injection contract (will probably come up with a better usage of this package at some point).
