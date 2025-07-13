@@ -1,11 +1,16 @@
 //  @ts-check
 
-import { tanstackConfigJs } from '@phyt/eslint/tanstack';
+import tanstackViteConfig from '@phyt/eslint/tanstack';
 
 /** @type {import("eslint").Linter.Config[]} */
 export default [
-    ...tanstackConfigJs,
+    ...tanstackViteConfig,
     {
-        ignores: ['src/components/ui/**/*', '*.gen.ts']
+        // shadcn ui - can't be bothered to fix the linting on this
+        ignores: [
+            'src/components/ui/**/*',
+            '*.gen.ts',
+            'src/reportWebVitals.ts'
+        ]
     }
 ];
