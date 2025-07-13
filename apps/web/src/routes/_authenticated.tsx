@@ -1,10 +1,13 @@
 import { Outlet, createFileRoute, redirect } from '@tanstack/react-router';
+
 import { AuthenticatedLayout } from '@/components/layouts/authenticated-layout';
 
 export const Route = createFileRoute('/_authenticated')({
     beforeLoad: ({ context }) => {
         // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         if (!context.authentication?.authenticated) {
+            // Throwing the redirect is the correct pattern for tanstack router
+            // eslint-disable-next-line @typescript-eslint/only-throw-error
             throw redirect({
                 to: '/login',
                 search: {
