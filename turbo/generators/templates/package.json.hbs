@@ -4,13 +4,13 @@
   "version": "0.0.0",
   "type": "module",
   "exports": {
-    "./contracts": {
+    ".": {
         "types": "./dist/index.d.ts",
         "import": "./dist/index.js"
     }    
   },
   "scripts": {
-    "build": "tsc",
+    "build": "tsup",
     "check:types": "tsc --noEmit",
     "clean": "pnpm rimraf dist && pnpm rimraf node_modules && pnpm rimraf .turbo",
     "dev": "tsup --watch",
