@@ -348,7 +348,7 @@ importers:
         specifier: 'catalog:'
         version: 2.5.4
 
-  apps/hono-gate:
+  apps/hono-gateway:
     dependencies:
       '@hono/node-server':
         specifier: 'catalog:'
@@ -595,9 +595,9 @@ importers:
       '@phyt/eslint':
         specifier: workspace:*
         version: link:../../packages/eslint
-      '@phyt/hono-gate':
+      '@phyt/hono-gateway':
         specifier: workspace:*
-        version: link:../hono-gate
+        version: link:../hono-gateway
       '@phyt/tsconfig':
         specifier: workspace:*
         version: link:../../packages/tsconfig
