@@ -7,10 +7,14 @@ export const env = createEnv({
         NODE_ENV: z
             .enum(['development', 'production', 'test'])
             .default('development'),
-        PORT: z.number().default(3000),
+        CORS_ORIGIN: z.string(),
+        PORT: z.coerce.number(),
         PRIVY_APP_ID: z.string(),
         PRIVY_SECRET_KEY: z.string(),
-        PRIVY_VERIFICATION_KEY: z.string()
+        PRIVY_VERIFICATION_KEY: z.string(),
+        PRIVY_WEBHOOK_SECRET: z.string().startsWith('whsec_'),
+        WEBHOOK_ENDPOINT: z.string(),
+        DATABASE_URL: z.string().url()
     },
     runtimeEnv: process.env,
     emptyStringAsUndefined: true,
