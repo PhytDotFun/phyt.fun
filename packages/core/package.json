@@ -4,55 +4,19 @@
     "private": true,
     "type": "module",
     "exports": {
-        "./env": {
-            "types": "./dist/env.d.ts",
-            "import": "./dist/env.js"
-        },
-        "./logger": {
-            "types": "./dist/logger.d.ts",
-            "import": "./dist/logger.js"
-        },
-        "./constants/ui": {
-            "types": "./dist/constants/ui.d.ts",
-            "import": "./dist/constants/ui.js"
-        },
-        "./types/api": {
-            "types": "./dist/types/api.d.ts",
-            "import": "./dist/types/api.js"
-        },
-        "./types/ui": {
-            "types": "./dist/types/ui.d.ts",
-            "import": "./dist/types/ui.js"
-        },
-        "./validation/users": {
-            "types": "./dist/validation/users.d.ts",
-            "import": "./dist/validation/users.js"
-        }
+        "./di": "./dist/di.d.ts"
     },
     "scripts": {
-        "build": "tsup",
-        "check:types": "tsc --noEmit",
-        "clean": "pnpm rimraf dist && pnpm rimraf node_modules",
-        "dev": "tsup --watch",
-        "format": "prettier --write . --ignore-unknown",
-        "lint": "eslint",
-        "lint:fix": "eslint --fix",
-        "test": "vitest run"
-    },
-    "dependencies": {
-        "@t3-oss/env-core": "^0.13.8",
-        "pino": "^9.7.0",
-        "zod": "^3.25.67"
+        "build": "tsup --dts-only",
+        "clean": "pnpm rimraf dist && pnpm rimraf node_modules && pnpm rimraf .turbo"
     },
     "devDependencies": {
-        "@phyt/eslint": "workspace:*",
         "@phyt/tsconfig": "workspace:*",
         "@types/node": "^24.0.7",
-        "eslint": "^9.30.0",
-        "pino-pretty": "^13.0.0",
+        "@types/pg": "^8.15.4",
+        "drizzle-kit": "^0.31.4",
+        "drizzle-orm": "^0.44.2",
         "tsup": "^8.5.0",
-        "typescript": "^5.8.3",
-        "vite": "^6.3.5",
-        "vitest": "^3.2.4"
+        "typescript": "^5.8.3"
     }
 }
