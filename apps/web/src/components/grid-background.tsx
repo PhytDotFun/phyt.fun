@@ -27,7 +27,7 @@ export const GridBackground = () => {
             className={`fixed inset-0 pointer-events-none z-0 ${isMobile ? 'opacity-5' : 'opacity-10'}`}
             style={
                 {
-                    '--snake-animation-duration': `${animationDuration}s`
+                    '--snake-animation-duration': `${animationDuration.toString()}s`
                 } as React.CSSProperties
             }
         >
@@ -42,7 +42,7 @@ export const GridBackground = () => {
                         <div
                             className="snake-animation absolute inset-0"
                             style={{
-                                animationDelay: `${getAnimationDelay(i)}s`
+                                animationDelay: `${getAnimationDelay(i).toString()}s`
                             }}
                         />
                     </div>
