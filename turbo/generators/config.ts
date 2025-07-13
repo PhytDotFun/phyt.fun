@@ -72,13 +72,41 @@ export default function generator(plop: PlopTypes.NodePlopAPI): void {
                         for (const dep of answers.deps
                             .split(' ')
                             .filter(Boolean)) {
-                            const version = await fetch(
-                                `https://registry.npmjs.org/-/package/${dep}/dist-tags`
-                            )
-                                .then((res) => res.json())
-                                .then((json) => json.latest);
+                            let version = 'latest'; // fallback version
+
+                            try {
+                                const response = await fetch(
+                                    `https://registry.npmjs.org/-/package/${dep}/dist-tags`
+                                );
+
+                                if (!response.ok) {
+                                    console.warn(
+                                        `Failed to fetch version for ${dep}: ${response.status} ${response.statusText}`
+                                    );
+                                } else {
+                                    const json = await response.json();
+                                    if (
+                                        json &&
+                                        typeof json.latest === 'string'
+                                    ) {
+                                        version = `^${json.latest}`;
+                                    } else {
+                                        console.warn(
+                                            `Package ${dep} does not have a latest version tag`
+                                        );
+                                    }
+                                }
+                            } catch (error) {
+                                console.warn(
+                                    `Error fetching version for ${dep}:`,
+                                    error instanceof Error
+                                        ? error.message
+                                        : String(error)
+                                );
+                            }
+
                             if (!pkg.dependencies) pkg.dependencies = {};
-                            pkg.dependencies[dep] = `^${version}`;
+                            pkg.dependencies[dep] = version;
                         }
                         return JSON.stringify(pkg, null, 2);
                     }
