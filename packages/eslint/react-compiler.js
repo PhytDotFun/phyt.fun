@@ -10,7 +10,7 @@ import * as reactCompiler from 'eslint-plugin-react-compiler';
  * A custom ESLint configuration for the React Compiler.
  *
  * @type {import("eslint").Linter.Config[]} */
-export const reactCompilerConfig = [
+const reactCompilerConfig = [
     js.configs.recommended,
     eslintConfigPrettier,
     ...tseslint.configs.recommended,
@@ -45,3 +45,5 @@ export const reactCompilerConfig = [
         }
     }
 ];
+
+export default reactCompilerConfig;
