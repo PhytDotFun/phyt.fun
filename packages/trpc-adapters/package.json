@@ -1,0 +1,53 @@
+{
+    "name": "@phyt/trpc-adapters",
+    "version": "0.0.0",
+    "private": true,
+    "type": "module",
+    "exports": {
+        "./trpc": {
+            "types": "./dist/trpc.d.ts",
+            "import": "./dist/trpc.js"
+        },
+        "./users/procedures": {
+            "types": "./dist/users/procedures.d.ts",
+            "import": "./dist/users/procedures.js"
+        },
+        "./users/repository": {
+            "types": "./dist/users/repository.d.ts",
+            "import": "./dist/users/repository.js"
+        },
+        "./users/service": {
+            "types": "./dist/users/service.d.ts",
+            "import": "./dist/users/service.js"
+        }
+    },
+    "scripts": {
+        "build": "tsup",
+        "check:types": "tsc --noEmit",
+        "clean": "pnpm rimraf dist && pnpm rimraf node_modules && pnpm rimraf .turbo",
+        "dev": "tsup --watch",
+        "format": "prettier --write . --ignore-unknown",
+        "lint": "eslint .",
+        "lint:fix": "eslint --fix",
+        "test": "vitest run"
+    },
+    "dependencies": {
+        "@phyt/data-persistence": "workspace:*",
+        "@privy-io/server-auth": "^1.28.2",
+        "@t3-oss/env-core": "^0.13.8",
+        "@trpc/server": "^11.4.3",
+        "dotenv": "^17.1.0",
+        "drizzle-orm": "^0.44.2",
+        "superjson": "^2.2.2",
+        "zod": "^3.25.67"
+    },
+    "devDependencies": {
+        "@phyt/core": "workspace:*",
+        "@phyt/eslint": "workspace:*",
+        "@phyt/tsconfig": "workspace:*",
+        "eslint": "^9.30.0",
+        "tsup": "^8.5.0",
+        "typescript": "^5.8.3",
+        "vitest": "^3.2.4"
+    }
+}
