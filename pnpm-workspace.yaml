@@ -56,6 +56,7 @@ catalog:
   '@types/react-dom': ^19.1.6
   '@vitejs/plugin-react': ^4.6.0
   babel-plugin-react-compiler: 19.1.0-rc.2
+  bullmq: ^5.56.4
   class-variance-authority: ^0.7.1
   clsx: ^2.1.1
   cmdk: ^1.1.1
@@ -118,5 +119,6 @@ onlyBuiltDependencies:
   - bufferutil
   - core-js-pure
   - esbuild
+  - msgpackr-extract
   - unrs-resolver
   - utf-8-validate
