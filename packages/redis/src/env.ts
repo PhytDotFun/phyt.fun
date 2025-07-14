@@ -7,7 +7,7 @@ export const env = createEnv({
         NODE_ENV: z
             .enum(['development', 'production', 'test'])
             .default('development'),
-        REDIS_URL: z.string().url()
+        REDIS_URL: z.string().url().default('redis://localhost:6379')
     },
     runtimeEnv: process.env,
     emptyStringAsUndefined: true,
