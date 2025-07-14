@@ -1,0 +1,41 @@
+{
+    "name": "@phyt/m-queue",
+    "private": true,
+    "version": "0.0.0",
+    "type": "module",
+    "exports": {
+        "./queue": {
+            "types": "./dist/queue.d.ts",
+            "import": "./dist/queue.js"
+        },
+        "./jobs": {
+            "types": "./dist/jobs.d.ts",
+            "import": "./dist/jobs.js"
+        }
+    },
+    "scripts": {
+        "build": "tsup",
+        "check:types": "tsc --noEmit",
+        "clean": "pnpm rimraf dist && pnpm rimraf node_modules && pnpm rimraf .turbo",
+        "dev": "tsup --watch",
+        "format": "prettier --write . --ignore-unknown",
+        "lint": "eslint",
+        "lint:fix": "eslint --fix",
+        "test": "vitest run"
+    },
+    "dependencies": {
+        "@phyt/data-access": "workspace:*",
+        "@phyt/redis": "workspace:*",
+        "bullmq": "catalog:",
+        "zod": "catalog:"
+    },
+    "devDependencies": {
+        "@phyt/eslint": "workspace:*",
+        "@phyt/tsconfig": "workspace:*",
+        "eslint": "catalog:",
+        "prettier": "catalog:",
+        "tsup": "catalog:",
+        "typescript": "catalog:",
+        "vitest": "catalog:"
+    }
+}
