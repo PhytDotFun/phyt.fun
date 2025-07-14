@@ -46,7 +46,8 @@
         "redis": "class",
         "trpc-adapters": "examples",
         "tsconfig": "typescript",
-        "webhooks": "connection"
+        "webhooks": "connection",
+        "workers": "tools"
     },
     "cSpell.words": ["bullmq", "phyt", "viem"]
 }
