@@ -32,7 +32,7 @@
         "test": "vitest run"
     },
     "dependencies": {
-        "@phyt/data-persistence": "workspace:*",
+        "@phyt/data-access": "workspace:*",
         "@privy-io/server-auth": "catalog:",
         "@t3-oss/env-core": "catalog:",
         "@trpc/server": "catalog:",
