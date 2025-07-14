@@ -1,13 +1,9 @@
 {
-    "name": "@phyt/data-persistence",
+    "name": "@phyt/data-access",
     "version": "0.0.0",
     "private": true,
     "type": "module",
     "exports": {
-        "./contracts": {
-            "types": "./dist/contracts/index.d.ts",
-            "import": "./dist/contracts/index.js"
-        },
         "./db/client": {
             "types": "./dist/db/client.d.ts",
             "import": "./dist/db/client.js"
@@ -16,13 +12,9 @@
             "types": "./dist/db/schema.d.ts",
             "import": "./dist/db/schema.js"
         },
-        "./db/models/users": {
-            "types": "./dist/db/models/users.d.ts",
-            "import": "./dist/db/models/users.js"
-        },
-        "./redis": {
-            "types": "./dist/redis/index.d.ts",
-            "import": "./dist/redis/index.js"
+        "./models/users": {
+            "types": "./dist/models/users.d.ts",
+            "import": "./dist/models/users.js"
         }
     },
     "scripts": {
