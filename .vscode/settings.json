@@ -47,7 +47,7 @@
         "trpc-adapters": "examples",
         "tsconfig": "typescript",
         "webhooks": "connection",
-        "workers": "tools"
+        "workers": "robot"
     },
     "cSpell.words": ["bullmq", "phyt", "viem"]
 }
