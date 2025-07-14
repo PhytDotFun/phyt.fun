@@ -28,7 +28,7 @@
         "@hono/node-server": "catalog:",
         "@hono/trpc-server": "catalog:",
         "@hono/zod-validator": "catalog:",
-        "@phyt/data-persistence": "workspace:*",
+        "@phyt/data-access": "workspace:*",
         "@phyt/trpc-adapters": "workspace:*",
         "@privy-io/server-auth": "catalog:",
         "@t3-oss/env-core": "catalog:",
