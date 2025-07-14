@@ -1,5 +1,5 @@
 import type { Dependencies as Deps } from '@phyt/core/di';
-import { db } from '@phyt/data-persistence/db/client';
+import { db } from '@phyt/data-access/db/client';
 // import Redis from 'ioredis';
 
 export const dependencies: Deps = {

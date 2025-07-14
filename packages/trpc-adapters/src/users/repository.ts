@@ -1,11 +1,11 @@
 import { eq } from 'drizzle-orm';
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
-import { users } from '@phyt/data-persistence/db/schema';
+import { users } from '@phyt/data-access/db/schema';
 import {
     User,
     NewUser,
     InsertUserSchema
-} from '@phyt/data-persistence/db/models/users';
+} from '@phyt/data-access/models/users';
 
 export class UserRepository {
     constructor(private db: NodePgDatabase) {}

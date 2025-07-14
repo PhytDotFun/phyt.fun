@@ -1,5 +1,5 @@
 import type { Dependencies as Deps } from '@phyt/core/di';
-import type { NewUser, User } from '@phyt/data-persistence/db/models/users';
+import type { NewUser, User } from '@phyt/data-access/models/users';
 
 import { UserRepository } from './repository';
 

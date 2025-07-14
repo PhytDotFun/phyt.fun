@@ -19,6 +19,9 @@ node_modules/
 # Ignore dependency lock
 pnpm-lock.yaml
 
+# Ignore pnpm-workspace
+pnpm-workspace.yaml
+
 # Ignore shadcn ui components
 **/apps/web/src/components/ui/
 

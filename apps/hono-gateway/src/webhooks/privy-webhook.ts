@@ -5,7 +5,7 @@
 // apps/api should serve as a lightweight interface to core logic that's defined in contextful packages
 //
 import { Hono } from 'hono';
-import { InsertUserSchema } from '@phyt/data-persistence/db/models/users';
+import { InsertUserSchema } from '@phyt/data-access/models/users';
 import { UserService } from '@phyt/trpc-adapters/users/service';
 
 import privy from '@/privy';

@@ -1,4 +1,4 @@
-# `@phyt/hono-gate`
+# `@phyt/hono-gateway`
 
 Hono API gateway¹.
 
