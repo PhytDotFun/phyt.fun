@@ -15,7 +15,7 @@ export const CreateWalletJobSchema = z.object({
     chainType: z.string()
 });
 
-export type SendPrivyUserJob = z.infer<typeof SyncPrivyUserJobSchema>;
+export type SyncPrivyUserJob = z.infer<typeof SyncPrivyUserJobSchema>;
 export type CreateWalletJob = z.infer<typeof CreateWalletJobSchema>;
 
 export enum JobName {
