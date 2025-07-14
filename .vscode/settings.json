@@ -23,6 +23,8 @@
         "**/routeTree.gen.ts": true
     },
 
+    "typescript.preferences.exclude": ["**/node_modules"],
+
     "editor.defaultFormatter": "esbenp.prettier-vscode",
 
     "[typescript]": {
