@@ -4,9 +4,17 @@
     "private": true,
     "type": "module",
     "exports": {
-        ".": {
-            "types": "./dist/index.d.ts",
-            "import": "./dist/index.js"
+        "./client": {
+            "types": "./dist/client.d.ts",
+            "import": "./dist/client.js"
+        },
+        "./bull": {
+            "types": "./dist/bull.d.ts",
+            "import": "./dist/bull.js"
+        },
+        "./cache": {
+            "types": "./dist/cache.d.ts",
+            "import": "./dist/cache.js"
         }
     },
     "scripts": {
