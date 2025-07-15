@@ -4,8 +4,8 @@ import {
     CreateWalletJob,
     JobName,
     SyncPrivyUserJobSchema
-} from '@phyt/m-queue';
-import { addJobWithContext, authQueue } from '@phyt/m-queue';
+} from '@phyt/m-queue/jobs';
+import { addJobWithContext, authQueue } from '@phyt/m-queue/queue';
 
 import { dependencies } from '@/di';
 

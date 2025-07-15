@@ -1,6 +1,6 @@
 import { Worker, Job } from 'bullmq';
-import { bull as redis } from '@phyt/redis';
-import { JobName, CreateWalletJob, SyncPrivyUserJob } from '@phyt/m-queue';
+import { redisBull } from '@phyt/redis/bull';
+import { JobName, CreateWalletJob, SyncPrivyUserJob } from '@phyt/m-queue/jobs';
 
 import { createWallet } from './jobs/createWallet';
 import { syncPrivyUser } from './jobs/syncPrivyUser';
@@ -20,7 +20,7 @@ const worker = new Worker(
                 throw new Error(`Unknown job: ${job.name}`);
         }
     },
-    { connection: redis }
+    { connection: redisBull }
 );
 
 worker.on('completed', (job) => {

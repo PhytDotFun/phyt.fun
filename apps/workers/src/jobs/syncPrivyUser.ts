@@ -1,5 +1,5 @@
 import { Job } from 'bullmq';
-import { SyncPrivyUserJob, SyncPrivyUserJobSchema } from '@phyt/m-queue';
+import { SyncPrivyUserJob, SyncPrivyUserJobSchema } from '@phyt/m-queue/jobs';
 import { InsertUserSchema } from '@phyt/data-access/models/users';
 import { UserService } from '@phyt/trpc-adapters/users/service';
 
