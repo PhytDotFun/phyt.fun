@@ -1,56 +1,53 @@
-//
-// Might explore breaking webhooks into own package
-// (Just dependent how many more webhooks needed in the future)
-//
-// apps/api should serve as a lightweight interface to core logic that's defined in contextful packages
-//
+/**
+ * Lightweight API router for Privy webhooks.
+ * Business logic is handled by the webhooks package.
+ */
 import { Hono } from 'hono';
-import { InsertUserSchema } from '@phyt/data-access/models/users';
-import { UserService } from '@phyt/trpc-adapters/users/service';
+import { webhookResponse, PrivyWebhookHandler } from '@phyt/webhooks';
+import { queueFactory } from '@phyt/m-queue/queue';
 
-import privy from '@/privy';
-import { env } from '@/env';
 import { dependencies } from '@/di';
+import { env } from '@/env';
 
-import type { PrivyWebhookEvent } from './webhook-types';
+// Create webhook handler
+const privyWebhookHandler = new PrivyWebhookHandler({
+    privyClient: dependencies.privy,
+    secret: env.PRIVY_WEBHOOK_SECRET,
+    queueFactory
+});
 
 export const privyWebhook = new Hono().post('/', async (c) => {
-    const id = c.req.header('svix-id') ?? '';
-    const timestamp = c.req.header('svix-timestamp') ?? '';
-    const signature = c.req.header('svix-signature') ?? '';
-    const rawBody = await c.req.text();
+    try {
+        // Get raw body
+        const rawBody = await c.req.text();
 
-    const ev = (await privy.verifyWebhook(
-        rawBody,
-        { id, timestamp, signature },
-        env.PRIVY_WEBHOOK_SECRET
-    )) as PrivyWebhookEvent;
+        // Extract headers
+        const headers = {
+            id: c.req.header('svix-id') || '',
+            timestamp: c.req.header('svix-timestamp') || '',
+            signature: c.req.header('svix-signature') || '',
+            clientIp:
+                c.req.header('x-forwarded-for')?.split(',')[0]?.trim() ||
+                c.req.header('x-real-ip') ||
+                'unknown'
+        };
 
-    if (ev.type !== 'user.created' && ev.type !== 'user.authenticated')
-        return c.json({ ok: true });
+        // Delegate to webhook handler
+        const result = await privyWebhookHandler.handle(rawBody, headers);
 
-    const user = ev.user;
-
-    const walletAddress =
-        user.wallet?.address ??
-        (
-            await privy.walletApi.createWallet({
-                chainType: 'ethereum',
-                owner: { userId: user.id }
-            })
-        ).address;
-
-    const record = {
-        privyDID: user.id,
-        username: user.twitter?.username ?? `user_${user.id.slice(0, 6)}`,
-        profilePictureUrl: user.twitter?.profilePictureUrl ?? '',
-        walletAddress: walletAddress,
-        email: user.email?.address ?? null,
-        role: 'user' as const
-    };
-
-    const newUser = InsertUserSchema.parse(record);
-    await new UserService(dependencies).syncPrivyData(newUser);
-
-    return c.json({ ok: true });
+        return new Response(JSON.stringify(result.body), {
+            status: result.status,
+            headers: { 'Content-Type': 'application/json' }
+        });
+    } catch (error) {
+        console.error('Webhook processing error:', error);
+        const errorResponse = webhookResponse.error(
+            'Internal server error',
+            500
+        );
+        return new Response(JSON.stringify(errorResponse.body), {
+            status: errorResponse.status,
+            headers: { 'Content-Type': 'application/json' }
+        });
+    }
 });
