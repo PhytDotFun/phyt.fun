@@ -220,7 +220,7 @@ function Sidebar({
 
     return (
         <div
-            className="group peer hidden md:block"
+            className="group peer hidden xs:block"
             data-state={state}
             data-collapsible={state === 'collapsed' ? collapsible : ''}
             data-variant={variant}
@@ -242,7 +242,7 @@ function Sidebar({
             <div
                 data-slot="sidebar-container"
                 className={cn(
-                    'fixed inset-y-0 z-10 hidden h-svh w-(--sidebar-width) transition-[left,right,width] duration-200 ease-linear md:flex',
+                    'fixed inset-y-0 z-10 hidden h-svh w-(--sidebar-width) transition-[left,right,width] duration-200 ease-linear xs:flex',
                     side === 'left'
                         ? 'left-0 group-data-[collapsible=offcanvas]:left-[calc(var(--sidebar-width)*-1)]'
                         : 'right-0 group-data-[collapsible=offcanvas]:right-[calc(var(--sidebar-width)*-1)]',
@@ -279,7 +279,7 @@ function SidebarTrigger({
             data-slot="sidebar-trigger"
             variant="noShadow"
             size="icon"
-            className={cn('size-7', className)}
+            className={cn('size-8', className)}
             onClick={(event) => {
                 onClick?.(event);
                 toggleSidebar();
@@ -339,7 +339,7 @@ function SidebarInput({
         <Input
             data-slot="sidebar-input"
             data-sidebar="input"
-            className={cn('bg-sidebar h-8 w-full shadow-none', className)}
+            className={cn('', className)}
             {...props}
         />
     );
@@ -482,13 +482,14 @@ function SidebarMenuItem({ className, ...props }: React.ComponentProps<'li'>) {
 }
 
 const sidebarMenuButtonVariants = cva(
-    'peer/menu-button flex w-full items-center gap-2 overflow-hidden outline-2 outline-transparent rounded-base p-2 text-left text-sm ring-sidebar-ring transition-[width,height,padding] hover:bg-main hover:text-main-foreground hover:outline-border focus-visible:outline-border focus-visible:text-main-foreground focus-visible:bg-main disabled:pointer-events-none disabled:opacity-50 group-has-data-[sidebar=menu-action]/menu-item:pr-8 aria-disabled:pointer-events-none aria-disabled:opacity-50 group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-2! [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0',
+    'peer/menu-button text-sidebar-foreground flex w-full items-center gap-2 overflow-hidden outline-2 outline-transparent rounded-base p-2 text-left text-sm ring-sidebar-ring transition-[width,height,padding] hover:bg-main hover:text-main-foreground hover:outline-border focus-visible:outline-border focus-visible:text-main-foreground focus-visible:bg-main disabled:pointer-events-none disabled:opacity-50 group-has-data-[sidebar=menu-action]/menu-item:pr-8 aria-disabled:pointer-events-none aria-disabled:opacity-50 group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-2! [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0',
     {
         variants: {
             size: {
                 default: 'h-8 text-sm',
                 sm: 'h-7 text-xs',
-                lg: 'h-12 text-sm group-data-[collapsible=icon]:p-0!'
+                lg: 'h-12 text-sm',
+                xl: 'h-18 text-sm'
             }
         },
         defaultVariants: {
@@ -688,7 +689,7 @@ function SidebarMenuSubButton({
             data-size={size}
             data-active={isActive}
             className={cn(
-                'text-sidebar-foreground hover:bg-main hover:outline-border hover:text-main-foreground  active:bg-main outline-transparent outline-2 [&>svg]:text-main-foreground flex h-7 min-w-0 -translate-x-px items-center gap-2 overflow-hidden rounded-base px-2 focus-visible:ring-2 disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0',
+                'text-sidebar-foreground hover:bg-main hover:outline-border hover:text-main-foreground  active:bg-main outline-transparent outline-2 [&>svg]:text-sidebar-foreground flex h-7 min-w-0 -translate-x-px items-center gap-2 overflow-hidden rounded-base px-2 focus-visible:ring-2 disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0',
                 'data-[active=true]:bg-main data-[active=true]:outline-border',
                 size === 'sm' && 'text-xs',
                 size === 'md' && 'text-sm',
