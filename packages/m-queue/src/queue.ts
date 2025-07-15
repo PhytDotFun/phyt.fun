@@ -1,40 +1,35 @@
-import { Queue, QueueEvents } from 'bullmq';
-import { createBullConnection } from '@phyt/redis/bull';
+import { Queue, JobsOptions } from 'bullmq';
+import { redisBull } from '@phyt/redis/bull';
+export type QueueFactory = () => Queue;
 
-export enum QueueName {
-    AUTH = 'auth',
-    BLOCKCHAIN = 'blockchain',
-    ANALYTICS = 'analytics'
-}
+const registry: Map<string, Queue> = new Map();
 
-export const defaultJobOptions = {
-    attempts: 5,
-    backoff: {
-        type: 'exponential' as const,
-        delay: 2000
-    },
-    removeOnComplete: {
-        age: 3600, // 1 hour
-        count: 100
-    },
-    removeOnFail: {
-        age: 86400 // 24 hours
+export function createQueue(name: string): Queue {
+    if (registry.has(name)) {
+        throw new Error(`Queue "${name}" already exists – use getQueue().`);
     }
-};
-
-export function createQueue<T>(name: QueueName): Queue<T> {
-    return new Queue<T>(name, {
-        connection: createBullConnection(),
-        defaultJobOptions
-    });
+    const queue: Queue = new Queue(name, { connection: redisBull });
+    registry.set(name, queue);
+    return queue;
 }
 
-export function createQueueEvents(name: QueueName): QueueEvents {
-    return new QueueEvents(name, {
-        connection: createBullConnection()
-    });
+export function getQueue(name: string): Queue {
+    const q = registry.get(name);
+    if (!q) throw new Error(`Queue "${name}" has not been created yet.`);
+    return q;
 }
 
-export const authQueue = createQueue(QueueName.AUTH);
-export const blockchainQueue = createQueue(QueueName.BLOCKCHAIN);
-export const analyticsQueue = createQueue(QueueName.ANALYTICS);
+const AUTH_QUEUE_NAME = 'auth';
+export const authQueue: Queue = createQueue(AUTH_QUEUE_NAME);
+
+export const queueFactory: QueueFactory = () => authQueue;
+
+export async function addJobWithContext(
+    queue: Queue,
+    name: string,
+    data: unknown,
+    opts?: JobsOptions
+): Promise<string | number> {
+    const job = await queue.add(name, data, opts);
+    return job.id ?? Date.now().toString();
+}
