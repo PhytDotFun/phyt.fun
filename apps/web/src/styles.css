@@ -22,6 +22,8 @@
 @import 'tw-animate-css';
 
 @theme {
+    --breakpoint-xs: 30rem; /* 480px */
+
     --font-dmsans: 'DMSans', sans-serif;
     --font-lexend: 'Lexend', sans-serif;
     --font-base: 'Lexend', sans-serif;
@@ -48,11 +50,11 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-    --background: oklch(1 0 0);
-    --secondary-background: #e5e7eb;
+    --background: oklch(0.997 0.0144 106.66);
+    --secondary-background: oklch(0.997 0.0144 106.66);
     --foreground: oklch(0 0 0);
     --main-foreground: oklch(0 0 0);
-    --main: oklch(1 0 0);
+    --main: oklch(0.997 0.0144 106.66);
     --border: oklch(0% 0 0);
     --ring: oklch(0% 0 0);
     --overlay: oklch(0% 0 0 / 0.8);
@@ -68,8 +70,8 @@
     --chart-4: #00d696;
     --chart-5: #5294ff;
     --chart-active-dot: #000;
-    --sidebar: oklch(1 0 0);
-    --sidebar-foreground: oklch(0 0 0);
+    --sidebar: oklch(0 0 0);
+    --sidebar-foreground: oklch(0.997 0.0144 106.66);
     /* --sidebar-main: oklch(0.205 0 0);
     --sidebar-main-foreground: oklch(0.985 0 0); */
     /* --sidebar-accent: oklch(0.97 0 0);
@@ -123,7 +125,6 @@
     --spacing-boxShadowY: 2px;
     --spacing-reverseBoxShadowX: -2px;
     --spacing-reverseBoxShadowY: -2px;
-    --radius-base: 5px;
     --shadow-shadow: var(--shadow);
     --font-weight-base: 500;
     --font-weight-heading: 900;
