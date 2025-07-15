@@ -15,15 +15,41 @@ services:
             interval: 5s
             timeout: 5s
             retries: 5
-    pgadmin:
-        image: dpage/pgadmin4
-        container_name: phyt-pgadmin
-        environment:
-            PGADMIN_DEFAULT_EMAIL: admin@phyt.com
-            PGADMIN_DEFAULT_PASSWORD: phyt_password
+
+    redis:
+        image: redis:7-alpine
+        container_name: phyt-redis
         ports:
-            - 5050:80
+            - 6379:6379
+        volumes:
+            - phyt-redis-data:/data
+        healthcheck:
+            test: ['CMD', 'redis-cli', 'ping']
+            interval: 5s
+            timeout: 5s
+            retries: 5
+
+    workers:
+        build:
+            context: .
+            dockerfile: apps/workers/Dockerfile
+        platform: linux/amd64
+        container_name: phyt-workers
         depends_on:
-            - postgres
+            postgres:
+                condition: service_healthy
+            redis:
+                condition: service_healthy
+        environment:
+            NODE_ENV: production
+            DATABASE_URL: postgresql://phyt_user:phyt_password@postgres:5432/phyt_db
+            REDIS_URL: redis://redis:6379
+            PRIVY_APP_ID: ${PRIVY_APP_ID}
+            PRIVY_SECRET_KEY: ${PRIVY_SECRET_KEY}
+            WORKER_CONCURRENCY: 3
+            WORKER_RATE_LIMIT: 10
+        restart: unless-stopped
+
 volumes:
     phyt-postgres-data:
+    phyt-redis-data:
