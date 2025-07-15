@@ -19,13 +19,13 @@ interface WalletButtonProps {
 export const WalletButton = ({ className, variant }: WalletButtonProps) => {
     const isMobile = useIsMobile();
 
-    const effectiveVariant = variant ?? (isMobile ? 'noShadow' : 'default');
+    const effectiveVariant = variant ?? (isMobile ? 'noShadow' : 'reverse');
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
                 <Button
                     variant={effectiveVariant}
-                    className={cn('px-2 size-7', className)}
+                    className={cn('size-8', className)}
                 >
                     <Wallet />
                 </Button>

@@ -20,7 +20,7 @@ interface ProfileIconProps {
 export const ProfileIcon = ({ variant }: ProfileIconProps) => {
     const isMobile = useIsMobile();
 
-    const effectiveVariant = variant ?? (isMobile ? 'noShadow' : 'default');
+    const effectiveVariant = variant ?? (isMobile ? 'noShadow' : 'reverse');
 
     const { signOut } = useAuth();
     const navigate = useNavigate();
