@@ -29,7 +29,11 @@ export async function createWallet(
 
     /* -- Enqueue sync_privy_user ------------------------------------------- */
     const syncPayload = SyncPrivyUserJobSchema.parse({
-        ...data,
+        privyDID: data.privyDID,
+        username: data.username,
+        profilePictureUrl: data.profilePictureUrl,
+        email: data.email,
+        role: data.role,
         walletAddress: wallet.address
     });
 
