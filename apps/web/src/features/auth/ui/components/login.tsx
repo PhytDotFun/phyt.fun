@@ -43,7 +43,7 @@ export const Login = () => {
 
     return (
         <div
-            className={`bg-white relative ${isMobile ? 'h-[89vh]' : 'h-screen'}`}
+            className={`bg-secondary-background relative ${isMobile ? 'h-[89vh]' : 'h-screen'}`}
         >
             <GridBackground />
             <div
