@@ -765,6 +765,9 @@ importers:
       '@t3-oss/env-core':
         specifier: 'catalog:'
         version: 0.13.8(typescript@5.8.3)(zod@3.25.76)
+      dotenv:
+        specifier: 'catalog:'
+        version: 17.2.0
       drizzle-orm:
         specifier: 'catalog:'
         version: 0.44.2(@types/pg@8.15.4)(pg@8.16.3)
