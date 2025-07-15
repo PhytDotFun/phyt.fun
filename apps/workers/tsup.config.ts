@@ -6,5 +6,8 @@ export default defineConfig({
     dts: true,
     clean: true,
     sourcemap: true,
-    treeshake: true
+    bundle: true,
+    external: [], // Bundle everything
+    platform: 'node',
+    target: 'node18'
 });

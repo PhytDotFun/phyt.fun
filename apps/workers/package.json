@@ -14,17 +14,31 @@
         "check:types": "tsc --noEmit",
         "clean": "pnpm rimraf dist && pnpm rimraf node_modules && pnpm rimraf .turbo",
         "dev": "tsup --watch",
+        "start": "node dist/index.js",
         "format": "prettier --write . --ignore-unknown",
         "lint": "eslint",
         "lint:fix": "eslint --fix",
         "test": "vitest run"
     },
+    "dependencies": {
+        "@phyt/core": "workspace:*",
+        "@phyt/data-access": "workspace:*",
+        "@phyt/m-queue": "workspace:*",
+        "@phyt/redis": "workspace:*",
+        "@phyt/trpc-adapters": "workspace:*",
+        "@privy-io/server-auth": "catalog:",
+        "@t3-oss/env-core": "catalog:",
+        "bullmq": "catalog:",
+        "pino": "catalog:",
+        "zod": "catalog:"
+    },
     "devDependencies": {
         "@phyt/eslint": "workspace:*",
         "@phyt/tsconfig": "workspace:*",
+        "@types/node": "catalog:",
         "eslint": "catalog:",
-        "tsup": "catalog:",
         "prettier": "catalog:",
+        "tsup": "catalog:",
         "typescript": "catalog:",
         "vitest": "catalog:"
     }
