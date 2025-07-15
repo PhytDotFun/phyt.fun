@@ -4,19 +4,36 @@
     "private": true,
     "type": "module",
     "exports": {
-        "./di": "./dist/di.d.ts"
+        "./di": {
+            "types": "./dist/di.d.ts",
+            "default": "./dist/di.js"
+        }
     },
     "scripts": {
-        "build": "tsup --dts-only",
-        "clean": "pnpm rimraf dist && pnpm rimraf node_modules && pnpm rimraf .turbo"
+        "build": "tsup",
+        "check:types": "tsc --noEmit",
+        "clean": "pnpm rimraf dist && pnpm rimraf node_modules && pnpm rimraf .turbo",
+        "dev": "tsup --watch",
+        "format": "prettier --write . --ignore-unknown",
+        "lint": "eslint",
+        "lint:fix": "eslint --fix",
+        "test": "vitest run"
+    },
+    "dependencies": {
+        "@privy-io/server-auth": "catalog:",
+        "drizzle-orm": "catalog:",
+        "ioredis": "catalog:"
     },
     "devDependencies": {
         "@phyt/tsconfig": "workspace:*",
+        "@phyt/eslint": "workspace:*",
         "@types/node": "catalog:",
         "@types/pg": "catalog:",
         "drizzle-kit": "catalog:",
-        "drizzle-orm": "catalog:",
+        "eslint": "catalog:",
         "tsup": "catalog:",
-        "typescript": "catalog:"
+        "typescript": "catalog:",
+        "prettier": "catalog:",
+        "vitest": "catalog:"
     }
 }

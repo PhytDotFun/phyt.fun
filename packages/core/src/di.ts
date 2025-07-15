@@ -1,9 +1,9 @@
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
-// import type { Redis } from 'ioredis';
-// import type { Logger } from 'pino';
+import type { PrivyClient } from '@privy-io/server-auth';
+import type Redis from 'ioredis';
 
 export interface Dependencies {
     db: NodePgDatabase;
-    // redis: Redis;
-    // log: Logger;
+    redis: Redis;
+    privy: PrivyClient;
 }
