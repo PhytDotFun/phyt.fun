@@ -10,8 +10,7 @@ export const CreateWalletJobSchema = z.object({
     username: z.string().min(3),
     profilePictureUrl: z.string().url(),
     email: z.string().email().nullable(),
-    role: z.enum(['user', 'admin', 'runner']),
-    eventType: z.enum(['user.created', 'user.authenticated'])
+    role: z.enum(['user', 'admin', 'runner'])
 });
 export type CreateWalletJob = z.infer<typeof CreateWalletJobSchema>;
 
