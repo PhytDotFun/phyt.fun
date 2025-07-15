@@ -7,7 +7,15 @@ export const env = createEnv({
         NODE_ENV: z
             .enum(['development', 'production', 'test'])
             .default('development'),
-        REDIS_URL: z.string().url()
+        LOG_LEVEL: z
+            .enum(['trace', 'debug', 'info', 'warn', 'error'])
+            .default('info'),
+        PRIVY_APP_ID: z.string().min(1),
+        PRIVY_SECRET_KEY: z.string().min(1),
+        DATABASE_URL: z.string().url(),
+        REDIS_URL: z.string().url(),
+        WORKER_CONCURRENCY: z.number().min(1).default(5),
+        WORKER_RATE_LIMIT: z.number().min(1).default(10)
     },
     runtimeEnv: process.env,
     emptyStringAsUndefined: true,

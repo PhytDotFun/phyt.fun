@@ -1,12 +1,12 @@
 {
-    "name": "@phyt/core",
-    "version": "0.0.0",
+    "name": "@phyt/workers",
     "private": true,
+    "version": "0.0.0",
     "type": "module",
     "exports": {
-        "./di": {
-            "types": "./dist/di.d.ts",
-            "default": "./dist/di.js"
+        ".": {
+            "types": "./dist/index.d.ts",
+            "import": "./dist/index.js"
         }
     },
     "scripts": {
@@ -14,26 +14,32 @@
         "check:types": "tsc --noEmit",
         "clean": "pnpm rimraf dist && pnpm rimraf node_modules && pnpm rimraf .turbo",
         "dev": "tsup --watch",
+        "start": "node dist/index.js",
         "format": "prettier --write . --ignore-unknown",
         "lint": "eslint",
         "lint:fix": "eslint --fix",
         "test": "vitest run"
     },
     "dependencies": {
+        "@phyt/core": "workspace:*",
+        "@phyt/data-access": "workspace:*",
+        "@phyt/m-queue": "workspace:*",
+        "@phyt/redis": "workspace:*",
+        "@phyt/trpc-adapters": "workspace:*",
         "@privy-io/server-auth": "catalog:",
-        "drizzle-orm": "catalog:",
-        "ioredis": "catalog:"
+        "@t3-oss/env-core": "catalog:",
+        "bullmq": "catalog:",
+        "pino": "catalog:",
+        "zod": "catalog:"
     },
     "devDependencies": {
-        "@phyt/tsconfig": "workspace:*",
         "@phyt/eslint": "workspace:*",
+        "@phyt/tsconfig": "workspace:*",
         "@types/node": "catalog:",
-        "@types/pg": "catalog:",
-        "drizzle-kit": "catalog:",
         "eslint": "catalog:",
+        "prettier": "catalog:",
         "tsup": "catalog:",
         "typescript": "catalog:",
-        "prettier": "catalog:",
         "vitest": "catalog:"
     }
 }

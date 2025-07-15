@@ -23,6 +23,8 @@
         "**/routeTree.gen.ts": true
     },
 
+    "typescript.preferences.exclude": ["**/node_modules"],
+
     "editor.defaultFormatter": "esbenp.prettier-vscode",
 
     "[typescript]": {
@@ -46,7 +48,8 @@
         "redis": "class",
         "trpc-adapters": "examples",
         "tsconfig": "typescript",
-        "webhooks": "connection"
+        "webhooks": "connection",
+        "workers": "robot"
     },
     "cSpell.words": ["bullmq", "phyt", "viem"]
 }

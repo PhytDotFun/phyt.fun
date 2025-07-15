@@ -1,24 +1,25 @@
 import { z } from 'zod';
 
-export const SyncPrivyUserJobSchema = z.object({
-    privyDID: z.string(),
-    username: z.string(),
-    profilePictureUrl: z.string().url(),
-    walletAddress: z.string(),
-    email: z.string().email().nullable(),
-    role: z.enum(['user', 'runner', 'admin']),
-    eventType: z.enum(['user.created', 'user.authenticated'])
-});
+export enum JobName {
+    CREATE_WALLET = 'create_wallet',
+    SYNC_PRIVY_USER = 'sync_privy_user'
+}
 
 export const CreateWalletJobSchema = z.object({
     privyDID: z.string(),
-    chainType: z.string()
+    username: z.string().min(3),
+    profilePictureUrl: z.string().url(),
+    email: z.string().email().nullable(),
+    role: z.enum(['user', 'admin', 'runner'])
 });
-
-export type SyncPrivyUserJob = z.infer<typeof SyncPrivyUserJobSchema>;
 export type CreateWalletJob = z.infer<typeof CreateWalletJobSchema>;
 
-export enum JobName {
-    SYNC_PRIVY_USER = 'sync-privy-user',
-    CREATE_WALLET = 'create_wallet'
-}
+export const SyncPrivyUserJobSchema = z.object({
+    privyDID: z.string(),
+    username: z.string().min(3),
+    profilePictureUrl: z.string().url(),
+    walletAddress: z.string().min(1),
+    email: z.string().email().nullable(),
+    role: z.enum(['user', 'admin', 'runner'])
+});
+export type SyncPrivyUserJob = z.infer<typeof SyncPrivyUserJobSchema>;

@@ -8,6 +8,12 @@ import { UserService } from './service';
 export const userRouter = router({
     me: protectedProcedure.query(async ({ ctx }) => {
         const svc = new UserService(ctx);
+        if (!ctx.userId) {
+            throw new TRPCError({
+                code: 'UNAUTHORIZED',
+                message: 'User ID not found in context'
+            });
+        }
         const user = await svc.me(ctx.userId);
         if (!user)
             throw new TRPCError({
