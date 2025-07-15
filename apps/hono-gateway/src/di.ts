@@ -1,9 +1,14 @@
-import type { Dependencies as Deps } from '@phyt/core/di';
+import type { Dependencies } from '@phyt/core/di';
 import { db } from '@phyt/data-access/db/client';
-// import Redis from 'ioredis';
+import { getRedisClient } from '@phyt/redis/client';
+import { PrivyClient } from '@privy-io/server-auth';
 
-export const dependencies: Deps = {
-    db
-    // redis: new Redis(env.REDIS_URL),
-    // log
+import { env } from './env';
+
+const privy = new PrivyClient(env.PRIVY_APP_ID, env.PRIVY_SECRET_KEY);
+
+export const dependencies: Dependencies = {
+    db,
+    redis: getRedisClient(),
+    privy
 };
