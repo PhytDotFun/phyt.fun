@@ -5,6 +5,7 @@ import superjson from 'superjson';
 
 export interface AppContext extends Record<string, unknown>, Deps {
     authClaims: AuthTokenClaims | null;
+    userId?: string;
 }
 
 const t = initTRPC.context<AppContext>().create({
@@ -20,4 +21,5 @@ const isAuthenticated = t.middleware(async ({ ctx, next }) => {
         ctx: { ...ctx, userId: ctx.authClaims.userId }
     });
 });
-export const protectedProcedure = t.procedure.use(isAuthenticated);
+export const protectedProcedure: ReturnType<typeof t.procedure.use> =
+    t.procedure.use(isAuthenticated);
