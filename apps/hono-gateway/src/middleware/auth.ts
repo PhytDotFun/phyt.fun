@@ -1,7 +1,7 @@
 import type { MiddlewareHandler } from 'hono';
 import type { AuthTokenClaims } from '@privy-io/server-auth';
 
-import privy from '@/privy';
+import { dependencies } from '@/di';
 import { env } from '@/env';
 
 export type HonoEnv = {
@@ -14,7 +14,7 @@ export const authMiddleware: MiddlewareHandler<HonoEnv> = async (c, next) => {
         try {
             c.set(
                 'authClaims',
-                await privy.verifyAuthToken(
+                await dependencies.privy.verifyAuthToken(
                     authToken,
                     env.PRIVY_VERIFICATION_KEY
                 )

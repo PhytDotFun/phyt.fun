@@ -19,9 +19,16 @@
         "lint:fix": "eslint --fix",
         "test": "vitest run"
     },
+    "dependencies": {
+        "zod": "catalog:",
+        "@phyt/redis": "workspace:*",
+        "@phyt/m-queue": "workspace:*",
+        "@privy-io/server-auth": "catalog:"
+    },
     "devDependencies": {
         "@phyt/eslint": "workspace:*",
         "@phyt/tsconfig": "workspace:*",
+        "@types/node": "catalog:",
         "eslint": "catalog:",
         "prettier": "catalog:",
         "tsup": "catalog:",
