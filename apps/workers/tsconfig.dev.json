@@ -1,0 +1,22 @@
+{
+    "extends": "./tsconfig.json",
+    "compilerOptions": {
+        "paths": {
+            "@/*": ["./src/*"],
+            "@phyt/core/di": ["../../packages/core/src/di.ts"],
+            "@phyt/data-access/db/client": [
+                "../../packages/data-access/src/db/client.ts"
+            ],
+            "@phyt/data-access/models/users": [
+                "../../packages/data-access/src/models/users.ts"
+            ],
+            "@phyt/trpc-adapters/users/service": [
+                "../../packages/trpc-adapters/src/users/service.ts"
+            ],
+            "@phyt/redis/client": ["../../packages/redis/src/client.ts"],
+            "@phyt/redis/bull": ["../../packages/redis/src/bull.ts"],
+            "@phyt/m-queue/queue": ["../../packages/m-queue/src/queue.ts"],
+            "@phyt/m-queue/jobs": ["../../packages/m-queue/src/jobs.ts"]
+        }
+    }
+}
