@@ -13,7 +13,7 @@ import { cn } from '@/lib/utils';
 
 interface WalletButtonProps {
     className?: string;
-    variant?: 'default' | 'reverse' | 'neutral' | 'noShadow' | 'ghost';
+    variant?: 'default' | 'reverse' | 'neutral' | 'noShadow';
 }
 
 export const WalletButton = ({ className, variant }: WalletButtonProps) => {
