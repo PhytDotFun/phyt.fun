@@ -19,6 +19,35 @@ import {
     type WebhookResponse
 } from './helper';
 
+// Runtime data structure interfaces (snake_case from Privy API)
+interface PrivyLinkedAccount {
+    first_verified_at: number;
+    latest_verified_at: number;
+    name?: string;
+    profile_picture_url?: string;
+    subject: string;
+    type:
+        | 'twitter_oauth'
+        | 'farcaster'
+        | 'email'
+        | 'wallet'
+        | 'google_oauth'
+        | 'discord_oauth'
+        | 'github_oauth'
+        | 'linkedin_oauth'
+        | 'spotify_oauth'
+        | 'tiktok_oauth'
+        | 'apple_oauth';
+    username?: string;
+    verified_at: number;
+}
+
+interface PrivyUserRuntime {
+    id: string;
+    linked_accounts?: PrivyLinkedAccount[];
+    [key: string]: unknown;
+}
+
 type PrivyWebhookEvent = {
     type: string;
     user: User;
@@ -140,15 +169,29 @@ export class PrivyWebhookHandler {
         user: User,
         eventType: 'user.created' | 'user.authenticated'
     ) {
+        // Access the actual snake_case field from runtime data
+        const runtimeUser = user as unknown as PrivyUserRuntime;
+        const linkedAccounts = runtimeUser.linked_accounts || [];
+
+        // Find Twitter account from linked_accounts
+        const twitterAccount = linkedAccounts.find(
+            (account) => account.type === 'twitter_oauth'
+        );
+
+        // Find Farcaster account from linked_accounts
+        const farcasterAccount = linkedAccounts.find(
+            (account) => account.type === 'farcaster'
+        );
+
         // Username must be <= 15 characters (varchar(15) in database)
         const username =
-            user.twitter?.username?.slice(0, 15) ??
-            user.farcaster?.username?.slice(0, 15) ??
+            twitterAccount?.username?.slice(0, 15) ??
+            farcasterAccount?.username?.slice(0, 15) ??
             `user_${user.id.slice(0, 8)}`;
 
         const profilePictureUrl =
-            user.twitter?.profilePictureUrl ??
-            user.farcaster?.pfp ??
+            twitterAccount?.profile_picture_url ??
+            farcasterAccount?.profile_picture_url ??
             'https://rsg5uys7zq.ufs.sh/f/AMgtrA9DGKkFTTUitgzI9xWiHtmo3wu4PcnYaCGO1jX0bRBQ';
 
         return {
