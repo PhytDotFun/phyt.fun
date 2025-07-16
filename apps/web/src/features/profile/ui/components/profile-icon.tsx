@@ -14,13 +14,13 @@ import { useAuth } from '@/hooks/use-auth';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 interface ProfileIconProps {
-    variant?: 'default' | 'reverse' | 'neutral' | 'noShadow' | 'ghost';
+    variant?: 'default' | 'reverse' | 'neutral' | 'noShadow';
 }
 
 export const ProfileIcon = ({ variant }: ProfileIconProps) => {
     const isMobile = useIsMobile();
 
-    const effectiveVariant = variant ?? (isMobile ? 'noShadow' : 'reverse');
+    const effectiveVariant = variant ?? (isMobile ? 'noShadow' : 'noShadow');
 
     const { signOut } = useAuth();
     const navigate = useNavigate();
