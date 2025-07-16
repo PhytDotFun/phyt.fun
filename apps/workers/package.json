@@ -38,6 +38,7 @@
         "@phyt/eslint": "workspace:*",
         "@phyt/tsconfig": "workspace:*",
         "@types/node": "catalog:",
+        "chalk": "catalog:",
         "eslint": "catalog:",
         "prettier": "catalog:",
         "tsup": "catalog:",
