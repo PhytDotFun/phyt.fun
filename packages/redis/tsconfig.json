@@ -5,10 +5,10 @@
         "outDir": "dist",
         "rootDir": "src",
         "baseUrl": ".",
-        "types": ["node"],
-        "paths": {
-            "@/*": ["./src/*"]
-        }
+        "types": ["node"]
+        // "paths": {
+        //     "@/*": ["./src/*"]
+        // }
     },
     "include": ["src/**/*"],
     "exclude": ["node_modules", "dist"]
