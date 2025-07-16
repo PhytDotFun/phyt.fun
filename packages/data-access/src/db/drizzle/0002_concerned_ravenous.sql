@@ -1,0 +1,1 @@
+ALTER TABLE "users" ALTER COLUMN "privy_did" SET DATA TYPE varchar(35);

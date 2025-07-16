@@ -8,6 +8,20 @@
       "when": 1752618587664,
       "tag": "0000_dashing_champions",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1752633834405,
+      "tag": "0001_orange_firelord",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1752634324250,
+      "tag": "0002_concerned_ravenous",
+      "breakpoints": true
     }
   ]
 }

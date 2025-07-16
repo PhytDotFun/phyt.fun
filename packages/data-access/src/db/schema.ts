@@ -15,9 +15,9 @@ export const users = pgTable(
     'users',
     {
         id: serial('id').primaryKey(),
-        privyDID: char('privy_did', { length: 35 }).unique().notNull(),
+        privyDID: varchar('privy_did', { length: 35 }).unique().notNull(),
         email: varchar('email', { length: 255 }).unique(),
-        username: char('username', { length: 15 }).notNull(),
+        username: varchar('username', { length: 15 }).notNull(),
         role: role('role').notNull().default('user'),
         stravaUsername: varchar('strava_username', { length: 255 }),
         stravaID: integer('strava_id'),
