@@ -30,7 +30,8 @@
     "dependencies": {
         "@t3-oss/env-core": "catalog:",
         "ioredis": "catalog:",
-        "zod": "catalog:"
+        "zod": "catalog:",
+        "dotenv": "catalog:"
     },
     "devDependencies": {
         "@phyt/core": "workspace:^",
