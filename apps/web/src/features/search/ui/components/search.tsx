@@ -118,7 +118,7 @@ export function Search({ inputClassName, listClassName }: SearchProps) {
 
 interface SearchButtonProps {
     className?: string;
-    variant?: 'default' | 'reverse' | 'neutral' | 'noShadow' | 'ghost';
+    variant?: 'default' | 'reverse' | 'neutral' | 'noShadow';
 }
 
 export const SearchButton = ({ className, variant }: SearchButtonProps) => {
