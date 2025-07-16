@@ -165,6 +165,9 @@ catalogs:
     bullmq:
       specifier: ^5.56.4
       version: 5.56.4
+    chalk:
+      specifier: 5.4.1
+      version: 5.4.1
     class-variance-authority:
       specifier: ^0.7.1
       version: 0.7.1
@@ -420,6 +423,9 @@ importers:
       '@types/node':
         specifier: 'catalog:'
         version: 24.0.13
+      chalk:
+        specifier: 'catalog:'
+        version: 5.4.1
       eslint:
         specifier: 'catalog:'
         version: 9.31.0(jiti@2.4.2)
@@ -707,6 +713,9 @@ importers:
       '@types/node':
         specifier: 'catalog:'
         version: 24.0.13
+      chalk:
+        specifier: 'catalog:'
+        version: 5.4.1
       eslint:
         specifier: 'catalog:'
         version: 9.31.0(jiti@2.4.2)
@@ -10341,7 +10350,7 @@ snapshots:
 
   '@types/minimatch@6.0.0':
     dependencies:
-      minimatch: 9.0.5
+      minimatch: 10.0.3
 
   '@types/ms@2.1.0': {}
 
@@ -10849,7 +10858,7 @@ snapshots:
       '@noble/hashes': 1.7.0
       '@walletconnect/safe-json': 1.0.2
       '@walletconnect/time': 1.0.2
-      uint8arrays: 3.1.0
+      uint8arrays: 3.1.1
 
   '@walletconnect/safe-json@1.0.2':
     dependencies:
@@ -13627,8 +13636,8 @@ snapshots:
       '@adraffy/ens-normalize': 1.11.0
       '@noble/curves': 1.9.2
       '@noble/hashes': 1.8.0
-      '@scure/bip32': 1.6.2
-      '@scure/bip39': 1.5.4
+      '@scure/bip32': 1.7.0
+      '@scure/bip39': 1.6.0
       abitype: 1.0.8(typescript@5.8.3)(zod@3.25.76)
       eventemitter3: 5.0.1
     optionalDependencies:
