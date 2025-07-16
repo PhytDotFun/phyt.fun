@@ -45,7 +45,7 @@ import {
 import { cache } from '@phyt/redis/cache';
 import {
     JobName,
-    // CreateWalletJobSchema,
+    CreateWalletJobSchema,
     SyncPrivyUserJobSchema
 } from '@phyt/m-queue/jobs';
 import { addJobWithContext, type QueueFactory } from '@phyt/m-queue/queue';
@@ -132,9 +132,8 @@ export class PrivyWebhookHandler {
 
         // Check for auth event
         if (
-            // event.type !== 'user.created' &&
-            event.type !== 'user.authenticated' &&
-            event.type !== 'user.wallet_created'
+            event.type !== 'user.created' &&
+            event.type !== 'user.authenticated'
         ) {
             console.log(`[Webhook] ℹ Ignoring ${event.type} event`);
             return webhookResponse.success();
@@ -225,8 +224,7 @@ export class PrivyWebhookHandler {
 
     private buildBasePayload(
         user: User,
-        eventType: /*'user.created' |*/
-        'user.authenticated' | 'user.wallet_created'
+        eventType: 'user.authenticated' | 'user.created'
     ) {
         // Access the actual snake_case field from runtime data
         const runtimeUser = user as unknown as PrivyUserRuntime;
@@ -267,24 +265,24 @@ export class PrivyWebhookHandler {
 
     private selectJob(
         data: ReturnType<PrivyWebhookHandler['buildBasePayload']>
-    ): // | {
-    //       jobName: JobName.CREATE_WALLET;
-    //       payload: z.infer<typeof CreateWalletJobSchema>;
-    //   }
-    // |
-    {
-        jobName: JobName.SYNC_PRIVY_USER;
-        payload: z.infer<typeof SyncPrivyUserJobSchema>;
-    } {
-        // if (data.walletAddress.length === 0) {
-        //     const {
-        //         walletAddress: _walletAddress,
-        //         eventType: _eventType,
-        //         ...createWalletData
-        //     } = data;
-        //     const payload = CreateWalletJobSchema.parse(createWalletData);
-        //     return { jobName: JobName.CREATE_WALLET, payload };
-        // }
+    ):
+        | {
+              jobName: JobName.CREATE_WALLET;
+              payload: z.infer<typeof CreateWalletJobSchema>;
+          }
+        | {
+              jobName: JobName.SYNC_PRIVY_USER;
+              payload: z.infer<typeof SyncPrivyUserJobSchema>;
+          } {
+        if (data.walletAddress.length === 0) {
+            const {
+                walletAddress: _walletAddress,
+                eventType: _eventType,
+                ...createWalletData
+            } = data;
+            const payload = CreateWalletJobSchema.parse(createWalletData);
+            return { jobName: JobName.CREATE_WALLET, payload };
+        }
 
         const { eventType: _eventType, ...syncUserData } = data;
         const payload = SyncPrivyUserJobSchema.parse(syncUserData);
