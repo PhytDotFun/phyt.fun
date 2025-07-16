@@ -1,15 +1,10 @@
-/**
- * Lightweight API router for Privy webhooks.
- * Business logic is handled by the webhooks package.
- */
 import { Hono } from 'hono';
-import { webhookResponse, PrivyWebhookHandler } from '@phyt/webhooks';
+import { PrivyWebhookHandler, webhookResponse } from '@phyt/webhooks';
 import { queueFactory } from '@phyt/m-queue/queue';
 
 import { dependencies } from '@/di';
 import { env } from '@/env';
 
-// Create webhook handler
 const privyWebhookHandler = new PrivyWebhookHandler({
     privyClient: dependencies.privy,
     secret: env.PRIVY_WEBHOOK_SECRET,
@@ -18,21 +13,38 @@ const privyWebhookHandler = new PrivyWebhookHandler({
 
 export const privyWebhook = new Hono().post('/', async (c) => {
     try {
-        // Get raw body
-        const rawBody = await c.req.text();
+        // Use arrayBuffer() to get the raw bytes, then convert to string
+        // This preserves the exact body that Privy signed
+        const arrayBuffer = await c.req.arrayBuffer();
+        const rawBody = new TextDecoder().decode(arrayBuffer);
 
-        // Extract headers
+        // Check for required headers
+        const svixId = c.req.header('svix-id');
+        const svixTimestamp = c.req.header('svix-timestamp');
+        const svixSignature = c.req.header('svix-signature');
+
+        if (!svixId || !svixTimestamp || !svixSignature) {
+            console.error('[Webhook] Missing required svix headers');
+            const errorResponse = webhookResponse.error(
+                'Missing required webhook headers',
+                400
+            );
+            return new Response(JSON.stringify(errorResponse.body), {
+                status: errorResponse.status,
+                headers: { 'Content-Type': 'application/json' }
+            });
+        }
+
         const headers = {
-            id: c.req.header('svix-id') || '',
-            timestamp: c.req.header('svix-timestamp') || '',
-            signature: c.req.header('svix-signature') || '',
+            id: svixId,
+            timestamp: svixTimestamp,
+            signature: svixSignature,
             clientIp:
                 c.req.header('x-forwarded-for')?.split(',')[0]?.trim() ||
                 c.req.header('x-real-ip') ||
                 'unknown'
         };
 
-        // Delegate to webhook handler
         const result = await privyWebhookHandler.handle(rawBody, headers);
 
         return new Response(JSON.stringify(result.body), {
@@ -40,7 +52,7 @@ export const privyWebhook = new Hono().post('/', async (c) => {
             headers: { 'Content-Type': 'application/json' }
         });
     } catch (error) {
-        console.error('Webhook processing error:', error);
+        console.error('[Webhook] Processing error:', error);
         const errorResponse = webhookResponse.error(
             'Internal server error',
             500
