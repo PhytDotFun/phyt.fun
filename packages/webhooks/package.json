@@ -20,10 +20,13 @@
         "test": "vitest run"
     },
     "dependencies": {
-        "zod": "catalog:",
-        "@phyt/redis": "workspace:*",
         "@phyt/m-queue": "workspace:*",
-        "@privy-io/server-auth": "catalog:"
+        "@phyt/redis": "workspace:*",
+        "@privy-io/server-auth": "catalog:",
+        "@t3-oss/env-core": "catalog:",
+        "dotenv": "catalog:",
+        "svix": "catalog:",
+        "zod": "catalog:"
     },
     "devDependencies": {
         "@phyt/eslint": "workspace:*",
