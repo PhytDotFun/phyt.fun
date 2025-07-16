@@ -11,14 +11,12 @@ const buttonVariants = cva(
         variants: {
             variant: {
                 default:
-                    'text-main-foreground bg-main border-2 border-border shadow-shadow hover:translate-x-boxShadowX hover:translate-y-boxShadowY hover:shadow-none focus-visible:translate-x-boxShadowX focus-visible:translate-y-boxShadowY focus-visible:shadow-none',
-                noShadow:
-                    'text-main-foreground bg-main border-2 border-border hover:bg-accent-3 focus-visible:bg-accent-3',
+                    'text-main-foreground bg-main border-2 border-border shadow-shadow hover:translate-x-boxShadowX hover:translate-y-boxShadowY hover:shadow-none',
+                noShadow: 'text-main-foreground bg-main border-2 border-border',
                 neutral:
-                    'bg-secondary-background text-foreground border-2 border-border shadow-shadow hover:translate-x-boxShadowX hover:translate-y-boxShadowY hover:shadow-none focus-visible:translate-x-boxShadowX focus-visible:translate-y-boxShadowY focus-visible:shadow-none',
+                    'bg-secondary-background text-foreground border-2 border-border shadow-shadow hover:translate-x-boxShadowX hover:translate-y-boxShadowY hover:shadow-none',
                 reverse:
-                    'text-main-foreground bg-main border-2 border-border hover:translate-x-reverseBoxShadowX hover:translate-y-reverseBoxShadowY hover:shadow-shadow focus-visible:translate-x-reverseBoxShadowX focus-visible:translate-y-reverseBoxShadowY focus-visible:shadow-shadow',
-                ghost: 'hover:bg-accent-3 focus-visible:bg-accent-3'
+                    'text-main-foreground bg-main border-2 border-border hover:translate-x-reverseBoxShadowX hover:translate-y-reverseBoxShadowY hover:shadow-shadow'
             },
             size: {
                 default: 'h-10 px-4 py-2',
