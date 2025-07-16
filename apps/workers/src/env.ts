@@ -1,6 +1,6 @@
 import { createEnv } from '@t3-oss/env-core';
 import { z } from 'zod';
-// import 'dotenv/config';
+import 'dotenv/config';
 
 export const env = createEnv({
     server: {
@@ -14,8 +14,8 @@ export const env = createEnv({
         PRIVY_SECRET_KEY: z.string().min(1),
         DATABASE_URL: z.string().url(),
         REDIS_URL: z.string().url(),
-        WORKER_CONCURRENCY: z.number().min(1).default(5),
-        WORKER_RATE_LIMIT: z.number().min(1).default(10)
+        WORKER_CONCURRENCY: z.coerce.number().min(1).default(5),
+        WORKER_RATE_LIMIT: z.coerce.number().min(1).default(10)
     },
     runtimeEnv: process.env,
     emptyStringAsUndefined: true,

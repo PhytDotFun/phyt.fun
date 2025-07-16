@@ -5,9 +5,6 @@ import { JobName, CreateWalletJob, SyncPrivyUserJob } from '@phyt/m-queue/jobs';
 import { createWallet } from './jobs/createWallet';
 import { syncPrivyUser } from './jobs/syncPrivyUser';
 
-/**
- * Auth queue worker.
- */
 const worker = new Worker(
     'auth',
     async (job: Job) => {
