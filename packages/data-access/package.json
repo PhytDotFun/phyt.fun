@@ -27,7 +27,6 @@
         "db:migrate": "pnpm drizzle-kit migrate --config=./src/db/drizzle.config.js",
         "db:push": "pnpm drizzle-kit push --config=./src/db/drizzle.config.js",
         "db:studio": "pnpm drizzle-kit studio --config=./src/db/drizzle.config.js",
-        "dev": "tsup --watch",
         "format": "prettier --write . --ignore-unknown",
         "lint": "eslint",
         "lint:fix": "eslint --fix",
