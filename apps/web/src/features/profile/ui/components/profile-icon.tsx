@@ -35,11 +35,13 @@ export const ProfileIcon = ({ variant }: ProfileIconProps) => {
             <DropdownMenuTrigger asChild>
                 <Button
                     variant={effectiveVariant}
-                    className="h-9 w-9 rounded-full p-0"
+                    className="h-9 w-9 rounded-full p-0 overflow-hidden transition-none transform-none scale-100 focus:scale-100 active:scale-100 hover:scale-100 focus:outline-none focus-visible:ring-0 focus:ring-0 ring-0 focus:transform-none active:transform-none data-[state=open]:transform-none"
                 >
-                    <Avatar className="size-9">
+                    <Avatar className="h-full w-full">
                         <AvatarImage src="" />
-                        <AvatarFallback>P</AvatarFallback>
+                        <AvatarFallback className="rounded-full">
+                            P
+                        </AvatarFallback>
                     </Avatar>
                 </Button>
             </DropdownMenuTrigger>
