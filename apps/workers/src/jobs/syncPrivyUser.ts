@@ -13,6 +13,10 @@ export async function syncPrivyUser(
 ): Promise<{ ok: true }> {
     const data = SyncPrivyUserJobSchema.parse(job.data);
 
+    console.log(
+        `[Worker] Processing sync_privy_user for user ${data.privyDID}`
+    );
+
     const record = {
         privyDID: data.privyDID,
         username: data.username,
@@ -22,8 +26,19 @@ export async function syncPrivyUser(
         role: data.role
     };
 
-    const newUser = InsertUserSchema.parse(record);
-    await new UserService(dependencies).syncPrivyData(newUser);
+    try {
+        const newUser = InsertUserSchema.parse(record);
+        await new UserService(dependencies).syncPrivyData(newUser);
 
-    return { ok: true };
+        console.log(
+            `[Worker] ✓ Synced user ${data.username} (${data.privyDID})`
+        );
+        return { ok: true };
+    } catch (error) {
+        console.error(
+            `[Worker] ✗ Failed to sync user ${data.privyDID}:`,
+            error instanceof Error ? error.message : 'Unknown error'
+        );
+        throw error;
+    }
 }
