@@ -282,6 +282,9 @@ catalogs:
     superjson:
       specifier: ^2.2.2
       version: 2.2.2
+    svix:
+      specifier: ^1.69.0
+      version: 1.69.0
     syncpack:
       specifier: 14.0.0-alpha.18
       version: 14.0.0-alpha.18
@@ -685,6 +688,9 @@ importers:
       bullmq:
         specifier: 'catalog:'
         version: 5.56.4
+      dotenv:
+        specifier: 'catalog:'
+        version: 17.2.0
       pino:
         specifier: 'catalog:'
         version: 9.7.0
@@ -905,6 +911,9 @@ importers:
       '@t3-oss/env-core':
         specifier: 'catalog:'
         version: 0.13.8(typescript@5.8.3)(zod@3.25.76)
+      dotenv:
+        specifier: 'catalog:'
+        version: 17.2.0
       ioredis:
         specifier: 'catalog:'
         version: 5.6.1
@@ -1002,6 +1011,15 @@ importers:
       '@privy-io/server-auth':
         specifier: 'catalog:'
         version: 1.28.3(bufferutil@4.0.9)(encoding@0.1.13)(typescript@5.8.3)(utf-8-validate@5.0.10)(viem@2.31.7(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.76))
+      '@t3-oss/env-core':
+        specifier: 'catalog:'
+        version: 0.13.8(typescript@5.8.3)(zod@3.25.76)
+      dotenv:
+        specifier: 'catalog:'
+        version: 17.2.0
+      svix:
+        specifier: 'catalog:'
+        version: 1.69.0(encoding@0.1.13)
       zod:
         specifier: 'catalog:'
         version: 3.25.76
