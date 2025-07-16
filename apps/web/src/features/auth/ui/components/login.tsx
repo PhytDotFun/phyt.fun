@@ -1,4 +1,3 @@
-import { Dumbbell } from 'lucide-react';
 import { useNavigate } from '@tanstack/react-router';
 import { useLoginWithOAuth } from '@privy-io/react-auth';
 import { useEffect, useState } from 'react';
@@ -8,6 +7,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { useAuth } from '@/hooks/use-auth';
 import { Logo } from '@/components/logo';
 import { GridBackground } from '@/components/grid-background';
+import { XIcon } from '@/assets/icons/X';
 
 export const Login = () => {
     const isMobile = useIsMobile();
@@ -60,7 +60,7 @@ export const Login = () => {
                         className="bg-black text-white font-bold text-lg hover:cursor-pointer"
                         variant={isMobile ? 'noShadow' : 'reverse'}
                     >
-                        <Dumbbell className="mr-3" size={isMobile ? 20 : 28} />
+                        <XIcon className="mr-2" size={isMobile ? 20 : 40} />
                         {loading ? 'CONNECTING...' : 'LOGIN TO PHYT'}
                     </Button>
                 </div>
