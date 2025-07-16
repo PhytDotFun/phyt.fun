@@ -11,8 +11,13 @@ import {
     SyncPrivyUserJobSchema
 } from '@phyt/m-queue/jobs';
 import { addJobWithContext, type QueueFactory } from '@phyt/m-queue/queue';
+import { Webhook } from 'svix';
 
-import { IdempotencyManager, webhookResponse, WebhookResponse } from './index';
+import {
+    IdempotencyManager,
+    webhookResponse,
+    type WebhookResponse
+} from './helper';
 
 type PrivyWebhookEvent = {
     type: string;
@@ -46,38 +51,59 @@ export class PrivyWebhookHandler {
             jobId?: string | number;
         }>
     > {
-        /* -- Verify ----------------------------------------------------------- */
+        console.log(
+            `[Webhook] Processing ${hdrs.id} from ${hdrs.clientIp || 'unknown'}`
+        );
+
         let event: PrivyWebhookEvent;
         try {
-            event = (await this.cfg.privyClient.verifyWebhook(
-                rawBody,
-                {
-                    id: hdrs.id,
-                    timestamp: hdrs.timestamp,
-                    signature: hdrs.signature
-                },
-                this.cfg.secret
-            )) as PrivyWebhookEvent;
-        } catch {
-            return webhookResponse.error('Invalid webhook', 401);
+            // Use svix directly instead of Privy's wrapper
+            const wh = new Webhook(this.cfg.secret);
+
+            // Svix expects headers in the format: svix-id, svix-timestamp, svix-signature
+            const svixHeaders = {
+                'svix-id': hdrs.id,
+                'svix-timestamp': hdrs.timestamp,
+                'svix-signature': hdrs.signature
+            };
+
+            // Verify with svix directly
+            event = wh.verify(rawBody, svixHeaders) as PrivyWebhookEvent;
+
+            console.log(`[Webhook] ✓ Verified ${event.type} event`);
+        } catch (error) {
+            console.error(
+                `[Webhook] ✗ Verification failed for ${hdrs.id}:`,
+                error instanceof Error ? error.message : 'Unknown error'
+            );
+            if (error instanceof Error && error.stack) {
+                console.error(`[Webhook] Stack trace:`, error.stack);
+            }
+            return webhookResponse.error('Invalid webhook signature', 401);
         }
 
         if (
             event.type !== 'user.created' &&
             event.type !== 'user.authenticated'
         ) {
+            console.log(`[Webhook] ℹ Ignoring ${event.type} event`);
             return webhookResponse.success();
         }
 
-        /* -- Idempotency ------------------------------------------------------ */
         const { isDuplicate, key } = await this.idemp.checkAndMark(
             hdrs.id,
             event.type
         );
-        if (isDuplicate) return webhookResponse.duplicate();
+        if (isDuplicate) {
+            console.log(`[Webhook] ⚠ Duplicate ${event.type} event ignored`);
+            return webhookResponse.duplicate();
+        }
 
-        /* -- Decide which job ------------------------------------------------- */
         const basePayload = this.buildBasePayload(event.user, event.type);
+
+        console.log(
+            `[Webhook] → Processing ${event.type} for user ${event.user.id}`
+        );
 
         try {
             const { jobName, payload } = this.selectJob(basePayload);
@@ -93,8 +119,15 @@ export class PrivyWebhookHandler {
                 }
             );
 
+            console.log(
+                `[Webhook] ✓ Queued ${jobName} job (${String(jobId)}) for user ${event.user.id}`
+            );
             return webhookResponse.accepted(jobId);
         } catch (err) {
+            console.error(
+                `[Webhook] ✗ Failed to queue job for user ${event.user.id}:`,
+                err instanceof Error ? err.message : 'Unknown error'
+            );
             await this.idemp.delete(key).catch(() => {});
             if (err instanceof z.ZodError) {
                 return webhookResponse.error('Invalid webhook data', 400);
@@ -103,13 +136,11 @@ export class PrivyWebhookHandler {
         }
     }
 
-    /* ---------------------------------------------------------------------- */
-    /*  Helpers                                                               */
-    /* ---------------------------------------------------------------------- */
     private buildBasePayload(
         user: User,
         eventType: 'user.created' | 'user.authenticated'
     ) {
+        // Username must be <= 15 characters (varchar(15) in database)
         const username =
             user.twitter?.username?.slice(0, 15) ??
             user.farcaster?.username?.slice(0, 15) ??
@@ -143,7 +174,6 @@ export class PrivyWebhookHandler {
               payload: z.infer<typeof SyncPrivyUserJobSchema>;
           } {
         if (data.walletAddress.length === 0) {
-            // Remove walletAddress and eventType for CREATE_WALLET job
             const {
                 walletAddress: _walletAddress,
                 eventType: _eventType,
@@ -153,11 +183,8 @@ export class PrivyWebhookHandler {
             return { jobName: JobName.CREATE_WALLET, payload };
         }
 
-        // Remove eventType for SYNC_PRIVY_USER job
         const { eventType: _eventType, ...syncUserData } = data;
         const payload = SyncPrivyUserJobSchema.parse(syncUserData);
         return { jobName: JobName.SYNC_PRIVY_USER, payload };
     }
 }
-
-export { PrivyWebhookHandler as default };
