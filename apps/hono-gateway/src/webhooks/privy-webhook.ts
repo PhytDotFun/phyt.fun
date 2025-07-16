@@ -2,8 +2,8 @@ import { Hono } from 'hono';
 import { PrivyWebhookHandler, webhookResponse } from '@phyt/webhooks';
 import { queueFactory } from '@phyt/m-queue/queue';
 
-import { dependencies } from '@/di';
-import { env } from '@/env';
+import { dependencies } from '../di';
+import { env } from '../env';
 
 const privyWebhookHandler = new PrivyWebhookHandler({
     privyClient: dependencies.privy,

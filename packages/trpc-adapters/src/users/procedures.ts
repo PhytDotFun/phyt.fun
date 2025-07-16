@@ -1,7 +1,7 @@
 import { TRPCError } from '@trpc/server';
 import { UserProfileSchema } from '@phyt/data-access/models/users';
 
-import { router, protectedProcedure } from '@/trpc';
+import { router, protectedProcedure } from '../trpc';
 
 import { UserService } from './service';
 

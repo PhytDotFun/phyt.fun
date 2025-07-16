@@ -147,7 +147,7 @@ export class PrivyWebhookHandler {
                     removeOnFail: { age: 86_400 }
                 }
             );
-
+            console.log(event.user);
             console.log(
                 `[Webhook] ✓ Queued ${jobName} job (${String(jobId)}) for user ${event.user.id}`
             );

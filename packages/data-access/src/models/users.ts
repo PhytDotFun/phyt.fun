@@ -2,7 +2,7 @@ import { InferSelectModel, InferInsertModel } from 'drizzle-orm';
 import { z } from 'zod';
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
 
-import { users } from '@/db/schema';
+import { users } from '../db/schema';
 
 export type User = InferSelectModel<typeof users>;
 export type NewUser = InferInsertModel<typeof users>;

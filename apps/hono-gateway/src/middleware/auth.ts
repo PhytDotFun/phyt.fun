@@ -1,8 +1,8 @@
 import type { MiddlewareHandler } from 'hono';
 import type { AuthTokenClaims } from '@privy-io/server-auth';
 
-import { dependencies } from '@/di';
-import { env } from '@/env';
+import { env } from '../env';
+import { dependencies } from '../di';
 
 export type HonoEnv = {
     Variables: { authClaims: AuthTokenClaims };

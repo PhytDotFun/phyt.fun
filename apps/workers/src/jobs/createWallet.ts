@@ -7,7 +7,7 @@ import {
 } from '@phyt/m-queue/jobs';
 import { addJobWithContext, authQueue } from '@phyt/m-queue/queue';
 
-import { dependencies } from '@/di';
+import { dependencies } from '../di';
 
 /**
  * Processor for create_wallet.

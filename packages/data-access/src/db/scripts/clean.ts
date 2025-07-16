@@ -1,6 +1,6 @@
 import { sql } from 'drizzle-orm';
 
-import { db, pgClient } from '@/db/client';
+import { db, pgClient } from '../client';
 
 const KEEP_TABLES = ['_drizzle_migrations'];
 
