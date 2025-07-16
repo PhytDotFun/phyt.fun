@@ -10,9 +10,11 @@ import { env } from './env';
 
 export const app = new Hono<HonoEnv>();
 
-app.use('*', authMiddleware);
+app.get('/api/health', (c) => c.json({ status: 'ok' }));
 
 app.route(env.WEBHOOK_ENDPOINT, privyWebhook);
+
+app.use('*', authMiddleware);
 
 app.use(
     '/trpc/*',
