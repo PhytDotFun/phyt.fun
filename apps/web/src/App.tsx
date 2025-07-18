@@ -1,10 +1,12 @@
 import { RouterProvider } from '@tanstack/react-router';
+import { useEffect } from 'react';
 
 import PrivyAppProvider from './providers/privy-provider';
 import QueryClientAppProvider from './providers/query-provider';
 import { router } from './router';
 import { useAuth } from './hooks/use-auth';
 import { Loader } from './components/loading';
+import { trpc, queryClient } from './lib/trpc';
 
 function Loading() {
     return (
@@ -19,6 +21,19 @@ function Loading() {
 
 function InnerApp() {
     const authentication = useAuth();
+
+    // Prefetch user data when authenticated
+    useEffect(() => {
+        if (authentication.authenticated && authentication.ready) {
+            // Prefetch the current user data so it's ready for components that need it
+            queryClient
+                .prefetchQuery(trpc.users.getCurrentUser.queryOptions())
+                .catch((error: unknown) => {
+                    // Silently handle prefetch errors - the actual components will handle errors properly
+                    console.warn('Failed to prefetch current user:', error);
+                });
+        }
+    }, [authentication.authenticated, authentication.ready]);
 
     if (!authentication.ready) {
         return <Loading />;
