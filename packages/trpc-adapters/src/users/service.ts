@@ -13,7 +13,11 @@ export class UserService {
         return this.repo.upsertByPrivyId(data);
     }
 
-    me(privyDID: string): Promise<User | null> {
+    getUserByPrivyDID(privyDID: string): Promise<User | null> {
         return this.repo.findByPrivyDID(privyDID);
+    }
+
+    getUserByWalletAddress(walletAddress: string): Promise<User | null> {
+        return this.repo.findByWalletAddress(walletAddress);
     }
 }
