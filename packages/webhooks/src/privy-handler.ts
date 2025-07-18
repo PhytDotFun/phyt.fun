@@ -249,9 +249,6 @@ export class PrivyWebhookHandler {
 
         const walletAddress = wallet?.address;
 
-        console.log('WALLET ADDRESS FROM BUILDBASEPAYLOAD');
-        console.log(walletAddress);
-
         return {
             privyDID: user.id,
             username,
