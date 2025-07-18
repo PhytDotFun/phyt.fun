@@ -12,16 +12,19 @@ export const authMiddleware: MiddlewareHandler<HonoEnv> = async (c, next) => {
     const authToken = c.req.header('Authorization')?.replace('Bearer ', '');
     if (authToken) {
         try {
-            c.set(
-                'authClaims',
-                await dependencies.privy.verifyAuthToken(
-                    authToken,
-                    env.PRIVY_VERIFICATION_KEY
-                )
+            console.log('[auth] Verifying token with Privy');
+            const claims = await dependencies.privy.verifyAuthToken(
+                authToken,
+                env.PRIVY_VERIFICATION_KEY
             );
-        } catch {
+            c.set('authClaims', claims);
+            console.log('[auth] Auth successful for user:', claims.userId);
+        } catch (error) {
+            console.log('[auth] Auth failed:', error);
             /* ignore unauthenticated */
         }
+    } else {
+        console.log('[auth] No auth token provided');
     }
     await next();
 };
