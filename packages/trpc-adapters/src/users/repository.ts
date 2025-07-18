@@ -25,6 +25,16 @@ export class UserRepository {
         );
     }
 
+    findByWalletAddress(walletAddress: string) {
+        return this.first(
+            this.db
+                .select()
+                .from(users)
+                .where(eq(users.walletAddress, walletAddress))
+                .limit(1)
+        );
+    }
+
     async insert(data: unknown) {
         const validated: NewUser = InsertUserSchema.parse(data);
         const [row] = await this.db.insert(users).values(validated).returning();
