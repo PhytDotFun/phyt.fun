@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 import PrivyAppProvider from './providers/privy-provider';
 import QueryClientAppProvider from './providers/query-provider';
 import { router } from './router';
-import { useAuth } from './hooks/use-auth';
+import { useAuth } from './hooks/auth/use-auth';
 import { Loader } from './components/loading';
 import { trpc, queryClient } from './lib/trpc';
 
