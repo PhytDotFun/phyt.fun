@@ -90,6 +90,7 @@ export const posts = pgTable('posts', {
     runId: bigint('run_id', { mode: 'number' })
         .references(() => runs.id)
         .notNull(),
+    content: varchar('content', { length: 2000 }),
     isProfile: boolean('is_profile').default(false).notNull(),
     createdAt: timestamp('created_at').notNull().defaultNow(),
     updatedAt: timestamp('updated_at').notNull().defaultNow(),
@@ -103,6 +104,7 @@ export const comments = pgTable('comments', {
     userId: bigint('user_id', { mode: 'number' })
         .references(() => users.id)
         .notNull(),
+    content: varchar('content', { length: 2000 }),
     isProfile: boolean('is_profile').default(false).notNull(),
     contentType: contentType('content_type').notNull(),
     contentId: bigint('content_id', { mode: 'number' }).notNull(),
