@@ -19,6 +19,7 @@
         "db:studio": "pnpm --filter @phyt/data-access db:studio",
         "db:up": "docker compose up -d",
         "db:clean": "pnpm run --filter=@phyt/data-access db:clean",
+        "db:seed": "pnpm run --filter=@phyt/data-access db:seed",
         "redis:start": "docker compose start redis",
         "redis:stop": "docker compose stop redis",
         "dev": "turbo run dev",

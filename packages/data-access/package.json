@@ -22,6 +22,7 @@
         "check:types": "tsc --noEmit",
         "clean": "pnpm rimraf dist && pnpm rimraf node_modules && pnpm rimraf .turbo",
         "db:clean": "tsx ./src/db/scripts/clean.ts",
+        "db:seed": "tsx ./src/db/scripts/seed.ts",
         "db:check": "pnpm drizzle-kit check --config=./src/db/drizzle.config.js",
         "db:generate": "pnpm drizzle-kit generate --config=./src/db/drizzle.config.js",
         "db:migrate": "pnpm drizzle-kit migrate --config=./src/db/drizzle.config.js",
