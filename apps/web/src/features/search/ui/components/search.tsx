@@ -92,7 +92,7 @@ export function Search({ inputClassName, listClassName }: SearchProps) {
     return (
         <CommandDialog open={open} onOpenChange={setOpen}>
             <CommandInput
-                placeholder="Search runners..."
+                placeholder="Search runners, tokens..."
                 className={inputClassName}
             />
             <CommandList className={listClassName}>
@@ -191,7 +191,7 @@ export const Searchbar = () => {
             <div className="relative group hover:translate-x-reverseBoxShadowX hover:translate-y-reverseBoxShadowY hover:shadow-shadow focus-within:translate-x-reverseBoxShadowX focus-within:translate-y-reverseBoxShadowY focus-within:shadow-shadow transition-all">
                 <SearchIcon className="size-4 absolute left-3 top-1/2 -translate-y-1/2 text-foreground group-hover:text-main z-10" />
                 <Input
-                    placeholder="Search runners..."
+                    placeholder="Search runners, tokens..."
                     className="pl-10 h-10 focus-visible:ring-0 focus-visible:ring-offset-0 focus:outline-none placeholder-text-foreground transition-colors hover:bg-foreground focus-visible:foreground placeholder:text-black hover:placeholder:text-main hover:!translate-x-0 hover:!translate-y-0 hover:!shadow-none focus-visible:!translate-x-0 focus-visible:!translate-y-0 focus-visible:!shadow-none"
                     onClick={() => {
                         setOpen(true);
