@@ -18,17 +18,16 @@
         "lint:fix": "eslint --fix",
         "test": "vitest run"
     },
-    "dependencies": {
-        "@privy-io/server-auth": "catalog:",
-        "drizzle-orm": "catalog:",
-        "ioredis": "catalog:"
-    },
+    "dependencies": {},
     "devDependencies": {
         "@phyt/tsconfig": "workspace:*",
         "@phyt/eslint": "workspace:*",
         "@types/node": "catalog:",
         "@types/pg": "catalog:",
         "drizzle-kit": "catalog:",
+        "@privy-io/server-auth": "catalog:",
+        "drizzle-orm": "catalog:",
+        "ioredis": "catalog:",
         "eslint": "catalog:",
         "tsup": "catalog:",
         "typescript": "catalog:",
