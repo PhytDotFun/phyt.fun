@@ -2,15 +2,23 @@ import { eq } from 'drizzle-orm';
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { users } from '@phyt/data-access/db/schema';
 import {
-    User,
-    NewUser,
+    SelectUser,
+    InsertUser,
     InsertUserSchema
 } from '@phyt/data-access/models/users';
 
-export class UserRepository {
-    constructor(private db: NodePgDatabase) {}
+interface UserRepositoryDeps {
+    db: NodePgDatabase;
+}
 
-    private async first(q: Promise<User[]>): Promise<User | null> {
+export class UserRepository {
+    private db: NodePgDatabase;
+
+    constructor(deps: UserRepositoryDeps) {
+        this.db = deps.db;
+    }
+
+    private async first(q: Promise<SelectUser[]>): Promise<SelectUser | null> {
         const r = (await q)[0];
         return r ?? null;
     }
@@ -36,14 +44,14 @@ export class UserRepository {
     }
 
     async insert(data: unknown) {
-        const validated: NewUser = InsertUserSchema.parse(data);
+        const validated: InsertUser = InsertUserSchema.parse(data);
         const [row] = await this.db.insert(users).values(validated).returning();
-        return row as User;
+        return row as SelectUser;
     }
 
     async upsertByPrivyId(data: unknown) {
         // Turns out upsert is a word for an insert/update combo
-        const validated: NewUser = InsertUserSchema.parse(data);
+        const validated: InsertUser = InsertUserSchema.parse(data);
         const existing = await this.findByPrivyDID(validated.privyDID);
 
         if (existing) {
@@ -53,7 +61,7 @@ export class UserRepository {
                 .set(validated)
                 .where(eq(users.privyDID, validated.privyDID))
                 .returning();
-            return updated as User;
+            return updated as SelectUser;
         } else {
             // Insert new user
             return await this.insert(validated);
