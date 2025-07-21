@@ -1,19 +1,28 @@
-import type { Dependencies as Deps } from '@phyt/core/di';
-import type { NewUser, User } from '@phyt/data-access/models/users';
-import { UserSchema } from '@phyt/data-access/models/users';
+import type {
+    InsertUser,
+    SelectUser,
+    User
+} from '@phyt/data-access/models/users';
+import type { Redis } from 'ioredis';
+import { SelectUserSchema, UserSchema } from '@phyt/data-access/models/users';
 
-import { UserRepository } from './repository';
+import type { UserRepository } from './repository';
+
+interface UserServiceDeps {
+    userRepository: UserRepository;
+    redis: Redis;
+}
 
 export class UserService {
     private repo: UserRepository;
-    private deps: Deps;
+    private redis: Redis;
 
     // Cache TTL in seconds (15 minutes)
     private readonly USER_CACHE_TTL = 15 * 60;
 
-    constructor(deps: Deps) {
-        this.deps = deps;
-        this.repo = new UserRepository(deps.db);
+    constructor(deps: UserServiceDeps) {
+        this.repo = deps.userRepository;
+        this.redis = deps.redis;
     }
 
     // Generate cache keys for different lookup types
@@ -21,7 +30,7 @@ export class UserService {
         return `user:${type}:${identifier}`;
     }
 
-    async syncPrivyData(data: NewUser): Promise<User> {
+    async syncPrivyData(data: InsertUser): Promise<SelectUser> {
         const user = await this.repo.upsertByPrivyId(data);
 
         // Invalidate all cache entries for this user after sync
@@ -59,12 +68,13 @@ export class UserService {
 
         // Try to get from cache first
         try {
-            const cached = await this.deps.redis.get(cacheKey);
+            const cached = await this.redis.get(cacheKey);
 
             if (cached) {
                 const parsedJson: unknown = JSON.parse(cached);
                 const transformedData = this.transformCachedUser(parsedJson);
-                const parsed = UserSchema.nullable().safeParse(transformedData);
+                const parsed =
+                    SelectUserSchema.nullable().safeParse(transformedData);
 
                 if (parsed.success) {
                     return parsed.data;
@@ -73,7 +83,7 @@ export class UserService {
                         '[cache] Schema validation failed:',
                         parsed.error.issues
                     );
-                    await this.deps.redis.del(cacheKey);
+                    await this.redis.del(cacheKey);
                 }
             }
         } catch (error) {
@@ -84,15 +94,16 @@ export class UserService {
                 error
             );
         }
+        try {
+            // Cache miss - fetch from database
+            const user = await this.repo.findByPrivyDID(privyDID);
 
-        // Cache miss - fetch from database
-        const user = await this.repo.findByPrivyDID(privyDID);
+            if (!user) throw new Error('Could not find user in Cache or DB');
 
-        // Cache the result
-        if (user) {
+            // Cache the result
             try {
                 const serialized = JSON.stringify(user);
-                await this.deps.redis.set(
+                await this.redis.set(
                     cacheKey,
                     serialized,
                     'EX',
@@ -106,58 +117,81 @@ export class UserService {
                     error
                 );
             }
-        }
 
-        return user;
+            const returnedUser = {
+                username: user.username,
+                role: user.role,
+                profilePictureUrl: user.profilePictureUrl,
+                walletAddress: user.walletAddress
+            };
+
+            UserSchema.parse(returnedUser);
+
+            return returnedUser;
+        } catch (error) {
+            console.error('Error fetching user by privyDID', error);
+            return null;
+        }
     }
 
     async getUserByWalletAddress(walletAddress: string): Promise<User | null> {
         const cacheKey = this.getCacheKey('wallet', walletAddress);
 
-        // Try to get from cache first
-        const cached = await this.deps.redis.get(cacheKey);
-        if (cached) {
-            const parsedJson: unknown = JSON.parse(cached);
-            const transformedData = this.transformCachedUser(parsedJson);
-            const parsed = UserSchema.nullable().safeParse(transformedData);
-            if (parsed.success) {
-                return parsed.data;
+        try {
+            // Try to get from cache first
+            const cached = await this.redis.get(cacheKey);
+            if (cached) {
+                const parsedJson: unknown = JSON.parse(cached);
+                const transformedData = this.transformCachedUser(parsedJson);
+                const parsed =
+                    SelectUserSchema.nullable().safeParse(transformedData);
+                if (parsed.success) {
+                    return parsed.data;
+                }
+                // Invalid cached data - delete it
+                await this.redis.del(cacheKey);
             }
-            // Invalid cached data - delete it
-            await this.deps.redis.del(cacheKey);
-        }
 
-        // Cache miss - fetch from database
-        const user = await this.repo.findByWalletAddress(walletAddress);
+            // Cache miss - fetch from database
+            const user = await this.repo.findByWalletAddress(walletAddress);
 
-        // Cache the result
-        if (user) {
-            await this.deps.redis.set(
+            if (!user) throw new Error();
+
+            // Cache the result
+            await this.redis.set(
                 cacheKey,
                 JSON.stringify(user),
                 'EX',
                 this.USER_CACHE_TTL
             );
-        }
 
-        return user;
+            const returnedUser = {
+                username: user.username,
+                role: user.role,
+                profilePictureUrl: user.profilePictureUrl,
+                walletAddress: user.walletAddress
+            };
+
+            UserSchema.parse(returnedUser);
+
+            return returnedUser;
+        } catch (error) {
+            console.error('Error fetching user by wallet address', error);
+            return null;
+        }
     }
 
     // Helper method to invalidate all cache entries for a user
-    private async invalidateUserCache(user: User): Promise<void> {
+    private async invalidateUserCache(user: SelectUser): Promise<void> {
         const promises: Promise<number>[] = [];
 
         // Clear cache by Privy DID
-        promises.push(
-            this.deps.redis.del(this.getCacheKey('privy', user.privyDID))
-        );
+        promises.push(this.redis.del(this.getCacheKey('privy', user.privyDID)));
 
         // Clear cache by wallet address if present
         if (user.walletAddress) {
             promises.push(
-                this.deps.redis.del(
-                    this.getCacheKey('wallet', user.walletAddress)
-                )
+                this.redis.del(this.getCacheKey('wallet', user.walletAddress))
             );
         }
 
@@ -168,7 +202,7 @@ export class UserService {
     // Public method to manually clear user cache (useful for admin operations)
     async clearUserCache(privyDID: string): Promise<void> {
         // For simplicity, just clear the main cache entry
-        const deletedCount = await this.deps.redis.del(
+        const deletedCount = await this.redis.del(
             this.getCacheKey('privy', privyDID)
         );
         console.log(
