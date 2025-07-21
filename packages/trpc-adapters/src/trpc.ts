@@ -1,9 +1,10 @@
 import { initTRPC, TRPCError } from '@trpc/server';
-import type { Dependencies as Deps } from '@phyt/core/di';
 import type { AuthTokenClaims } from '@privy-io/server-auth';
 import superjson from 'superjson';
 
-export interface AppContext extends Record<string, unknown>, Deps {
+import type { AppDependencies } from './di';
+
+export interface AppContext extends Record<string, unknown>, AppDependencies {
     authClaims: AuthTokenClaims | null;
     userId?: string;
 }
