@@ -1,10 +1,9 @@
 import { Job } from 'bullmq';
 import { SyncPrivyUserJob, SyncPrivyUserJobSchema } from '@phyt/m-queue/jobs';
 import { InsertUserSchema } from '@phyt/data-access/models/users';
-import { UserService } from '@phyt/trpc-adapters/users/service';
 import { cache } from '@phyt/redis/cache';
 
-import { dependencies } from '../di';
+import { appDeps } from '../di';
 
 /**
  * Processor for sync_privy_user.
@@ -52,7 +51,7 @@ export async function syncPrivyUser(
 
     try {
         const newUser = InsertUserSchema.parse(record);
-        await new UserService(dependencies).syncPrivyData(newUser);
+        await appDeps.userService.syncPrivyData(newUser);
 
         // Cache the successfully processed data (24 hour TTL)
         await cache.set(cacheKey, data, 86400);

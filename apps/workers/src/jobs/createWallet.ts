@@ -7,7 +7,7 @@ import {
 } from '@phyt/m-queue/jobs';
 import { addJobWithContext, authQueue } from '@phyt/m-queue/queue';
 
-import { dependencies } from '../di';
+import { appDeps } from '../di';
 
 /**
  * Processor for create_wallet.
@@ -25,7 +25,7 @@ export async function createWallet(
 
     try {
         // Create Privy wallet
-        const wallet = await dependencies.privy.walletApi.createWallet({
+        const wallet = await appDeps.privy.walletApi.createWallet({
             chainType: 'ethereum',
             owner: { userId: data.privyDID }
         });
