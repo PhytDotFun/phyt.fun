@@ -2,11 +2,11 @@ import { Hono } from 'hono';
 import { PrivyWebhookHandler, webhookResponse } from '@phyt/webhooks';
 import { queueFactory } from '@phyt/m-queue/queue';
 
-import { dependencies } from '../di';
+import { appDeps } from '../di';
 import { env } from '../env';
 
 const privyWebhookHandler = new PrivyWebhookHandler({
-    privyClient: dependencies.privy,
+    privyClient: appDeps.privy,
     secret: env.PRIVY_WEBHOOK_SECRET,
     queueFactory
 });
