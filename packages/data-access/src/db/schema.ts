@@ -17,6 +17,8 @@ export const role = pgEnum('role', ['user', 'runner', 'admin']);
 
 export const contentType = pgEnum('content_type', ['post', 'comment']);
 
+export const visibility = pgEnum('visibility', ['public', 'hidden']);
+
 export const users = pgTable(
     'users',
     {
@@ -91,6 +93,7 @@ export const posts = pgTable('posts', {
         .references(() => runs.id)
         .notNull(),
     content: varchar('content', { length: 2000 }),
+    visibility: visibility('visibility').default('public').notNull(),
     isProfile: boolean('is_profile').default(false).notNull(),
     createdAt: timestamp('created_at').notNull().defaultNow(),
     updatedAt: timestamp('updated_at').notNull().defaultNow(),
@@ -105,7 +108,7 @@ export const comments = pgTable('comments', {
         .references(() => users.id)
         .notNull(),
     content: varchar('content', { length: 2000 }),
-    isProfile: boolean('is_profile').default(false).notNull(),
+    visibility: visibility('visibility').default('public').notNull(),
     contentType: contentType('content_type').notNull(),
     contentId: bigint('content_id', { mode: 'number' }).notNull(),
     createdAt: timestamp('created_at').notNull().defaultNow(),
