@@ -1,110 +1,122 @@
-// import { eq, and, isNull, desc, sql } from 'drizzle-orm';
-// import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
-// import { users, posts, runs } from '@phyt/data-access/db/schema';
-// import {
-//     SelectPostSchema,
-//     InsertPostSchema,
-//     SelectPost,
-//     InsertPost,
-//     UpdatePostSchema
-// } from '@phyt/data-access/models/posts';
+import { eq, and, isNull } from 'drizzle-orm';
+import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
+import { posts } from '@phyt/data-access/db/schema';
+import type { SelectPost, InsertPost } from '@phyt/data-access/models/posts';
+import {
+    SelectPostSchema,
+    InsertPostSchema,
+    UpdatePostSchema
+} from '@phyt/data-access/models/posts';
 
-// import type { UserRepository } from '@/users/repository';
+import type { UserRepository } from '../users/repository';
 
-// export class PostRepository {
-//     constructor(
-//         private db: NodePgDatabase,
-//         private userRepository: UserRepository
-//     ) {}
+interface PostRepositoryDeps {
+    db: NodePgDatabase;
+    userRepository: UserRepository;
+}
 
-//     private async first<T>(q: Promise<T[]>): Promise<T | null> {
-//         const r = (await q)[0];
-//         SelectPostSchema.parse(r);
-//         return r ?? null;
-//     }
+export class PostRepository {
+    private db: NodePgDatabase;
+    private userRepository: UserRepository;
 
-//     async findById(id: number): Promise<SelectPost | null> {
-//         return this.first(
-//             this.db
-//                 .select()
-//                 .from(posts)
-//                 .where(and(eq(posts.id, id), isNull(posts.deletedAt)))
-//                 .limit(1)
-//         );
-//     }
+    constructor(deps: PostRepositoryDeps) {
+        this.db = deps.db;
+        this.userRepository = deps.userRepository;
+    }
 
-//     async findByWalletAddress(
-//         walletAddress: string
-//     ): Promise<SelectPost | null> {
-//         const user = await userRepository.findByWalletAddress(walletAddress);
-//     }
+    private async first(q: Promise<SelectPost[]>): Promise<SelectPost | null> {
+        const r = (await q)[0];
+        SelectPostSchema.parse(r);
+        return r ?? null;
+    }
 
-//     async create(data: unknown): Promise<SelectPost> {
-//         const validated: InsertPost = InsertPostSchema.parse(data);
-//         const [row] = await this.db.insert(posts).values(validated).returning();
-//         return row as SelectPost;
-//     }
+    async findByPostId(id: number) {
+        return this.first(
+            this.db
+                .select()
+                .from(posts)
+                .where(and(eq(posts.id, id), isNull(posts.deletedAt)))
+                .limit(1)
+        );
+    }
 
-//     async update(data: unknown): Promise<SelectPost | null> {
-//         const validated = UpdatePostSchema.parse(data);
+    async findByWalletAddress(walletAddress: string) {
+        const user =
+            await this.userRepository.findByWalletAddress(walletAddress);
 
-//         if (!validated.id) {
-//             throw new Error('Post ID is required for update');
-//         }
+        if (!user) throw new Error('User not found');
 
-//         const [updated] = await this.db
-//             .update(posts)
-//             .set({ ...validated, updatedAt: new Date() })
-//             .where(and(eq(posts.id, validated.id), isNull(posts.deletedAt)))
-//             .returning();
+        return this.db
+            .select()
+            .from(posts)
+            .where(
+                and(
+                    eq(posts.userId, user.id),
+                    isNull(posts.deletedAt),
+                    eq(posts.visibility, 'public')
+                )
+            );
+    }
 
-//         return updated || null;
-//     }
+    async insert(data: unknown) {
+        const validated: InsertPost = InsertPostSchema.parse(data);
+        const [row] = await this.db.insert(posts).values(validated).returning();
+        return row as SelectPost;
+    }
 
-//     async delete(id: number): Promise<boolean> {
-//         const [deleted] = await this.db
-//             .update(posts)
-//             .set({ deletedAt: new Date() })
-//             .where(and(eq(posts.id, id), isNull(posts.deletedAt)))
-//             .returning();
+    async update(data: unknown) {
+        const validated = UpdatePostSchema.parse(data);
 
-//         return Boolean(deleted);
-//     }
+        if (!validated.id) {
+            throw new Error('Post ID is required for update');
+        }
 
-//     // async countByUserWalletAddress(walletAddress: string): Promise<number> {
-//     //     const userResult = await this.db
-//     //         .select({ id: users.id })
-//     //         .from(users)
-//     //         .where(eq(users.walletAddress, walletAddress))
-//     //         .limit(1);
+        const [updated] = await this.db
+            .update(posts)
+            .set({ ...validated, updatedAt: new Date() })
+            .where(and(eq(posts.id, validated.id), isNull(posts.deletedAt)))
+            .returning();
 
-//     //     const user = userResult[0];
-//     //     if (!user) return 0;
+        return updated || null;
+    }
 
-//     //     const result = await this.db
-//     //         .select({ count: sql<number>`count(*)` })
-//     //         .from(posts)
-//     //         .where(
-//     //             and(
-//     //                 eq(posts.userId, user.id),
-//     //                 isNull(posts.deletedAt),
-//     //                 eq(posts.visibility, 'public')
-//     //             )
-//     //         );
+    async delete(id: number) {
+        const [deleted] = await this.db
+            .update(posts)
+            .set({ deletedAt: new Date() })
+            .where(and(eq(posts.id, id), isNull(posts.deletedAt)))
+            .returning();
 
-//     //     return result[0]?.count || 0;
-//     // }
+        return deleted || false;
+    }
 
-//     // async exists(publicId: string): Promise<boolean> {
-//     //     const internalId = decodePostId(publicId);
-//     //     if (!internalId) return false;
+    // async countByUserWalletAddress(walletAddress: string): Promise<number> {
+    //     const user =
+    //         await this.userRepository.findByWalletAddress(walletAddress);
 
-//     //     const result = await this.db
-//     //         .select({ id: posts.id })
-//     //         .from(posts)
-//     //         .where(and(eq(posts.id, internalId), isNull(posts.deletedAt)))
-//     //         .limit(1);
+    //     if (!user) return 0;
 
-//     //     return Boolean(result[0]);
-//     // }
-// }
+    //     const result = await this.db
+    //         .select({ count: sql<number>`count(*)` })
+    //         .from(posts)
+    //         .where(
+    //             and(
+    //                 eq(posts.userId, user.id),
+    //                 isNull(posts.deletedAt),
+    //                 eq(posts.visibility, 'public')
+    //             )
+    //         );
+
+    //     return result[0]?.count || 0;
+    // }
+
+    async exists(id: number) {
+        const result = await this.db
+            .select({ id: posts.id })
+            .from(posts)
+            .where(and(eq(posts.id, id), isNull(posts.deletedAt)))
+            .limit(1);
+
+        return Boolean(result[0]);
+    }
+}
