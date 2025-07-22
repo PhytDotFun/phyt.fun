@@ -15,6 +15,10 @@
         "./users/procedures": {
             "types": "./dist/users/procedures.d.ts",
             "import": "./dist/users/procedures.js"
+        },
+        "./encoder": {
+            "types": "./dist/encoder.d.ts",
+            "import": "./dist/encoder.js"
         }
     },
     "scripts": {
