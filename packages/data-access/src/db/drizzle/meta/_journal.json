@@ -8,6 +8,20 @@
       "when": 1752893623931,
       "tag": "0000_chief_blur",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1753147435509,
+      "tag": "0001_magenta_nico_minoru",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1753147478907,
+      "tag": "0002_outgoing_penance",
+      "breakpoints": true
     }
   ]
 }
