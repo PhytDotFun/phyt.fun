@@ -19,8 +19,12 @@ export function getQueue(name: string): Queue {
     return q;
 }
 
+// Queue configurations
 const AUTH_QUEUE_NAME = 'auth';
+const POSTS_QUEUE_NAME = 'posts';
+
 export const authQueue: Queue = createQueue(AUTH_QUEUE_NAME);
+export const postsQueue: Queue = createQueue(POSTS_QUEUE_NAME);
 
 export const queueFactory: QueueFactory = () => authQueue;
 
