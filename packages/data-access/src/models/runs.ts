@@ -1,31 +1,41 @@
 import { InferSelectModel, InferInsertModel } from 'drizzle-orm';
 import { z } from 'zod';
-import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
+import {
+    createInsertSchema,
+    createSelectSchema,
+    createUpdateSchema
+} from 'drizzle-zod';
 
 import { runs } from '../db/schema';
 
-// Repos Schemas
+export const InsertRunSchema = createInsertSchema(runs);
+export const SelectRunSchema = createSelectSchema(runs);
+export const UpdateRunSchema = createUpdateSchema(runs);
 
 export type SelectRun = InferSelectModel<typeof runs>;
 export type InsertRun = InferInsertModel<typeof runs>;
 
-export const InsertRunSchema = createInsertSchema(runs);
-export const SelectRunSchema = createSelectSchema(runs);
-
-// Service Schemas
-
-export const CreateRunSchema = z.object({
-    runId: z.string().min(1),
-    content: z.string().max(2000).optional(),
-    visibility: z.enum(['public', 'hidden']).default('public')
+export const MarkRunPostedSchema = z.object({
+    id: z.string(),
+    isPosted: z.boolean(),
+    toPost: z.literal(false)
 });
 
-export const UpdateRunSchema = z
-    .object({
-        id: z.string().min(1),
-        content: z.string().max(2000).optional(),
-        visibility: z.enum(['public', 'hidden']).optional()
-    })
-    .refine(
-        (data) => data.content !== undefined || data.visibility !== undefined
-    );
+export type MarkRun = z.infer<typeof MarkRunPostedSchema>;
+
+export const RunPostSchema = z.object({
+    id: z.string(),
+    startTime: z.date(),
+    endTime: z.date(),
+    duration: z.number(),
+    distance: z.number(),
+    averageSpeed: z.number().nullable(),
+    averagePace: z.number().nullable(),
+    averageHeartRate: z.number(),
+    maxHeartRate: z.number(),
+    isIndoor: z.boolean().nullable(),
+    toPost: z.boolean(),
+    isPosted: z.boolean()
+});
+
+export type Run = z.infer<typeof RunPostSchema>;
