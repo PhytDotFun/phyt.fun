@@ -99,17 +99,45 @@ setTimeout(() => {
     );
 }, 100);
 
-// Setup CRON job for checking runs to post (every 10 minutes)
+// Setup CRON job for checking runs to post
 const setupCronJobs = async () => {
     const cronQueue = new Queue('posts', { connection: redisBull });
 
-    // Add recurring job to check for runs that need posting every 10 minutes
+    // Clean up any existing repeatable jobs for this job name to prevent duplicates
+    const jobSchedulers = await cronQueue.getJobSchedulers();
+    const existingJobs = jobSchedulers.filter(
+        (job) => job.name === (JobName.CHECK_RUNS_TO_POST as string)
+    );
+
+    for (const job of existingJobs) {
+        await cronQueue.removeJobScheduler(job.key);
+        console.log(`[POSTS] Removed existing repeatable job: ${job.key}`);
+    }
+
+    // Helper function to describe CRON pattern in human-readable format
+    const describeCronPattern = (pattern: string): string => {
+        // Common patterns
+        const patterns: Record<string, string> = {
+            '*/1 * * * *': 'every minute',
+            '*/2 * * * *': 'every 2 minutes',
+            '*/5 * * * *': 'every 5 minutes',
+            '*/10 * * * *': 'every 10 minutes',
+            '*/15 * * * *': 'every 15 minutes',
+            '*/30 * * * *': 'every 30 minutes',
+            '0 * * * *': 'every hour',
+            '0 */2 * * *': 'every 2 hours'
+        };
+
+        return patterns[pattern] || `with pattern: ${pattern}`;
+    };
+
+    // Add recurring job to check for runs that need posting
     await cronQueue.add(
         JobName.CHECK_RUNS_TO_POST as string,
         {}, // Empty payload for CRON job
         {
             repeat: {
-                pattern: '*/10 * * * *' // Every 10 minutes
+                pattern: env.CRON_SCHEDULE
             },
             jobId: 'check-runs-to-post-cron', // Unique ID to prevent duplicates
             removeOnComplete: { age: 3600, count: 10 },
@@ -118,7 +146,7 @@ const setupCronJobs = async () => {
     );
 
     console.log(
-        '📅 CRON job scheduled: check-runs-to-post every 10 minutes (posts queue)'
+        `[POSTS] CRON job scheduled: check-runs-to-post ${describeCronPattern(env.CRON_SCHEDULE)} (posts queue)`
     );
 };
 
