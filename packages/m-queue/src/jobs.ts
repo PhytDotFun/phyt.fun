@@ -30,7 +30,16 @@ export type SyncPrivyUserJob = z.infer<typeof SyncPrivyUserJobSchema>;
 export const CheckRunsToPostJobSchema = z.object({});
 export type CheckRunsToPostJob = z.infer<typeof CheckRunsToPostJobSchema>;
 
+// Queue-safe version of RunPostSchema that handles date strings from BullMQ serialization
+const QueueRunPostSchema = RunPostSchema.extend({
+    startTime: z.union([
+        z.date(),
+        z.string().transform((str) => new Date(str))
+    ]),
+    endTime: z.union([z.date(), z.string().transform((str) => new Date(str))])
+});
+
 export const PostRunsJobSchema = z.object({
-    run: RunPostSchema
+    run: QueueRunPostSchema
 });
 export type PostRunsJob = z.infer<typeof PostRunsJobSchema>;
