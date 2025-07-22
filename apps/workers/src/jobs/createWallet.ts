@@ -21,7 +21,7 @@ export async function createWallet(
 ): Promise<{ ok: true }> {
     const data = CreateWalletJobSchema.parse(job.data);
 
-    console.log(`[Worker] Creating wallet for user ${data.privyDID}`);
+    console.log(`[AUTH] Creating wallet for user ${data.privyDID}`);
 
     try {
         // Create Privy wallet
@@ -31,7 +31,7 @@ export async function createWallet(
         });
 
         console.log(
-            `[Worker] ✓ Created wallet ${wallet.address} for user ${data.privyDID}`
+            `[AUTH] Created wallet ${wallet.address} for user ${data.privyDID}`
         );
 
         // Enqueue sync_privy_user
@@ -55,11 +55,11 @@ export async function createWallet(
             }
         );
 
-        console.log(`[Worker] → Queued sync job for user ${data.privyDID}`);
+        console.log(`[AUTH] Queued sync job for user ${data.privyDID}`);
         return { ok: true };
     } catch (error) {
         console.error(
-            `[Worker] ✗ Failed to create wallet for user ${data.privyDID}:`,
+            `❌ [AUTH] Failed to create wallet for user ${data.privyDID}:`,
             error instanceof Error ? error.message : 'Unknown error'
         );
         throw error;
