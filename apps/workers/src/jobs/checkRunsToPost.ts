@@ -39,8 +39,8 @@ export async function checkRunsToPost(
                 // Run needs to be posted - queue it
                 const runPayload = {
                     id: encodeRunId(run.id),
-                    startTime: run.startTime,
-                    endTime: run.endTime,
+                    startTime: run.startTime.toISOString(),
+                    endTime: run.endTime.toISOString(),
                     duration: run.duration,
                     distance: run.distance,
                     averageSpeed: run.averageSpeed,
