@@ -3,8 +3,8 @@ import type {
     SelectUser,
     User
 } from '@phyt/data-access/models/users';
-import type { Redis } from 'ioredis';
 import { SelectUserSchema, UserSchema } from '@phyt/data-access/models/users';
+import type { Redis } from 'ioredis';
 
 import type { UserRepository } from './repository';
 
@@ -17,8 +17,7 @@ export class UserService {
     private repo: UserRepository;
     private redis: Redis;
 
-    // Cache TTL in seconds (15 minutes)
-    private readonly USER_CACHE_TTL = 15 * 60;
+    private readonly USER_CACHE_TTL = 15 * 60; // 15 minutes
 
     constructor(deps: UserServiceDeps) {
         this.repo = deps.userRepository;
@@ -26,17 +25,8 @@ export class UserService {
     }
 
     // Generate cache keys for different lookup types
-    private getCacheKey(type: 'privy' | 'wallet', identifier: string): string {
+    private getCacheKey(type: string, identifier: string): string {
         return `user:${type}:${identifier}`;
-    }
-
-    async syncPrivyData(data: InsertUser): Promise<SelectUser> {
-        const user = await this.repo.upsertByPrivyId(data);
-
-        // Invalidate all cache entries for this user after sync
-        await this.invalidateUserCache(user);
-
-        return user;
     }
 
     // Helper function to transform cached data (convert date strings back to Date objects)
@@ -63,10 +53,18 @@ export class UserService {
         return transformed;
     }
 
-    async getUserByPrivyDID(privyDID: string): Promise<User | null> {
-        const cacheKey = this.getCacheKey('privy', privyDID);
+    async syncPrivyData(data: InsertUser): Promise<SelectUser> {
+        const user = await this.repo.upsertByPrivyId(data);
 
-        // Try to get from cache first
+        // Invalidate all cache entries for this user after sync
+        await this.invalidateUserCache(user);
+
+        return user;
+    }
+
+    async getUserById(id: number): Promise<User | null> {
+        const cacheKey = this.getCacheKey('id', id.toString());
+
         try {
             const cached = await this.redis.get(cacheKey);
 
@@ -95,7 +93,78 @@ export class UserService {
             );
         }
         try {
-            // Cache miss - fetch from database
+            const user = await this.repo.findByUserId(id);
+
+            if (!user) throw new Error('Could not find user in Cache or DB');
+
+            // Cache the result
+            try {
+                const serialized = JSON.stringify(user);
+                await this.redis.set(
+                    cacheKey,
+                    serialized,
+                    'EX',
+                    this.USER_CACHE_TTL
+                );
+            } catch (error) {
+                console.error(
+                    '[cache] Redis SET error for key',
+                    cacheKey,
+                    ':',
+                    error
+                );
+            }
+
+            const returnedUser = {
+                username: user.username,
+                role: user.role,
+                profilePictureUrl: user.profilePictureUrl,
+                walletAddress: user.walletAddress
+            };
+
+            UserSchema.parse(returnedUser);
+
+            return returnedUser;
+        } catch (error) {
+            console.error('Error fetching user by id', error);
+            return null;
+        }
+    }
+
+    async getUserByPrivyDID(privyDID: string): Promise<User | null> {
+        const cacheKey = this.getCacheKey('privy', privyDID);
+
+        // Try cache first
+        try {
+            const cached = await this.redis.get(cacheKey);
+
+            if (cached) {
+                const parsedJson: unknown = JSON.parse(cached);
+                const transformedData = this.transformCachedUser(parsedJson);
+                const parsed =
+                    SelectUserSchema.nullable().safeParse(transformedData);
+
+                if (parsed.success) {
+                    return parsed.data;
+                } else {
+                    console.log(
+                        '[cache] Schema validation failed:',
+                        parsed.error.issues
+                    );
+                    await this.redis.del(cacheKey);
+                }
+            }
+        } catch (error) {
+            console.error(
+                '[cache] Redis GET error for key',
+                cacheKey,
+                ':',
+                error
+            );
+        }
+
+        // Cache miss - fetch from database
+        try {
             const user = await this.repo.findByPrivyDID(privyDID);
 
             if (!user) throw new Error('Could not find user in Cache or DB');
