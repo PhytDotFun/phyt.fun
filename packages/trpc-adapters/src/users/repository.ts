@@ -1,9 +1,9 @@
 import { eq } from 'drizzle-orm';
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { users } from '@phyt/data-access/db/schema';
+import type { SelectUser, InsertUser } from '@phyt/data-access/models/users';
 import {
-    SelectUser,
-    InsertUser,
+    SelectUserSchema,
     InsertUserSchema
 } from '@phyt/data-access/models/users';
 
@@ -20,7 +20,14 @@ export class UserRepository {
 
     private async first(q: Promise<SelectUser[]>): Promise<SelectUser | null> {
         const r = (await q)[0];
+        SelectUserSchema.parse(r);
         return r ?? null;
+    }
+
+    findByUserId(id: number) {
+        return this.first(
+            this.db.select().from(users).where(eq(users.id, id)).limit(1)
+        );
     }
 
     findByPrivyDID(privyDID: string) {
