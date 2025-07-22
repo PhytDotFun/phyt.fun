@@ -68,6 +68,8 @@ export const runs = pgTable(
         externalId: varchar('external_id', { length: 255 }).notNull(), // healthKidUUid, etc.
         platform: varchar('platform', { length: 50 }).notNull(), // 'apple_health', 'garmin', 'strava', 'fitbit', etc.
         sourceApp: varchar('source_app', { length: 100 }), // "Apple Watch", "Garmin Forerunner 945", "Strava", etc.
+        toPost: boolean('to_post').default(true).notNull(),
+        isPosted: boolean('is_posted').default(false).notNull(),
         createdAt: timestamp('created_at').notNull().defaultNow(),
         updatedAt: timestamp('updated_at').notNull().defaultNow(),
         deletedAt: timestamp('deleted_at')
