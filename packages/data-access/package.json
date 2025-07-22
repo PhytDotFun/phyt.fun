@@ -19,6 +19,10 @@
         "./models/posts": {
             "types": "./dist/models/posts.d.ts",
             "import": "./dist/models/posts.js"
+        },
+        "./models/runs": {
+            "types": "./dist/models/runs.d.ts",
+            "import": "./dist/models/runs.js"
         }
     },
     "scripts": {

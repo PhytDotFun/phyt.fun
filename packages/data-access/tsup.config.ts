@@ -5,7 +5,8 @@ export default defineConfig({
         'src/db/client.ts',
         'src/db/schema.ts',
         'src/models/users.ts',
-        'src/models/posts.ts'
+        'src/models/posts.ts',
+        'src/models/runs.ts'
     ],
     format: ['esm'],
     dts: true,
