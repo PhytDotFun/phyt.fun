@@ -26,7 +26,6 @@ export async function checkRunsToPost(
     console.log('[POSTS] Checking for runs that need to be posted...');
 
     try {
-        // Find all runs that have to_post = true and are not deleted
         const runsToCheck = await appDeps.runService.checkRunsToPost();
 
         let queuedCount = 0;

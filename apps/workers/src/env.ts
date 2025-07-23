@@ -16,7 +16,7 @@ export const env = createEnv({
         REDIS_URL: z.string().url(),
         WORKER_CONCURRENCY: z.coerce.number().min(1).default(5),
         WORKER_RATE_LIMIT: z.coerce.number().min(1).default(10),
-        CRON_SCHEDULE: z.string().default('*/5 * * * *') // Default: every 5 minutes
+        CRON_SCHEDULE: z.string().default('*/5 * * * *')
     },
     runtimeEnv: process.env,
     emptyStringAsUndefined: true,

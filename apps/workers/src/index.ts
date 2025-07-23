@@ -99,7 +99,6 @@ setTimeout(() => {
     );
 }, 100);
 
-// Setup CRON job for checking runs to post
 const setupCronJobs = async () => {
     const cronQueue = new Queue('posts', { connection: redisBull });
 
@@ -114,7 +113,6 @@ const setupCronJobs = async () => {
         console.log(`[POSTS] Removed existing repeatable job: ${job.key}`);
     }
 
-    // Helper function to describe CRON pattern in human-readable format
     const describeCronPattern = (pattern: string): string => {
         // Common patterns
         const patterns: Record<string, string> = {
@@ -139,7 +137,7 @@ const setupCronJobs = async () => {
             repeat: {
                 pattern: env.CRON_SCHEDULE
             },
-            jobId: 'check-runs-to-post-cron', // Unique ID to prevent duplicates
+            jobId: 'check-runs-to-post-cron',
             removeOnComplete: { age: 3600, count: 10 },
             removeOnFail: { age: 86400, count: 5 }
         }
@@ -150,9 +148,7 @@ const setupCronJobs = async () => {
     );
 };
 
-// Initialize CRON jobs
 setupCronJobs().catch(console.error);
-// Setup event handlers for both workers
 authWorker.on('completed', (job) => {
     console.log(
         `✅ [AUTH] ${job.name} (${job.id?.toString() ?? 'unknown'}) done`
