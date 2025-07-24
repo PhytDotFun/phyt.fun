@@ -1,6 +1,5 @@
 import { Job } from 'bullmq';
 import { PostRunsJob, PostRunsJobSchema } from '@phyt/m-queue/jobs';
-import { decodeRunId } from '@phyt/trpc-adapters/encoder';
 
 import { appDeps } from '../di';
 
@@ -15,7 +14,7 @@ export async function postRuns(job: Job<PostRunsJob>): Promise<{ ok: true }> {
     console.log(`[POSTS] Processing POST_RUNS for run ${data.run.id}`);
 
     try {
-        const runId = decodeRunId(data.run.id);
+        const runId = appDeps.idEncoder.decode('runs', data.run.id);
         if (!runId) {
             throw new Error(`Invalid run ID: ${data.run.id}`);
         }
