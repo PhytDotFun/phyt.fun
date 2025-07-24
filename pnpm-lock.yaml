@@ -419,10 +419,10 @@ importers:
         version: link:../../packages/core
       '@phyt/eslint':
         specifier: workspace:*
-        version: link:../../packages/eslint
+        version: link:../../tooling/eslint
       '@phyt/tsconfig':
         specifier: workspace:*
-        version: link:../../packages/tsconfig
+        version: link:../../tooling/tsconfig
       '@types/node':
         specifier: 'catalog:'
         version: 24.0.13
@@ -621,13 +621,13 @@ importers:
         version: link:../../packages/core
       '@phyt/eslint':
         specifier: workspace:*
-        version: link:../../packages/eslint
+        version: link:../../tooling/eslint
       '@phyt/hono-gateway':
         specifier: workspace:*
         version: link:../hono-gateway
       '@phyt/tsconfig':
         specifier: workspace:*
-        version: link:../../packages/tsconfig
+        version: link:../../tooling/tsconfig
       '@testing-library/dom':
         specifier: 'catalog:'
         version: 10.4.0
@@ -709,10 +709,10 @@ importers:
     devDependencies:
       '@phyt/eslint':
         specifier: workspace:*
-        version: link:../../packages/eslint
+        version: link:../../tooling/eslint
       '@phyt/tsconfig':
         specifier: workspace:*
-        version: link:../../packages/tsconfig
+        version: link:../../tooling/tsconfig
       '@types/node':
         specifier: 'catalog:'
         version: 24.0.13
@@ -739,10 +739,10 @@ importers:
     devDependencies:
       '@phyt/eslint':
         specifier: workspace:*
-        version: link:../eslint
+        version: link:../../tooling/eslint
       '@phyt/tsconfig':
         specifier: workspace:*
-        version: link:../tsconfig
+        version: link:../../tooling/tsconfig
       '@privy-io/server-auth':
         specifier: 'catalog:'
         version: 1.28.3(bufferutil@4.0.9)(encoding@0.1.13)(typescript@5.8.3)(utf-8-validate@5.0.10)(viem@2.31.7(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.76))
@@ -803,10 +803,10 @@ importers:
         version: link:../core
       '@phyt/eslint':
         specifier: workspace:*
-        version: link:../eslint
+        version: link:../../tooling/eslint
       '@phyt/tsconfig':
         specifier: workspace:*
-        version: link:../tsconfig
+        version: link:../../tooling/tsconfig
       '@types/node':
         specifier: 'catalog:'
         version: 24.0.13
@@ -832,54 +832,6 @@ importers:
         specifier: 'catalog:'
         version: 3.2.4(@types/debug@4.1.12)(@types/node@24.0.13)(jiti@2.4.2)(jsdom@26.1.0(bufferutil@4.0.9)(utf-8-validate@5.0.10))(lightningcss@1.30.1)(tsx@4.20.3)(yaml@2.8.0)
 
-  packages/eslint:
-    devDependencies:
-      '@eslint/js':
-        specifier: 'catalog:'
-        version: 9.31.0
-      '@next/eslint-plugin-next':
-        specifier: 'catalog:'
-        version: 15.3.5
-      '@tanstack/eslint-config':
-        specifier: 'catalog:'
-        version: 0.1.0(@typescript-eslint/utils@8.36.0(eslint@9.31.0(jiti@2.4.2))(typescript@5.8.3))(eslint-import-resolver-node@0.3.9)(eslint@9.31.0(jiti@2.4.2))(typescript@5.8.3)
-      eslint:
-        specifier: 'catalog:'
-        version: 9.31.0(jiti@2.4.2)
-      eslint-config-prettier:
-        specifier: 'catalog:'
-        version: 10.1.5(eslint@9.31.0(jiti@2.4.2))
-      eslint-import-resolver-typescript:
-        specifier: 'catalog:'
-        version: 4.4.4(eslint-plugin-import-x@4.16.1(@typescript-eslint/utils@8.36.0(eslint@9.31.0(jiti@2.4.2))(typescript@5.8.3))(eslint-import-resolver-node@0.3.9)(eslint@9.31.0(jiti@2.4.2)))(eslint-plugin-import@2.32.0)(eslint@9.31.0(jiti@2.4.2))
-      eslint-plugin-import:
-        specifier: 'catalog:'
-        version: 2.32.0(@typescript-eslint/parser@8.36.0(eslint@9.31.0(jiti@2.4.2))(typescript@5.8.3))(eslint-import-resolver-typescript@4.4.4)(eslint@9.31.0(jiti@2.4.2))
-      eslint-plugin-only-warn:
-        specifier: 'catalog:'
-        version: 1.1.0
-      eslint-plugin-react:
-        specifier: 'catalog:'
-        version: 7.37.5(eslint@9.31.0(jiti@2.4.2))
-      eslint-plugin-react-compiler:
-        specifier: 'catalog:'
-        version: 19.1.0-rc.2(eslint@9.31.0(jiti@2.4.2))
-      eslint-plugin-react-hooks:
-        specifier: 'catalog:'
-        version: 6.0.0-rc.1(eslint@9.31.0(jiti@2.4.2))
-      eslint-plugin-turbo:
-        specifier: 'catalog:'
-        version: 2.5.4(eslint@9.31.0(jiti@2.4.2))(turbo@2.5.5)
-      globals:
-        specifier: 'catalog:'
-        version: 16.3.0
-      typescript:
-        specifier: 'catalog:'
-        version: 5.8.3
-      typescript-eslint:
-        specifier: 'catalog:'
-        version: 8.36.0(eslint@9.31.0(jiti@2.4.2))(typescript@5.8.3)
-
   packages/m-queue:
     dependencies:
       '@phyt/data-access':
@@ -897,10 +849,10 @@ importers:
     devDependencies:
       '@phyt/eslint':
         specifier: workspace:*
-        version: link:../eslint
+        version: link:../../tooling/eslint
       '@phyt/tsconfig':
         specifier: workspace:*
-        version: link:../tsconfig
+        version: link:../../tooling/tsconfig
       eslint:
         specifier: 'catalog:'
         version: 9.31.0(jiti@2.4.2)
@@ -937,10 +889,10 @@ importers:
         version: link:../core
       '@phyt/eslint':
         specifier: workspace:*
-        version: link:../eslint
+        version: link:../../tooling/eslint
       '@phyt/tsconfig':
         specifier: workspace:*
-        version: link:../tsconfig
+        version: link:../../tooling/tsconfig
       '@types/node':
         specifier: 'catalog:'
         version: 24.0.13
@@ -995,10 +947,10 @@ importers:
         version: link:../core
       '@phyt/eslint':
         specifier: workspace:*
-        version: link:../eslint
+        version: link:../../tooling/eslint
       '@phyt/tsconfig':
         specifier: workspace:*
-        version: link:../tsconfig
+        version: link:../../tooling/tsconfig
       '@types/hashids':
         specifier: 'catalog:'
         version: 2.0.1
@@ -1017,8 +969,6 @@ importers:
       vitest:
         specifier: 'catalog:'
         version: 3.2.4(@types/debug@4.1.12)(@types/node@24.0.13)(jiti@2.4.2)(jsdom@26.1.0(bufferutil@4.0.9)(utf-8-validate@5.0.10))(lightningcss@1.30.1)(tsx@4.20.3)(yaml@2.8.0)
-
-  packages/tsconfig: {}
 
   packages/webhooks:
     dependencies:
@@ -1046,10 +996,10 @@ importers:
     devDependencies:
       '@phyt/eslint':
         specifier: workspace:*
-        version: link:../eslint
+        version: link:../../tooling/eslint
       '@phyt/tsconfig':
         specifier: workspace:*
-        version: link:../tsconfig
+        version: link:../../tooling/tsconfig
       '@types/node':
         specifier: 'catalog:'
         version: 24.0.13
@@ -1068,6 +1018,56 @@ importers:
       vitest:
         specifier: 'catalog:'
         version: 3.2.4(@types/debug@4.1.12)(@types/node@24.0.13)(jiti@2.4.2)(jsdom@26.1.0(bufferutil@4.0.9)(utf-8-validate@5.0.10))(lightningcss@1.30.1)(tsx@4.20.3)(yaml@2.8.0)
+
+  tooling/eslint:
+    devDependencies:
+      '@eslint/js':
+        specifier: 'catalog:'
+        version: 9.31.0
+      '@next/eslint-plugin-next':
+        specifier: 'catalog:'
+        version: 15.3.5
+      '@tanstack/eslint-config':
+        specifier: 'catalog:'
+        version: 0.1.0(@typescript-eslint/utils@8.36.0(eslint@9.31.0(jiti@2.4.2))(typescript@5.8.3))(eslint-import-resolver-node@0.3.9)(eslint@9.31.0(jiti@2.4.2))(typescript@5.8.3)
+      eslint:
+        specifier: 'catalog:'
+        version: 9.31.0(jiti@2.4.2)
+      eslint-config-prettier:
+        specifier: 'catalog:'
+        version: 10.1.5(eslint@9.31.0(jiti@2.4.2))
+      eslint-import-resolver-typescript:
+        specifier: 'catalog:'
+        version: 4.4.4(eslint-plugin-import-x@4.16.1(@typescript-eslint/utils@8.36.0(eslint@9.31.0(jiti@2.4.2))(typescript@5.8.3))(eslint-import-resolver-node@0.3.9)(eslint@9.31.0(jiti@2.4.2)))(eslint-plugin-import@2.32.0)(eslint@9.31.0(jiti@2.4.2))
+      eslint-plugin-import:
+        specifier: 'catalog:'
+        version: 2.32.0(@typescript-eslint/parser@8.36.0(eslint@9.31.0(jiti@2.4.2))(typescript@5.8.3))(eslint-import-resolver-typescript@4.4.4)(eslint@9.31.0(jiti@2.4.2))
+      eslint-plugin-only-warn:
+        specifier: 'catalog:'
+        version: 1.1.0
+      eslint-plugin-react:
+        specifier: 'catalog:'
+        version: 7.37.5(eslint@9.31.0(jiti@2.4.2))
+      eslint-plugin-react-compiler:
+        specifier: 'catalog:'
+        version: 19.1.0-rc.2(eslint@9.31.0(jiti@2.4.2))
+      eslint-plugin-react-hooks:
+        specifier: 'catalog:'
+        version: 6.0.0-rc.1(eslint@9.31.0(jiti@2.4.2))
+      eslint-plugin-turbo:
+        specifier: 'catalog:'
+        version: 2.5.4(eslint@9.31.0(jiti@2.4.2))(turbo@2.5.5)
+      globals:
+        specifier: 'catalog:'
+        version: 16.3.0
+      typescript:
+        specifier: 'catalog:'
+        version: 5.8.3
+      typescript-eslint:
+        specifier: 'catalog:'
+        version: 8.36.0(eslint@9.31.0(jiti@2.4.2))(typescript@5.8.3)
+
+  tooling/tsconfig: {}
 
 packages:
 
