@@ -5,8 +5,6 @@ import {
     JobName,
     PostRunsJobSchema
 } from '@phyt/m-queue/jobs';
-import { addJobWithContext, postsQueue } from '@phyt/m-queue/queue';
-import { encodeRunId } from '@phyt/trpc-adapters/encoder';
 
 import { appDeps } from '../di';
 
@@ -37,7 +35,7 @@ export async function checkRunsToPost(
             if (!run.isPosted) {
                 // Run needs to be posted - queue it
                 const runPayload = {
-                    id: encodeRunId(run.id),
+                    id: appDeps.idEncoder.encode('runs', run.id),
                     startTime: run.startTime.toISOString(),
                     endTime: run.endTime.toISOString(),
                     duration: run.duration,
@@ -55,8 +53,7 @@ export async function checkRunsToPost(
                     run: runPayload
                 });
 
-                await addJobWithContext(
-                    postsQueue,
+                await appDeps.postsQueue.addJobWithContext(
                     JobName.POST_RUNS,
                     postRunsPayload,
                     {
