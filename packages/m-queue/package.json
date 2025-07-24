@@ -23,12 +23,13 @@
         "test": "vitest run"
     },
     "dependencies": {
+        "@phyt/core": "workspace:*",
         "@phyt/data-access": "workspace:*",
-        "@phyt/redis": "workspace:*",
         "bullmq": "catalog:",
         "zod": "catalog:"
     },
     "devDependencies": {
+        "ioredis": "catalog:",
         "@phyt/eslint": "workspace:*",
         "@phyt/tsconfig": "workspace:*",
         "eslint": "catalog:",
