@@ -37,25 +37,16 @@ DATA STRUCTURE RETURNED BY PRIVY
 */
 
 import { z } from 'zod';
-import {
-    PrivyClient,
-    type User,
-    type LinkedAccountWithMetadata
-} from '@privy-io/server-auth';
-import { cache } from '@phyt/redis/cache';
+import type { User, LinkedAccountWithMetadata } from '@privy-io/server-auth';
 import {
     JobName,
     CreateWalletJobSchema,
     SyncPrivyUserJobSchema
 } from '@phyt/m-queue/jobs';
-import { addJobWithContext, type QueueFactory } from '@phyt/m-queue/queue';
 import { Webhook } from 'svix';
+import type { Dependencies } from '@phyt/core/di';
 
-import {
-    IdempotencyManager,
-    webhookResponse,
-    type WebhookResponse
-} from './helper';
+import { webhookResponse, type WebhookResponse } from './ops';
 
 // Runtime data structure interfaces (snake_case from Privy API)
 interface PrivyLinkedAccount {
@@ -93,16 +84,15 @@ type PrivyWebhookEvent = {
     account?: LinkedAccountWithMetadata;
 };
 
-interface HandlerConfig {
-    privyClient: PrivyClient;
+interface PrivyWebhookHandlerDeps {
     secret: string;
-    queueFactory: QueueFactory;
+    privy: Dependencies['privy'];
+    authQueue: Dependencies['authQueue'];
+    idempotency: Dependencies['idempotency'];
 }
 
 export class PrivyWebhookHandler {
-    private readonly idemp = new IdempotencyManager(cache);
-
-    constructor(private readonly cfg: HandlerConfig) {}
+    constructor(private readonly deps: PrivyWebhookHandlerDeps) {}
 
     async handle(
         rawBody: string,
@@ -140,7 +130,7 @@ export class PrivyWebhookHandler {
         }
 
         // Check for duplicate event
-        const { isDuplicate, key } = await this.idemp.checkAndMark(
+        const { isDuplicate, key } = await this.deps.idempotency.checkAndMark(
             hdrs.id,
             event.type
         );
@@ -158,26 +148,22 @@ export class PrivyWebhookHandler {
         try {
             const { jobName, payload } = this.selectJob(basePayload);
 
-            const jobId = await addJobWithContext(
-                this.cfg.queueFactory(),
-                jobName,
-                payload,
-                {
-                    jobId: `${jobName}-${event.user.id}-${Date.now().toString()}`,
-                    removeOnComplete: { age: 3_600, count: 100 },
-                    removeOnFail: { age: 86_400 }
-                }
-            );
+            const job = await this.deps.authQueue.add(jobName, payload, {
+                jobId: `${jobName}-${event.user.id}-${Date.now().toString()}`,
+                removeOnComplete: { age: 3600, count: 100 },
+                removeOnFail: { age: 86400 }
+            });
+
             console.log(
-                `[Webhook] ✓ Queued ${jobName} job (${String(jobId)}) for user ${event.user.id}`
+                `[Webhook] ✓ Queued ${jobName} job (${String(job.id)}) for user ${event.user.id}`
             );
-            return webhookResponse.accepted(jobId);
+            return webhookResponse.accepted(job.id);
         } catch (err) {
             console.error(
                 `[Webhook] ✗ Failed to queue job for user ${event.user.id}:`,
                 err instanceof Error ? err.message : 'Unknown error'
             );
-            await this.idemp.delete(key).catch(() => {});
+            await this.deps.idempotency.delete(key).catch(() => {});
             if (err instanceof z.ZodError) {
                 return webhookResponse.error('Invalid webhook data', 400);
             }
@@ -196,7 +182,7 @@ export class PrivyWebhookHandler {
     ): PrivyWebhookEvent {
         try {
             // Use svix directly instead of Privy's wrapper
-            const wh = new Webhook(this.cfg.secret);
+            const wh = new Webhook(this.deps.secret);
 
             // Svix expects headers in the format: svix-id, svix-timestamp, svix-signature
             const svixHeaders = {
