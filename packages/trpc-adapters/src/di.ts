@@ -32,7 +32,8 @@ export function createAppDependencies(core: CoreDeps): AppDependencies {
 
     const runService = new RunService({
         runRepository: runRepository,
-        redis: core.redis
+        redis: core.redis,
+        idEncoder: core.idEncoder
     });
 
     const postRepository = new PostRepository({
@@ -44,7 +45,8 @@ export function createAppDependencies(core: CoreDeps): AppDependencies {
         postRepository: postRepository,
         userService: userService,
         runService: runService,
-        redis: core.redis
+        redis: core.redis,
+        idEncoder: core.idEncoder
     });
 
     const repositories = {
