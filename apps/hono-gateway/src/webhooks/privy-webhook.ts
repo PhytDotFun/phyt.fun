@@ -1,5 +1,6 @@
 import { Hono } from 'hono';
-import { PrivyWebhookHandler, webhookResponse } from '@phyt/webhooks';
+import { PrivyWebhookHandler } from '@phyt/webhooks/privy-handler';
+import { webhookResponse } from '@phyt/webhooks/ops';
 
 import { appDeps } from '../di';
 import { env } from '../env';
