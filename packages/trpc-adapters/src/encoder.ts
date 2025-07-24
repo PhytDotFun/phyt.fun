@@ -1,23 +1,14 @@
 import Hashids from 'hashids';
 import { z } from 'zod';
+import type { Dependencies } from '@phyt/core/di';
 
-import { env } from './env';
-
-const SALTS = {
-    posts: env.POSTS_SALT,
-    comments: env.COMMENTS_SALT,
-    reactions: env.REACTIONS_SALT,
-    runs: env.RUNS_SALT,
-    users: env.USERS_SALT
-};
-
-type EntityType = keyof typeof SALTS;
+type EntityType = keyof Dependencies['salts'];
 
 export class IdEncoder {
     private hashers: Map<EntityType, Hashids> = new Map();
 
-    constructor() {
-        Object.entries(SALTS).forEach(([type, salt]) => {
+    constructor(salts: Dependencies['salts']) {
+        Object.entries(salts).forEach(([type, salt]) => {
             this.hashers.set(type as EntityType, new Hashids(salt, 8));
         });
     }
@@ -75,26 +66,9 @@ export class IdEncoder {
     }
 }
 
-export const idEncoder = new IdEncoder();
-
-export const encodePostId = (id: number): string =>
-    idEncoder.encode('posts', id);
-export const decodePostId = (encodedId: string): number | null =>
-    idEncoder.decode('posts', encodedId);
-
-export const encodeRunId = (id: number): string => idEncoder.encode('runs', id);
-export const decodeRunId = (encodedId: string): number | null =>
-    idEncoder.decode('runs', encodedId);
-
-export const encodeCommentId = (id: number): string =>
-    idEncoder.encode('comments', id);
-export const decodeCommentId = (encodedId: string): number | null =>
-    idEncoder.decode('comments', encodedId);
-
-export const encodeReactionId = (id: number): string =>
-    idEncoder.encode('reactions', id);
-export const decodeReactionId = (encodedId: string): number | null =>
-    idEncoder.decode('reactions', encodedId);
+export function createIdEncoder(salts: Dependencies['salts']): IdEncoder {
+    return new IdEncoder(salts);
+}
 
 export type EncodedPostId = string;
 export type EncodedRunId = string;
