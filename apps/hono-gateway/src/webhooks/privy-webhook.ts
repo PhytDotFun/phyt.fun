@@ -1,14 +1,14 @@
 import { Hono } from 'hono';
 import { PrivyWebhookHandler, webhookResponse } from '@phyt/webhooks';
-import { queueFactory } from '@phyt/m-queue/queue';
 
 import { appDeps } from '../di';
 import { env } from '../env';
 
 const privyWebhookHandler = new PrivyWebhookHandler({
-    privyClient: appDeps.privy,
     secret: env.PRIVY_WEBHOOK_SECRET,
-    queueFactory
+    privy: appDeps.privy,
+    authQueue: appDeps.authQueue,
+    idempotency: appDeps.idempotency
 });
 
 export const privyWebhook = new Hono().post('/', async (c) => {
