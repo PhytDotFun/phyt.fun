@@ -22,7 +22,6 @@
         "@phyt/m-queue": "workspace:*",
         "@phyt/redis": "workspace:*",
         "@privy-io/server-auth": "catalog:",
-        "@t3-oss/env-core": "catalog:",
         "dotenv": "catalog:",
         "svix": "catalog:",
         "zod": "catalog:"
