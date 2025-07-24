@@ -1,5 +1,4 @@
 import { Worker, Job, Queue } from 'bullmq';
-import { redisBull } from '@phyt/redis/bull';
 import {
     JobName,
     CreateWalletJob,
@@ -9,6 +8,7 @@ import {
 } from '@phyt/m-queue/jobs';
 import chalk from 'chalk';
 
+import { appDeps } from './di';
 import { createWallet } from './jobs/createWallet';
 import { syncPrivyUser } from './jobs/syncPrivyUser';
 import { checkRunsToPost } from './jobs/checkRunsToPost';
@@ -33,7 +33,7 @@ const authWorker = new Worker(
         }
     },
     {
-        connection: redisBull,
+        connection: appDeps.bull,
         concurrency: env.WORKER_CONCURRENCY,
         limiter: {
             max: env.WORKER_RATE_LIMIT,
@@ -56,7 +56,7 @@ const postsWorker = new Worker(
         }
     },
     {
-        connection: redisBull,
+        connection: appDeps.bull,
         concurrency: env.WORKER_CONCURRENCY,
         limiter: {
             max: env.WORKER_RATE_LIMIT,
@@ -100,7 +100,7 @@ setTimeout(() => {
 }, 100);
 
 const setupCronJobs = async () => {
-    const cronQueue = new Queue('posts', { connection: redisBull });
+    const cronQueue = new Queue('posts', { connection: appDeps.bull });
 
     // Clean up any existing repeatable jobs for this job name to prevent duplicates
     const jobSchedulers = await cronQueue.getJobSchedulers();
