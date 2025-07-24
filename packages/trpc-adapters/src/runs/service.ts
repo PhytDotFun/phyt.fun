@@ -4,25 +4,27 @@ import {
     RunPostSchema,
     MarkRunPostedSchema
 } from '@phyt/data-access/models/runs';
-
-import { decodeRunId, encodeRunId } from '@/encoder';
+import type { IdEncoder } from '@phyt/core/contracts';
 
 import type { RunRepository } from './repository';
 
 interface RunServiceDeps {
     runRepository: RunRepository;
     redis: Redis;
+    idEncoder: IdEncoder;
 }
 
 export class RunService {
     private repo: RunRepository;
     private redis: Redis;
+    private idEncoder: IdEncoder;
 
     private readonly RUN_CACHE_TTL = 15 * 60; // 15 minutes
 
     constructor(deps: RunServiceDeps) {
         this.repo = deps.runRepository;
         this.redis = deps.redis;
+        this.idEncoder = deps.idEncoder;
     }
 
     // Generate cache keys for different lookup types
@@ -66,7 +68,7 @@ export class RunService {
 
     async getRunByPublicId(publicId: string): Promise<Run | null> {
         try {
-            const id = decodeRunId(publicId);
+            const id = this.idEncoder.decode('run', publicId);
             if (!id) throw new Error('Failed to find run id');
 
             return await this.getRunById(id);
@@ -119,7 +121,7 @@ export class RunService {
 
             const returnedRun = {
                 duration: run.duration,
-                id: encodeRunId(run.id),
+                id: this.idEncoder.encode('run', run.id),
                 startTime: run.startTime,
                 endTime: run.endTime,
                 distance: run.distance,
@@ -145,7 +147,7 @@ export class RunService {
         try {
             MarkRunPostedSchema.parse(update);
 
-            const internalId = decodeRunId(update.id);
+            const internalId = this.idEncoder.decode('run', update.id);
 
             const updateWithInternalId = {
                 id: internalId,
@@ -159,7 +161,7 @@ export class RunService {
 
             const updatedRun = {
                 duration: result.duration,
-                id: encodeRunId(result.id),
+                id: this.idEncoder.encode('run', result.id),
                 startTime: result.startTime,
                 endTime: result.endTime,
                 distance: result.distance,
