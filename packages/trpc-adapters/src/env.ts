@@ -4,9 +4,6 @@ import 'dotenv/config';
 
 export const env = createEnv({
     server: {
-        NODE_ENV: z
-            .enum(['development', 'production', 'test'])
-            .default('development'),
         POSTS_SALT: z.string(),
         COMMENTS_SALT: z.string(),
         REACTIONS_SALT: z.string(),
