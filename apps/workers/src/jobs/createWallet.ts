@@ -5,7 +5,6 @@ import {
     JobName,
     SyncPrivyUserJobSchema
 } from '@phyt/m-queue/jobs';
-import { addJobWithContext, authQueue } from '@phyt/m-queue/queue';
 
 import { appDeps } from '../di';
 
@@ -44,8 +43,7 @@ export async function createWallet(
             walletAddress: wallet.address
         });
 
-        await addJobWithContext(
-            authQueue,
+        await appDeps.authQueue.addJobWithContext(
             JobName.SYNC_PRIVY_USER,
             syncPayload,
             {
