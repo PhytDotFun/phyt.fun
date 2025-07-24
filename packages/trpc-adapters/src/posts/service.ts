@@ -1,8 +1,8 @@
 import type { Post, InsertPost } from '@phyt/data-access/models/posts';
 import { PostSchema } from '@phyt/data-access/models/posts';
 import type { Redis } from 'ioredis';
+import type { IdEncoder } from '@phyt/core/contracts';
 
-import { decodePostId, encodePostId } from '../encoder';
 import type { UserService } from '../users/service';
 import type { RunService } from '../runs/service';
 
@@ -13,6 +13,7 @@ interface PostServiceDeps {
     userService: UserService;
     runService: RunService;
     redis: Redis;
+    idEncoder: IdEncoder;
 }
 
 export class PostService {
@@ -20,6 +21,7 @@ export class PostService {
     private userService: UserService;
     private runService: RunService;
     private redis: Redis;
+    private idEncoder: IdEncoder;
 
     private readonly POST_CACHE_TTL = 10 * 60; // 10 minutes
 
@@ -28,6 +30,7 @@ export class PostService {
         this.userService = deps.userService;
         this.runService = deps.runService;
         this.redis = deps.redis;
+        this.idEncoder = deps.idEncoder;
     }
 
     // Generate cache keys
@@ -79,7 +82,7 @@ export class PostService {
 
     async getPostByPublicId(publicId: string): Promise<Post | null> {
         try {
-            const id = decodePostId(publicId);
+            const id = this.idEncoder.decode('posts', publicId);
             if (!id) throw new Error('Failed to find post id');
 
             return await this.getPostById(id);
@@ -141,7 +144,7 @@ export class PostService {
             }
 
             const returnedPost = {
-                id: encodePostId(post.id),
+                id: this.idEncoder.encode('posts', post.id),
                 content: post.content,
                 visibility: post.visibility,
                 createdAt: post.createdAt,
@@ -177,7 +180,7 @@ export class PostService {
             }
 
             const returnedPost = {
-                id: encodePostId(newPost.id),
+                id: this.idEncoder.encode('posts', newPost.id),
                 content: newPost.content,
                 visibility: newPost.visibility,
                 user: user,
