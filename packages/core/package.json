@@ -6,7 +6,11 @@
     "exports": {
         "./di": {
             "types": "./dist/di.d.ts",
-            "default": "./dist/di.js"
+            "import": "./dist/di.js"
+        },
+        "./contracts": {
+            "types": "./dist/contracts.d.ts",
+            "import": "./dist/contracts.js"
         }
     },
     "scripts": {
@@ -22,16 +26,18 @@
     "devDependencies": {
         "@phyt/tsconfig": "workspace:*",
         "@phyt/eslint": "workspace:*",
+        "@privy-io/server-auth": "catalog:",
         "@types/node": "catalog:",
         "@types/pg": "catalog:",
+        "bullmq": "catalog:",
         "drizzle-kit": "catalog:",
-        "@privy-io/server-auth": "catalog:",
         "drizzle-orm": "catalog:",
         "ioredis": "catalog:",
         "eslint": "catalog:",
         "tsup": "catalog:",
         "typescript": "catalog:",
         "prettier": "catalog:",
-        "vitest": "catalog:"
+        "vitest": "catalog:",
+        "zod": "catalog:"
     }
 }
