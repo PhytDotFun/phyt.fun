@@ -1,8 +1,16 @@
 import { sql } from 'drizzle-orm';
 
-import { db, pgClient } from '../client';
+import { createDb, createPgClient } from '../client';
 
 const KEEP_TABLES = ['_drizzle_migrations'];
+
+const connectionString = process.argv[2];
+if (!connectionString) {
+    throw new Error('Connection string required as first argument');
+}
+
+const db = createDb(connectionString);
+const pgClient = createPgClient(connectionString);
 
 // Wrap the whole task in one async IIFE so ESLint is happy
 await (async () => {

@@ -1,6 +1,15 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { db, pgClient } from '../client';
-import { users, runs, posts, comments, reactions } from '../schema';
+import { createDb, createPgClient } from '../client';
+import { users, runs } from '../schema';
+// import { users, runs, posts, comments, reactions } from '../schema';
+
+const connectionString = process.argv[2];
+if (!connectionString) {
+    throw new Error('Connection string required as first argument');
+}
+
+const db = createDb(connectionString);
+const pgClient = createPgClient(connectionString);
 
 // Sample data
 const sampleUsers = [
@@ -131,97 +140,97 @@ const generateRuns = (userIds: number[]) => [
     }
 ];
 
-const generatePosts = (runIds: number[], userIds: number[]) => [
-    {
-        userId: userIds[0]!, // Alice
-        runId: runIds[0]!,
-        isProfile: false
-    },
-    {
-        userId: userIds[0]!, // Alice
-        runId: runIds[1]!,
-        isProfile: true
-    },
-    {
-        userId: userIds[1]!, // Bob
-        runId: runIds[2]!,
-        isProfile: false
-    },
-    {
-        userId: userIds[3]!, // David
-        runId: runIds[3]!,
-        isProfile: false
-    },
-    {
-        userId: userIds[4]!, // Eve
-        runId: runIds[4]!,
-        isProfile: true
-    }
-];
+// const generatePosts = (runIds: number[], userIds: number[]) => [
+//     {
+//         userId: userIds[0]!, // Alice
+//         runId: runIds[0]!,
+//         isProfile: false
+//     },
+//     {
+//         userId: userIds[0]!, // Alice
+//         runId: runIds[1]!,
+//         isProfile: true
+//     },
+//     {
+//         userId: userIds[1]!, // Bob
+//         runId: runIds[2]!,
+//         isProfile: false
+//     },
+//     {
+//         userId: userIds[3]!, // David
+//         runId: runIds[3]!,
+//         isProfile: false
+//     },
+//     {
+//         userId: userIds[4]!, // Eve
+//         runId: runIds[4]!,
+//         isProfile: true
+//     }
+// ];
 
-const generateComments = (postIds: number[], userIds: number[]) => [
-    {
-        userId: userIds[1]!, // Bob commenting on Alice's post
-        contentType: 'post' as const,
-        contentId: postIds[0]!,
-        isProfile: false
-    },
-    {
-        userId: userIds[3]!, // David commenting on Alice's post
-        contentType: 'post' as const,
-        contentId: postIds[0]!,
-        isProfile: false
-    },
-    {
-        userId: userIds[4]!, // Eve commenting on Bob's post
-        contentType: 'post' as const,
-        contentId: postIds[2]!,
-        isProfile: false
-    }
-];
+// const generateComments = (postIds: number[], userIds: number[]) => [
+//     {
+//         userId: userIds[1]!, // Bob commenting on Alice's post
+//         contentType: 'post' as const,
+//         contentId: postIds[0]!,
+//         isProfile: false
+//     },
+//     {
+//         userId: userIds[3]!, // David commenting on Alice's post
+//         contentType: 'post' as const,
+//         contentId: postIds[0]!,
+//         isProfile: false
+//     },
+//     {
+//         userId: userIds[4]!, // Eve commenting on Bob's post
+//         contentType: 'post' as const,
+//         contentId: postIds[2]!,
+//         isProfile: false
+//     }
+// ];
 
-const generateReactions = (
-    postIds: number[],
-    commentIds: number[],
-    userIds: number[]
-) => [
-    {
-        contentType: 'post' as const,
-        contentId: postIds[0]!,
-        userId: userIds[1]!, // Bob likes Alice's post
-        reactionType: 'like'
-    },
-    {
-        contentType: 'post' as const,
-        contentId: postIds[0]!,
-        userId: userIds[3]!, // David likes Alice's post
-        reactionType: 'like'
-    },
-    {
-        contentType: 'post' as const,
-        contentId: postIds[0]!,
-        userId: userIds[4]!, // Eve likes Alice's post
-        reactionType: 'fire'
-    },
-    {
-        contentType: 'post' as const,
-        contentId: postIds[2]!,
-        userId: userIds[0]!, // Alice likes Bob's post
-        reactionType: 'like'
-    },
-    {
-        contentType: 'post' as const,
-        contentId: postIds[4]!,
-        userId: userIds[0]!, // Alice likes Eve's post
-        reactionType: 'fire'
-    },
-    {
-        contentType: 'comment' as const,
-        contentId: commentIds[0]!,
-        userId: userIds[0]!, // Alice likes Bob's comment
-        reactionType: 'like'
-    }
-];
+// const generateReactions = (
+//     postIds: number[],
+//     commentIds: number[],
+//     userIds: number[]
+// ) => [
+//     {
+//         contentType: 'post' as const,
+//         contentId: postIds[0]!,
+//         userId: userIds[1]!, // Bob likes Alice's post
+//         reactionType: 'like'
+//     },
+//     {
+//         contentType: 'post' as const,
+//         contentId: postIds[0]!,
+//         userId: userIds[3]!, // David likes Alice's post
+//         reactionType: 'like'
+//     },
+//     {
+//         contentType: 'post' as const,
+//         contentId: postIds[0]!,
+//         userId: userIds[4]!, // Eve likes Alice's post
+//         reactionType: 'fire'
+//     },
+//     {
+//         contentType: 'post' as const,
+//         contentId: postIds[2]!,
+//         userId: userIds[0]!, // Alice likes Bob's post
+//         reactionType: 'like'
+//     },
+//     {
+//         contentType: 'post' as const,
+//         contentId: postIds[4]!,
+//         userId: userIds[0]!, // Alice likes Eve's post
+//         reactionType: 'fire'
+//     },
+//     {
+//         contentType: 'comment' as const,
+//         contentId: commentIds[0]!,
+//         userId: userIds[0]!, // Alice likes Bob's comment
+//         reactionType: 'like'
+//     }
+// ];
 
 // Wrap the whole task in one async IIFE so ESLint is happy
 await (async () => {
@@ -247,31 +256,31 @@ await (async () => {
         const runIds = insertedRuns.map((run) => run.id);
         console.log(`✓ Created ${runIds.length.toString()} runs`);
 
-        // 3) Insert posts
-        console.log('Seeding posts...');
-        const postsData = generatePosts(runIds, userIds);
-        const insertedPosts = await db
-            .insert(posts)
-            .values(postsData)
-            .returning({ id: posts.id });
-        const postIds = insertedPosts.map((post) => post.id);
-        console.log(`✓ Created ${postIds.length.toString()} posts`);
+        // // 3) Insert posts
+        // console.log('Seeding posts...');
+        // const postsData = generatePosts(runIds, userIds);
+        // const insertedPosts = await db
+        //     .insert(posts)
+        //     .values(postsData)
+        //     .returning({ id: posts.id });
+        // const postIds = insertedPosts.map((post) => post.id);
+        // console.log(`✓ Created ${postIds.length.toString()} posts`);
 
-        // 4) Insert comments
-        console.log('Seeding comments...');
-        const commentsData = generateComments(postIds, userIds);
-        const insertedComments = await db
-            .insert(comments)
-            .values(commentsData)
-            .returning({ id: comments.id });
-        const commentIds = insertedComments.map((comment) => comment.id);
-        console.log(`✓ Created ${commentIds.length.toString()} comments`);
+        // // 4) Insert comments
+        // console.log('Seeding comments...');
+        // const commentsData = generateComments(postIds, userIds);
+        // const insertedComments = await db
+        //     .insert(comments)
+        //     .values(commentsData)
+        //     .returning({ id: comments.id });
+        // const commentIds = insertedComments.map((comment) => comment.id);
+        // console.log(`✓ Created ${commentIds.length.toString()} comments`);
 
-        // 5) Insert reactions
-        console.log('Seeding reactions...');
-        const reactionsData = generateReactions(postIds, commentIds, userIds);
-        await db.insert(reactions).values(reactionsData);
-        console.log(`✓ Created ${reactionsData.length.toString()} reactions`);
+        // // 5) Insert reactions
+        // console.log('Seeding reactions...');
+        // const reactionsData = generateReactions(postIds, commentIds, userIds);
+        // await db.insert(reactions).values(reactionsData);
+        // console.log(`✓ Created ${reactionsData.length.toString()} reactions`);
 
         console.log('✅ Database seeded successfully!');
         console.log('\nSeeded data summary:');
@@ -281,13 +290,13 @@ await (async () => {
         console.log(
             `- ${runIds.length.toString()} runs (from various platforms: Apple Health, Strava, Garmin)`
         );
-        console.log(
-            `- ${postIds.length.toString()} posts (mix of profile and feed posts)`
-        );
-        console.log(`- ${commentIds.length.toString()} comments`);
-        console.log(
-            `- ${reactionsData.length.toString()} reactions (likes, fire emojis)`
-        );
+        // console.log(
+        //     `- ${postIds.length.toString()} posts (mix of profile and feed posts)`
+        // );
+        // console.log(`- ${commentIds.length.toString()} comments`);
+        // console.log(
+        //     `- ${reactionsData.length.toString()} reactions (likes, fire emojis)`
+        // );
     } catch (err) {
         console.error('Database seeding failed:', err);
         process.exitCode = 1; // set exit code, defer exit to finally
