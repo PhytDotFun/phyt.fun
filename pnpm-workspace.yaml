@@ -50,7 +50,7 @@ catalog:
   '@trpc/client': ^11.4.3
   '@trpc/server': ^11.4.3
   '@trpc/tanstack-react-query': ^11.4.3
-  '@turbo/gen': ^2.5.4
+  '@turbo/gen': ^2.5.5
   '@types/hashids': ^2.0.1
   '@types/node': ^24.0.7
   '@types/pg': ^8.15.4
