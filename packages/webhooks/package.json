@@ -7,6 +7,10 @@
         ".": {
             "types": "./dist/index.d.ts",
             "import": "./dist/index.js"
+        },
+        "./idempotency": {
+            "types": "./dist/idempotency.d.ts",
+            "import": "./dist/idempotency.js"
         }
     },
     "scripts": {
@@ -27,6 +31,7 @@
         "zod": "catalog:"
     },
     "devDependencies": {
+        "@phyt/core": "workspace:*",
         "@phyt/eslint": "workspace:*",
         "@phyt/tsconfig": "workspace:*",
         "@types/node": "catalog:",
