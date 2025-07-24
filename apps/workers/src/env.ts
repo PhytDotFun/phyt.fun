@@ -16,7 +16,12 @@ export const env = createEnv({
         REDIS_URL: z.string().url(),
         WORKER_CONCURRENCY: z.coerce.number().min(1).default(5),
         WORKER_RATE_LIMIT: z.coerce.number().min(1).default(10),
-        CRON_SCHEDULE: z.string().default('*/5 * * * *')
+        CRON_SCHEDULE: z.string().default('*/5 * * * *'),
+        POSTS_SALT: z.string(),
+        COMMENTS_SALT: z.string(),
+        REACTIONS_SALT: z.string(),
+        RUNS_SALT: z.string(),
+        USERS_SALT: z.string()
     },
     runtimeEnv: process.env,
     emptyStringAsUndefined: true,
