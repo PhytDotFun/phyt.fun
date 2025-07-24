@@ -1,7 +1,6 @@
 import { Job } from 'bullmq';
 import { SyncPrivyUserJob, SyncPrivyUserJobSchema } from '@phyt/m-queue/jobs';
 import { InsertUserSchema } from '@phyt/data-access/models/users';
-import { cache } from '@phyt/redis/cache';
 
 import { appDeps } from '../di';
 
@@ -17,7 +16,7 @@ export async function syncPrivyUser(
 
     // Check cache to see if data has changed
     const cacheKey = `sync_privy_user:${data.privyDID}`;
-    const cachedData = await cache.get<SyncPrivyUserJob>(
+    const cachedData = await appDeps.cache.get<SyncPrivyUserJob>(
         cacheKey,
         SyncPrivyUserJobSchema
     );
@@ -52,7 +51,7 @@ export async function syncPrivyUser(
         await appDeps.userService.syncPrivyData(newUser);
 
         // Cache the successfully processed data (24 hour TTL)
-        await cache.set(cacheKey, data, 86400);
+        await appDeps.cache.set(cacheKey, data, 86400);
 
         console.log(`[AUTH] Synced user ${data.username} (${data.privyDID})`);
         return { ok: true };
