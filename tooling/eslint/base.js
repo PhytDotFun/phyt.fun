@@ -73,13 +73,13 @@ const baseConfig = [
                     tsx: 'never',
                     json: 'always'
                 }
-            ],
-            'import/no-relative-parent-imports': [
-                'error',
-                {
-                    ignore: ['^@/'] // Still throwing linting error with path alias
-                }
             ]
+            // 'import/no-relative-parent-imports': [
+            //     'error',
+            //     {
+            //         ignore: ['^@/'] // Still throwing linting error with path alias
+            //     }
+            // ]
         }
     },
     {

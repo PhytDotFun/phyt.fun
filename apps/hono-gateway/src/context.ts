@@ -3,12 +3,12 @@ import type { Context } from 'hono';
 import type { AppContext } from '@phyt/trpc-adapters/trpc';
 
 import type { HonoEnv } from './middleware/auth';
-import { dependencies } from './di';
+import { appDeps } from './di';
 
 export const createContext = (
     _opts: FetchCreateContextFnOptions,
     c: Context<HonoEnv>
 ): AppContext => ({
-    ...dependencies,
+    ...appDeps,
     authClaims: c.get('authClaims')
 });

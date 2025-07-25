@@ -29,8 +29,18 @@ export default defineConfig({
         )
     },
     server: {
+        host: '0.0.0.0',
+        allowedHosts: ['on-marmot-finer.ngrok-free.app'],
         proxy: {
             '/api': {
+                target: 'http://localhost:3000',
+                changeOrigin: true
+            },
+            '/trpc': {
+                target: 'http://localhost:3000',
+                changeOrigin: true
+            },
+            '/wh': {
                 target: 'http://localhost:3000',
                 changeOrigin: true
             }

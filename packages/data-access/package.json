@@ -15,6 +15,14 @@
         "./models/users": {
             "types": "./dist/models/users.d.ts",
             "import": "./dist/models/users.js"
+        },
+        "./models/posts": {
+            "types": "./dist/models/posts.d.ts",
+            "import": "./dist/models/posts.js"
+        },
+        "./models/runs": {
+            "types": "./dist/models/runs.d.ts",
+            "import": "./dist/models/runs.js"
         }
     },
     "scripts": {
@@ -22,11 +30,12 @@
         "check:types": "tsc --noEmit",
         "clean": "pnpm rimraf dist && pnpm rimraf node_modules && pnpm rimraf .turbo",
         "db:check": "pnpm drizzle-kit check --config=./src/db/drizzle.config.js",
+        "db:clean": "tsx ./src/db/scripts/clean.ts \"$DATABASE_URL\"",
         "db:generate": "pnpm drizzle-kit generate --config=./src/db/drizzle.config.js",
         "db:migrate": "pnpm drizzle-kit migrate --config=./src/db/drizzle.config.js",
         "db:push": "pnpm drizzle-kit push --config=./src/db/drizzle.config.js",
+        "db:seed": "tsx ./src/db/scripts/seed.ts \"$DATABASE_URL\"",
         "db:studio": "pnpm drizzle-kit studio --config=./src/db/drizzle.config.js",
-        "dev": "tsup --watch",
         "format": "prettier --write . --ignore-unknown",
         "lint": "eslint",
         "lint:fix": "eslint --fix",
@@ -34,6 +43,7 @@
     },
     "dependencies": {
         "@t3-oss/env-core": "catalog:",
+        "dotenv": "catalog:",
         "drizzle-orm": "catalog:",
         "drizzle-zod": "catalog:",
         "pg": "catalog:",

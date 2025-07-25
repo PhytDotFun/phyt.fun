@@ -13,8 +13,14 @@ export const env = createEnv({
         PRIVY_SECRET_KEY: z.string(),
         PRIVY_VERIFICATION_KEY: z.string(),
         PRIVY_WEBHOOK_SECRET: z.string().startsWith('whsec_'),
-        WEBHOOK_ENDPOINT: z.string(),
-        DATABASE_URL: z.string().url()
+        REDIS_URL: z.string().url(),
+        PRIVY_WEBHOOK_ENDPOINT: z.string(),
+        DATABASE_URL: z.string().url(),
+        POSTS_SALT: z.string(),
+        COMMENTS_SALT: z.string(),
+        REACTIONS_SALT: z.string(),
+        RUNS_SALT: z.string(),
+        USERS_SALT: z.string()
     },
     runtimeEnv: process.env,
     emptyStringAsUndefined: true,

@@ -13,19 +13,19 @@ import { cn } from '@/lib/utils';
 
 interface WalletButtonProps {
     className?: string;
-    variant?: 'default' | 'reverse' | 'neutral' | 'noShadow' | 'ghost';
+    variant?: 'default' | 'reverse' | 'neutral' | 'noShadow';
 }
 
 export const WalletButton = ({ className, variant }: WalletButtonProps) => {
     const isMobile = useIsMobile();
 
-    const effectiveVariant = variant ?? (isMobile ? 'noShadow' : 'default');
+    const effectiveVariant = variant ?? (isMobile ? 'noShadow' : 'reverse');
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
                 <Button
                     variant={effectiveVariant}
-                    className={cn('px-2 size-7', className)}
+                    className={cn('size-8', className)}
                 >
                     <Wallet />
                 </Button>

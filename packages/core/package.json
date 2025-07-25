@@ -6,34 +6,38 @@
     "exports": {
         "./di": {
             "types": "./dist/di.d.ts",
-            "default": "./dist/di.js"
+            "import": "./dist/di.js"
+        },
+        "./contracts": {
+            "types": "./dist/contracts.d.ts",
+            "import": "./dist/contracts.js"
         }
     },
     "scripts": {
         "build": "tsup",
         "check:types": "tsc --noEmit",
         "clean": "pnpm rimraf dist && pnpm rimraf node_modules && pnpm rimraf .turbo",
-        "dev": "tsup --watch",
         "format": "prettier --write . --ignore-unknown",
         "lint": "eslint",
         "lint:fix": "eslint --fix",
         "test": "vitest run"
     },
-    "dependencies": {
-        "@privy-io/server-auth": "catalog:",
-        "drizzle-orm": "catalog:",
-        "ioredis": "catalog:"
-    },
+    "dependencies": {},
     "devDependencies": {
-        "@phyt/tsconfig": "workspace:*",
         "@phyt/eslint": "workspace:*",
+        "@phyt/tsconfig": "workspace:*",
+        "@privy-io/server-auth": "catalog:",
         "@types/node": "catalog:",
         "@types/pg": "catalog:",
+        "bullmq": "catalog:",
         "drizzle-kit": "catalog:",
+        "drizzle-orm": "catalog:",
         "eslint": "catalog:",
+        "ioredis": "catalog:",
+        "prettier": "catalog:",
         "tsup": "catalog:",
         "typescript": "catalog:",
-        "prettier": "catalog:",
-        "vitest": "catalog:"
+        "vitest": "catalog:",
+        "zod": "catalog:"
     }
 }

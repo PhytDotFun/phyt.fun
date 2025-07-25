@@ -10,6 +10,7 @@ import {
     CommandList
 } from '@/components/ui/command';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
 import {
@@ -24,8 +25,6 @@ import {
 type SearchContextProps = {
     open: boolean;
     setOpen: (open: boolean) => void;
-    openMobile: boolean;
-    setOpenMobile: (open: boolean) => void;
     isMobile: boolean;
 };
 
@@ -49,7 +48,6 @@ export function SearchProvider({
     onOpenChange?: (open: boolean) => void;
 }) {
     const isMobile = useIsMobile();
-    const [openMobile, setOpenMobile] = React.useState(false);
 
     // This is the internal state of the search dialog.
     // We use openProp and setOpenProp for control from outside the component.
@@ -71,11 +69,9 @@ export function SearchProvider({
         () => ({
             open,
             setOpen,
-            isMobile,
-            openMobile,
-            setOpenMobile
+            isMobile
         }),
-        [open, setOpen, isMobile, openMobile, setOpenMobile]
+        [open, setOpen, isMobile]
     );
 
     return (
@@ -96,7 +92,7 @@ export function Search({ inputClassName, listClassName }: SearchProps) {
     return (
         <CommandDialog open={open} onOpenChange={setOpen}>
             <CommandInput
-                placeholder="Search runners..."
+                placeholder="Search runners, tokens..."
                 className={inputClassName}
             />
             <CommandList className={listClassName}>
@@ -122,25 +118,21 @@ export function Search({ inputClassName, listClassName }: SearchProps) {
 
 interface SearchButtonProps {
     className?: string;
-    variant?: 'default' | 'reverse' | 'neutral' | 'noShadow' | 'ghost';
+    variant?: 'default' | 'reverse' | 'neutral' | 'noShadow';
 }
 
 export const SearchButton = ({ className, variant }: SearchButtonProps) => {
-    const { isMobile, setOpenMobile, setOpen } = useSearch();
+    const { isMobile, setOpen } = useSearch();
 
-    const effectiveVariant = variant ?? (isMobile ? 'noShadow' : 'default');
+    const effectiveVariant = variant ?? (isMobile ? 'noShadow' : 'reverse');
 
     return (
-        <div className={isMobile ? '' : 'hidden'}>
+        <div className="md:hidden block">
             <Button
                 variant={effectiveVariant}
-                className={cn('size-7 px-2', className)}
+                className={cn('size-8', className)}
                 onClick={() => {
-                    if (isMobile) {
-                        setOpenMobile(true);
-                    } else {
-                        setOpen(true);
-                    }
+                    setOpen(true);
                 }}
             >
                 <SearchIcon />
@@ -148,7 +140,7 @@ export const SearchButton = ({ className, variant }: SearchButtonProps) => {
         </div>
     );
 };
-export function SearchForm({
+export function SidebarSearchForm({
     className,
     collapsed,
     ...props
@@ -157,27 +149,29 @@ export function SearchForm({
 
     return (
         <div {...props} className={cn(className)}>
-            <SidebarGroup>
+            <SidebarGroup className="">
                 <SidebarGroupContent className="relative">
                     <SidebarMenu>
-                        <SidebarMenuItem>
+                        <SidebarMenuItem className="border-0 outline-0 ring-0 focus:border-0 focus:outline-0 focus:ring-0 focus-visible:border-0 focus-visible:outline-0 focus-visible:ring-0 active:border-0 active:outline-0 active:ring-0">
                             <SidebarMenuButton
                                 asChild
                                 className={cn(
-                                    !collapsed && 'border-2 bg-white'
+                                    !collapsed &&
+                                        'border-0 bg-sidebar text-sidebar-foreground rounded-none hover:border-0 hover:outline-0 hover:ring-0 focus:border-0 focus:outline-0 focus:ring-0 focus-visible:border-0 focus-visible:outline-0 focus-visible:ring-0 active:border-0 active:outline-0 active:ring-0 group/search'
                                 )}
                             >
-                                <div className="font-bold">
-                                    <SearchIcon className="size-5" />
+                                <div className="font-bold group-hover/search:bg-main border-0 outline-0 ring-0 focus:border-0 focus:outline-0 focus:ring-0 focus-visible:border-0 focus-visible:outline-0 focus-visible:ring-0 active:border-0 active:outline-0 active:ring-0">
+                                    <SearchIcon className="size-5 group-hover/search:text-black" />
                                     <SidebarInput
                                         id="search"
                                         placeholder="Search runners, tokens..."
-                                        className="group-data-[collapsible=icon]:hidden cursor-default bg-transaprent border-0 outline-0 pointer-events-none"
+                                        className="group-data-[collapsible=icon]:hidden cursor-pointer bg-transparent border-0 outline-0 ring-0 focus:border-0 focus:outline-0 focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:outline-0 focus-visible:border-0 active:border-0 active:outline-0 active:ring-0 hover:border-0 hover:outline-0 hover:ring-0 placeholder:text-sidebar-foreground group-hover/search:placeholder:text-black group-hover/search:text-black caret-transparent"
                                         onClick={() => {
                                             if (!collapsed) {
                                                 setOpen(true);
                                             }
                                         }}
+                                        readOnly
                                     />
                                 </div>
                             </SidebarMenuButton>
@@ -189,22 +183,22 @@ export function SearchForm({
     );
 }
 
-// export const Searchbar = ({
-//     onOpenChange
-// }: {
-//     onOpenChange: (open: boolean) => void;
-// }) => {
-//     return (
-//         <div className="hidden md:block relative w-full max-w-2xl">
-//             <div className="relative">
-//                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-//                 <Input
-//                     placeholder="Search runners..."
-//                     className="pl-10 h-14 text-lg font-bold placeholder:text-gray-500 focus-visible:ring-0 focus-visible:ring-offset-0 focus:outline-none"
-//                     onClick={() => onOpenChange(true)}
-//                     readOnly
-//                 />
-//             </div>
-//         </div>
-//     );
-// };
+export const Searchbar = () => {
+    const { setOpen } = useSearch();
+
+    return (
+        <div className="hidden md:block relative w-4/7">
+            <div className="relative group hover:translate-x-reverseBoxShadowX hover:translate-y-reverseBoxShadowY hover:shadow-shadow focus-within:translate-x-reverseBoxShadowX focus-within:translate-y-reverseBoxShadowY focus-within:shadow-shadow transition-all">
+                <SearchIcon className="size-4 absolute left-3 top-1/2 -translate-y-1/2 text-foreground group-hover:text-main z-10" />
+                <Input
+                    placeholder="Search runners, tokens..."
+                    className="pl-10 h-10 focus-visible:ring-0 focus-visible:ring-offset-0 focus:outline-none placeholder-text-foreground transition-colors hover:bg-foreground focus-visible:foreground placeholder:text-black hover:placeholder:text-main hover:!translate-x-0 hover:!translate-y-0 hover:!shadow-none focus-visible:!translate-x-0 focus-visible:!translate-y-0 focus-visible:!shadow-none"
+                    onClick={() => {
+                        setOpen(true);
+                    }}
+                    readOnly
+                />
+            </div>
+        </div>
+    );
+};

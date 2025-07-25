@@ -1,41 +1,28 @@
-import { Dumbbell } from 'lucide-react';
 import { useNavigate } from '@tanstack/react-router';
-import { useLoginWithOAuth } from '@privy-io/react-auth';
-import { useEffect, useState } from 'react';
+import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { useAuth } from '@/hooks/use-auth';
 import { Logo } from '@/components/logo';
+import { useAuth } from '@/hooks/auth/use-auth';
 import { GridBackground } from '@/components/grid-background';
+import { XIcon } from '@/assets/icons/X';
 
 export const Login = () => {
     const isMobile = useIsMobile();
-
-    const { authenticated, user } = useAuth();
     const navigate = useNavigate();
-    const [hasLoggedIn, setHasLoggedIn] = useState(false);
-    const { loading, initOAuth } = useLoginWithOAuth({
-        onComplete: ({ user }) => {
-            console.log('User logged in:', user);
+    const { loading, signIn } = useAuth({
+        onSignInComplete: () => {
             void navigate({ to: '/' });
         },
-        onError: (error) => {
-            console.error('Login failed:', error);
+        onSignInError: (error) => {
+            toast.error(error);
         }
     });
 
-    useEffect(() => {
-        if (authenticated && user && !hasLoggedIn) {
-            console.log('Existing user logged in:', user);
-            setHasLoggedIn(true);
-            void navigate({ to: '/' });
-        }
-    }, [authenticated, user, navigate, hasLoggedIn]);
-
     const handleLogin = async () => {
         try {
-            await initOAuth({ provider: 'twitter' });
+            await signIn();
         } catch (error) {
             console.error('OAuth failed:', error);
         }
@@ -43,7 +30,7 @@ export const Login = () => {
 
     return (
         <div
-            className={`bg-white relative ${isMobile ? 'h-[89vh]' : 'h-screen'}`}
+            className={`bg-secondary-background relative ${isMobile ? 'h-[89vh]' : 'h-screen'}`}
         >
             <GridBackground />
             <div
@@ -55,12 +42,14 @@ export const Login = () => {
                         className="hover:scale-110 hover:cursor-default transition-transform duration-300 mb-3"
                     />
                     <Button
-                        onClick={() => void handleLogin()}
+                        onClick={() => {
+                            void handleLogin();
+                        }}
                         disabled={loading}
                         className="bg-black text-white font-bold text-lg hover:cursor-pointer"
                         variant={isMobile ? 'noShadow' : 'reverse'}
                     >
-                        <Dumbbell className="mr-3" size={isMobile ? 20 : 28} />
+                        <XIcon className="mr-2" size={isMobile ? 20 : 40} />
                         {loading ? 'CONNECTING...' : 'LOGIN TO PHYT'}
                     </Button>
                 </div>

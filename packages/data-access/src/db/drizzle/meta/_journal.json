@@ -1,13 +1,27 @@
 {
-    "version": "7",
-    "dialect": "postgresql",
-    "entries": [
-        {
-            "idx": 0,
-            "version": "7",
-            "when": 1751268135289,
-            "tag": "0000_lame_agent_brand",
-            "breakpoints": true
-        }
-    ]
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1752893623931,
+      "tag": "0000_chief_blur",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1753147435509,
+      "tag": "0001_magenta_nico_minoru",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1753147478907,
+      "tag": "0002_outgoing_penance",
+      "breakpoints": true
+    }
+  ]
 }

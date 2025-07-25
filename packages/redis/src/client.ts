@@ -1,16 +1,18 @@
-import Redis from 'ioredis';
+import Redis, { RedisOptions } from 'ioredis';
 
-import { env } from './env';
-
+export interface RedisConfig {
+    url: string;
+    options?: RedisOptions;
+}
 // Singleton instance to prevent multiple event handlers
 let redisInstance: Redis | null = null;
 
-export function getRedisClient(): Redis {
+export function getRedisClient(cfg: RedisConfig): Redis {
     if (redisInstance) {
         return redisInstance;
     }
 
-    redisInstance = new Redis(env.REDIS_URL, {
+    redisInstance = new Redis(cfg.url, {
         maxRetriesPerRequest: 5,
         enableReadyCheck: true,
         lazyConnect: false,
@@ -28,52 +30,35 @@ export function getRedisClient(): Redis {
         }
     });
 
-    redisInstance.on('error', (error) => {
-        console.error('[redis] Error:', error);
-    });
+    redisInstance
+        .on('error', (e) => {
+            console.error('[Redis] Error:', e);
+        })
+        .on('connect', () => {
+            console.info('[Redis] Connected');
+        })
+        .on('reconnecting', () => {
+            console.info('[Redis] Reconnecting…');
+        })
+        .on('ready', () => {
+            console.info('[Redis] Ready');
+        })
+        .on('close', () => {
+            console.info('[Redis] Closed');
+        });
 
-    redisInstance.on('connect', () => {
-        console.info('[redis] Connected');
-    });
-
-    redisInstance.on('reconnecting', () => {
-        console.info('[redis] Reconnecting...');
-    });
-
-    redisInstance.on('ready', () => {
-        console.info('[redis] Ready to accept commands');
-    });
-
-    redisInstance.on('close', () => {
-        console.info('[redis] Connection closed');
-    });
-
-    // Graceful shutdown handler
-    const gracefulShutdown = async (signal: string): Promise<void> => {
-        console.info(`[redis] Received ${signal}, shutting down gracefully...`);
+    const shutdown = async (sig: string) => {
+        console.info(`[redis] ${sig} received, quitting…`);
         try {
-            if (redisInstance) {
-                await redisInstance.quit();
-                redisInstance = null;
-                console.info('[redis] Disconnected gracefully');
-            }
+            await redisInstance?.quit();
+            redisInstance = null;
+            console.info('[redis] Quit cleanly');
+        } finally {
             process.exit(0);
-        } catch (error) {
-            console.error('[redis] Error during shutdown:', error);
-            process.exit(1);
         }
     };
-
-    // Handle process termination signals
-    process.once('SIGINT', () => {
-        void gracefulShutdown('SIGINT');
-    });
-
-    process.once('SIGTERM', () => {
-        void gracefulShutdown('SIGTERM');
-    });
+    process.once('SIGINT', () => void shutdown('SIGINT'));
+    process.once('SIGTERM', () => void shutdown('SIGTERM'));
 
     return redisInstance;
 }
-
-export const redis = getRedisClient();

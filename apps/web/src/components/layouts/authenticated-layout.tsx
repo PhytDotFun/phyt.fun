@@ -1,6 +1,6 @@
 import { AppSidebar } from '@/components/app-sidebar';
 import { SidebarProvider } from '@/components/ui/sidebar';
-import { SearchProvider } from '@/features/search/ui/components/search';
+import { SearchProvider, Search } from '@/features/search/ui/components/search';
 import { Header } from '@/components/header';
 
 interface AuthenticatedLayoutProps {
@@ -14,6 +14,7 @@ export const AuthenticatedLayout = ({ children }: AuthenticatedLayoutProps) => {
                 <Header />
                 <AppSidebar />
                 <main>{children}</main>
+                <Search />
             </SearchProvider>
         </SidebarProvider>
     );

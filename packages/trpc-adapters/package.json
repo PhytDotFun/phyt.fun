@@ -8,24 +8,23 @@
             "types": "./dist/trpc.d.ts",
             "import": "./dist/trpc.js"
         },
+        "./di": {
+            "types": "./dist/di.d.ts",
+            "import": "./dist/di.js"
+        },
         "./users/procedures": {
             "types": "./dist/users/procedures.d.ts",
             "import": "./dist/users/procedures.js"
         },
-        "./users/repository": {
-            "types": "./dist/users/repository.d.ts",
-            "import": "./dist/users/repository.js"
-        },
-        "./users/service": {
-            "types": "./dist/users/service.d.ts",
-            "import": "./dist/users/service.js"
+        "./encoder": {
+            "types": "./dist/encoder.d.ts",
+            "import": "./dist/encoder.js"
         }
     },
     "scripts": {
         "build": "tsup",
         "check:types": "tsc --noEmit",
         "clean": "pnpm rimraf dist && pnpm rimraf node_modules && pnpm rimraf .turbo",
-        "dev": "tsup --watch",
         "format": "prettier --write . --ignore-unknown",
         "lint": "eslint .",
         "lint:fix": "eslint --fix",
@@ -38,6 +37,7 @@
         "@trpc/server": "catalog:",
         "dotenv": "catalog:",
         "drizzle-orm": "catalog:",
+        "hashids": "catalog:",
         "superjson": "catalog:",
         "zod": "catalog:"
     },
@@ -45,7 +45,9 @@
         "@phyt/core": "workspace:*",
         "@phyt/eslint": "workspace:*",
         "@phyt/tsconfig": "workspace:*",
+        "@types/hashids": "catalog:",
         "eslint": "catalog:",
+        "ioredis": "catalog:",
         "tsup": "catalog:",
         "typescript": "catalog:",
         "vitest": "catalog:"

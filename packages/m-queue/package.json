@@ -1,7 +1,7 @@
 {
     "name": "@phyt/m-queue",
-    "private": true,
     "version": "0.0.0",
+    "private": true,
     "type": "module",
     "exports": {
         "./queue": {
@@ -17,15 +17,14 @@
         "build": "tsup",
         "check:types": "tsc --noEmit",
         "clean": "pnpm rimraf dist && pnpm rimraf node_modules && pnpm rimraf .turbo",
-        "dev": "tsup --watch",
         "format": "prettier --write . --ignore-unknown",
         "lint": "eslint",
         "lint:fix": "eslint --fix",
         "test": "vitest run"
     },
     "dependencies": {
+        "@phyt/core": "workspace:*",
         "@phyt/data-access": "workspace:*",
-        "@phyt/redis": "workspace:*",
         "bullmq": "catalog:",
         "zod": "catalog:"
     },
@@ -33,6 +32,7 @@
         "@phyt/eslint": "workspace:*",
         "@phyt/tsconfig": "workspace:*",
         "eslint": "catalog:",
+        "ioredis": "catalog:",
         "prettier": "catalog:",
         "tsup": "catalog:",
         "typescript": "catalog:",

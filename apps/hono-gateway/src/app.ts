@@ -1,4 +1,5 @@
 import { Hono } from 'hono';
+import { cors } from 'hono/cors';
 import { trpcServer } from '@hono/trpc-server';
 
 import { apiRouter } from './router';
@@ -10,9 +11,22 @@ import { env } from './env';
 
 export const app = new Hono<HonoEnv>();
 
-app.use('*', authMiddleware);
+// Add CORS middleware before other middleware
+app.use(
+    '*',
+    cors({
+        origin: env.CORS_ORIGIN,
+        allowHeaders: ['Content-Type', 'Authorization'],
+        allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+        credentials: true
+    })
+);
 
-app.route(env.WEBHOOK_ENDPOINT, privyWebhook);
+app.get('/api/health', (c) => c.json({ status: 'ok' }));
+
+app.route(env.PRIVY_WEBHOOK_ENDPOINT, privyWebhook);
+
+app.use('*', authMiddleware);
 
 app.use(
     '/trpc/*',

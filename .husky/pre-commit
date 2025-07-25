@@ -1,1 +1,1 @@
-pnpm syncpack fix && pnpm exec lint-staged
+pnpm syncpack fix && pnpm syncpack format && pnpm exec lint-staged

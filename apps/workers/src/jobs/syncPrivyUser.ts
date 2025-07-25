@@ -1,9 +1,8 @@
 import { Job } from 'bullmq';
 import { SyncPrivyUserJob, SyncPrivyUserJobSchema } from '@phyt/m-queue/jobs';
 import { InsertUserSchema } from '@phyt/data-access/models/users';
-import { UserService } from '@phyt/trpc-adapters/users/service';
 
-import { dependencies } from '@/di';
+import { appDeps } from '../di';
 
 /**
  * Processor for sync_privy_user.
@@ -12,6 +11,31 @@ export async function syncPrivyUser(
     job: Job<SyncPrivyUserJob>
 ): Promise<{ ok: true }> {
     const data = SyncPrivyUserJobSchema.parse(job.data);
+
+    console.log(`[AUTH] Processing SYNC_PRIVY_USER for user ${data.privyDID}`);
+
+    // Check cache to see if data has changed
+    const cacheKey = `sync_privy_user:${data.privyDID}`;
+    const cachedData = await appDeps.cache.get<SyncPrivyUserJob>(
+        cacheKey,
+        SyncPrivyUserJobSchema
+    );
+
+    // Compare cached data with incoming data
+    if (
+        cachedData &&
+        cachedData.privyDID === data.privyDID &&
+        cachedData.username === data.username &&
+        cachedData.profilePictureUrl === data.profilePictureUrl &&
+        cachedData.walletAddress === data.walletAddress &&
+        cachedData.email === data.email &&
+        cachedData.role === data.role
+    ) {
+        console.log(
+            `[AUTH] Skipping sync for user ${data.username} (${data.privyDID}) - no changes detected`
+        );
+        return { ok: true };
+    }
 
     const record = {
         privyDID: data.privyDID,
@@ -22,8 +46,20 @@ export async function syncPrivyUser(
         role: data.role
     };
 
-    const newUser = InsertUserSchema.parse(record);
-    await new UserService(dependencies).syncPrivyData(newUser);
+    try {
+        const newUser = InsertUserSchema.parse(record);
+        await appDeps.userService.syncPrivyData(newUser);
 
-    return { ok: true };
+        // Cache the successfully processed data (24 hour TTL)
+        await appDeps.cache.set(cacheKey, data, 86400);
+
+        console.log(`[AUTH] Synced user ${data.username} (${data.privyDID})`);
+        return { ok: true };
+    } catch (error) {
+        console.error(
+            `❌ [AUTH] Failed to sync user ${data.privyDID}:`,
+            error instanceof Error ? error.message : 'Unknown error'
+        );
+        throw error;
+    }
 }

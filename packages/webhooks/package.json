@@ -4,28 +4,38 @@
     "private": true,
     "type": "module",
     "exports": {
-        ".": {
-            "types": "./dist/index.d.ts",
-            "import": "./dist/index.js"
+        "./idempotency": {
+            "types": "./dist/idempotency.d.ts",
+            "import": "./dist/idempotency.js"
+        },
+        "./privy-handler": {
+            "types": "./dist/privy-handler.d.ts",
+            "import": "./dist/privy-handler.js"
+        },
+        "./ops": {
+            "types": "./dist/ops.d.ts",
+            "import": "./dist/ops.js"
         }
     },
     "scripts": {
         "build": "tsup",
         "check:types": "tsc --noEmit",
         "clean": "pnpm rimraf dist && pnpm rimraf node_modules && pnpm rimraf .turbo",
-        "dev": "tsup --watch",
         "format": "prettier --write . --ignore-unknown",
         "lint": "eslint",
         "lint:fix": "eslint --fix",
         "test": "vitest run"
     },
     "dependencies": {
-        "zod": "catalog:",
-        "@phyt/redis": "workspace:*",
         "@phyt/m-queue": "workspace:*",
-        "@privy-io/server-auth": "catalog:"
+        "@phyt/redis": "workspace:*",
+        "@privy-io/server-auth": "catalog:",
+        "dotenv": "catalog:",
+        "svix": "catalog:",
+        "zod": "catalog:"
     },
     "devDependencies": {
+        "@phyt/core": "workspace:*",
         "@phyt/eslint": "workspace:*",
         "@phyt/tsconfig": "workspace:*",
         "@types/node": "catalog:",

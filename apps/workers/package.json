@@ -1,7 +1,7 @@
 {
     "name": "@phyt/workers",
-    "private": true,
     "version": "0.0.0",
+    "private": true,
     "type": "module",
     "exports": {
         ".": {
@@ -13,11 +13,12 @@
         "build": "tsup",
         "check:types": "tsc --noEmit",
         "clean": "pnpm rimraf dist && pnpm rimraf node_modules && pnpm rimraf .turbo",
-        "dev": "tsup --watch",
-        "start": "node dist/index.js",
+        "dev": "tsx watch --tsconfig tsconfig.dev.json src/index.ts",
+        "dev:debug": "tsx watch --inspect --tsconfig tsconfig.dev.json src/index.ts",
         "format": "prettier --write . --ignore-unknown",
         "lint": "eslint",
         "lint:fix": "eslint --fix",
+        "start": "node dist/index.js",
         "test": "vitest run"
     },
     "dependencies": {
@@ -26,9 +27,11 @@
         "@phyt/m-queue": "workspace:*",
         "@phyt/redis": "workspace:*",
         "@phyt/trpc-adapters": "workspace:*",
+        "@phyt/webhooks": "workspace:*",
         "@privy-io/server-auth": "catalog:",
         "@t3-oss/env-core": "catalog:",
         "bullmq": "catalog:",
+        "dotenv": "catalog:",
         "pino": "catalog:",
         "zod": "catalog:"
     },
@@ -36,6 +39,7 @@
         "@phyt/eslint": "workspace:*",
         "@phyt/tsconfig": "workspace:*",
         "@types/node": "catalog:",
+        "chalk": "catalog:",
         "eslint": "catalog:",
         "prettier": "catalog:",
         "tsup": "catalog:",
