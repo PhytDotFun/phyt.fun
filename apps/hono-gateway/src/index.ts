@@ -20,15 +20,15 @@ serve(
             const elapsedTime = Number(endTime - startTime) / 1_000_000; // Convert to milliseconds
             console.log('');
             console.log(
-                chalk.red('  HONO-GATEWAY v0.0.0  ') +
+                chalk.magenta('  HONO-GATEWAY v0.0.0  ') +
                     chalk.white(`ready in ${elapsedTime.toFixed(0)} ms`)
             );
             console.log('');
 
             console.log(
-                chalk.red('  ➜') +
+                chalk.magenta('  ➜') +
                     chalk.white('  Server:  ') +
-                    chalk.redBright(`http://localhost:${env.PORT.toString()}/`)
+                    chalk.yellow(`http://localhost:${env.PORT.toString()}/`)
             );
         }, 100);
     }
