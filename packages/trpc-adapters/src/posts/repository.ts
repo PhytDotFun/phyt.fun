@@ -1,6 +1,6 @@
-import { eq, and, isNull, desc } from 'drizzle-orm';
+import { eq, and, isNull, desc, lt } from 'drizzle-orm';
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
-import { posts } from '@phyt/data-access/db/schema';
+import { posts, users } from '@phyt/data-access/db/schema';
 import type { SelectPost, InsertPost } from '@phyt/data-access/models/posts';
 import {
     SelectPostSchema,
@@ -121,21 +121,113 @@ export class PostsRepository {
         return Boolean(result[0]);
     }
 
-    async findBatchPosts(limit: number = 50): Promise<SelectPost[]> {
-        const feedPosts = await this.db
+    async findBatchPosts(
+        limit: number = 20,
+        cursor?: Date
+    ): Promise<SelectPost[]> {
+        const conditions = [
+            eq(posts.visibility, 'public'),
+            eq(posts.isProfile, false),
+            isNull(posts.deletedAt)
+        ];
+
+        // Add cursor condition for pagination
+        if (cursor) {
+            conditions.push(lt(posts.createdAt, cursor));
+        }
+
+        const batchPosts = await this.db
             .select()
             .from(posts)
-            .where(
-                and(
-                    eq(posts.visibility, 'public'),
-                    eq(posts.isProfile, false),
-                    isNull(posts.deletedAt)
-                )
-            )
+            .where(and(...conditions))
             .orderBy(desc(posts.createdAt))
             .limit(limit);
 
-        return feedPosts.map((post) => {
+        return batchPosts.map((post) => {
+            SelectPostSchema.parse(post);
+            return post;
+        });
+    }
+
+    async findPrivyDIDBatchPosts(
+        privyDID: string,
+        limit: number = 20,
+        cursor?: Date
+    ): Promise<SelectPost[]> {
+        const conditions = [
+            eq(users.privyDID, privyDID),
+            eq(posts.visibility, 'public'),
+            eq(posts.isProfile, false),
+            isNull(posts.deletedAt),
+            isNull(users.deletedAt)
+        ];
+
+        // Add cursor condition for pagination
+        if (cursor) {
+            conditions.push(lt(posts.createdAt, cursor));
+        }
+
+        const batchPosts = await this.db
+            .select({
+                id: posts.id,
+                userId: posts.userId,
+                runId: posts.runId,
+                content: posts.content,
+                visibility: posts.visibility,
+                isProfile: posts.isProfile,
+                createdAt: posts.createdAt,
+                updatedAt: posts.updatedAt,
+                deletedAt: posts.deletedAt
+            })
+            .from(posts)
+            .innerJoin(users, eq(posts.userId, users.id))
+            .where(and(...conditions))
+            .orderBy(desc(posts.createdAt))
+            .limit(limit);
+
+        return batchPosts.map((post) => {
+            SelectPostSchema.parse(post);
+            return post;
+        });
+    }
+
+    async findWalletAddressBatchPosts(
+        walletAddress: string,
+        limit: number = 20,
+        cursor?: Date
+    ): Promise<SelectPost[]> {
+        const conditions = [
+            eq(users.walletAddress, walletAddress),
+            eq(posts.visibility, 'public'),
+            eq(posts.isProfile, false),
+            isNull(posts.deletedAt),
+            isNull(users.deletedAt)
+        ];
+
+        // Add cursor condition for pagination
+        if (cursor) {
+            conditions.push(lt(posts.createdAt, cursor));
+        }
+
+        const batchPosts = await this.db
+            .select({
+                id: posts.id,
+                userId: posts.userId,
+                runId: posts.runId,
+                content: posts.content,
+                visibility: posts.visibility,
+                isProfile: posts.isProfile,
+                createdAt: posts.createdAt,
+                updatedAt: posts.updatedAt,
+                deletedAt: posts.deletedAt
+            })
+            .from(posts)
+            .innerJoin(users, eq(posts.userId, users.id))
+            .where(and(...conditions))
+            .orderBy(desc(posts.createdAt))
+            .limit(limit);
+
+        return batchPosts.map((post) => {
             SelectPostSchema.parse(post);
             return post;
         });
