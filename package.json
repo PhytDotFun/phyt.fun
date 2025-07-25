@@ -33,6 +33,7 @@
     },
     "devDependencies": {
         "@turbo/gen": "catalog:",
+        "concurrently": "catalog:",
         "husky": "catalog:",
         "lint-staged": "catalog:",
         "prettier": "catalog:",
