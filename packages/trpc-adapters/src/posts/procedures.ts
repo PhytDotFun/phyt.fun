@@ -1,20 +1,32 @@
 import { TRPCError } from '@trpc/server';
-import { FeedPostsSchema, PostSchema } from '@phyt/data-access/models/posts';
+import {
+    PaginatedFeedSchema,
+    PostSchema
+} from '@phyt/data-access/models/posts';
 import { z } from 'zod';
 
 import { router, protectedProcedure } from '../trpc';
 
 export const postsRouter = router({
-    getFeed: protectedProcedure.query(async ({ ctx }) => {
-        if (!ctx.userId) {
-            throw new TRPCError({
-                code: 'UNAUTHORIZED',
-                message: 'User ID not found in context'
-            });
-        }
-        const feedPosts = await ctx.postsService.getFeed();
-        return FeedPostsSchema.parse(feedPosts);
-    }),
+    getFeed: protectedProcedure
+        .input(
+            z.object({
+                limit: z.number().min(1).max(50).default(20),
+                cursor: z.string().optional()
+            })
+        )
+        .query(async ({ ctx, input }) => {
+            if (!ctx.userId) {
+                throw new TRPCError({
+                    code: 'UNAUTHORIZED',
+                    message: 'User ID not found in context'
+                });
+            }
+
+            const { limit, cursor } = input;
+            const paginatedFeed = await ctx.postsService.getFeed(limit, cursor);
+            return PaginatedFeedSchema.parse(paginatedFeed);
+        }),
     getPostById: protectedProcedure
         .input(z.string())
         .query(async ({ ctx, input }) => {
