@@ -26,8 +26,9 @@ export class PostRepository {
 
     private async first(q: Promise<SelectPost[]>): Promise<SelectPost | null> {
         const r = (await q)[0];
+        if (!r) return null;
         SelectPostSchema.parse(r);
-        return r ?? null;
+        return r;
     }
 
     async findByPostId(id: number) {

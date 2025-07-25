@@ -20,8 +20,9 @@ export class UserRepository {
 
     private async first(q: Promise<SelectUser[]>): Promise<SelectUser | null> {
         const r = (await q)[0];
+        if (!r) return null;
         SelectUserSchema.parse(r);
-        return r ?? null;
+        return r;
     }
 
     findByUserId(id: number) {

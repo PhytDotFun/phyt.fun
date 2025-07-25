@@ -20,8 +20,9 @@ export class RunRepository {
 
     private async first(q: Promise<SelectRun[]>): Promise<SelectRun | null> {
         const r = (await q)[0];
+        if (!r) return null;
         SelectRunSchema.parse(r);
-        return r ?? null;
+        return r;
     }
 
     async findByRunId(id: number) {
