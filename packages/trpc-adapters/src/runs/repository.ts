@@ -7,14 +7,14 @@ import {
 } from '@phyt/data-access/models/runs';
 import { runs } from '@phyt/data-access/db/schema';
 
-interface RunRepositoryDeps {
+interface RunsRepositoryDeps {
     db: NodePgDatabase;
 }
 
-export class RunRepository {
+export class RunsRepository {
     private db: NodePgDatabase;
 
-    constructor(deps: RunRepositoryDeps) {
+    constructor(deps: RunsRepositoryDeps) {
         this.db = deps.db;
     }
 

@@ -6,24 +6,24 @@ import {
 } from '@phyt/data-access/models/runs';
 import type { IdEncoder, EntityType } from '@phyt/core/contracts';
 
-import type { RunRepository } from './repository';
+import type { RunsRepository } from './repository';
 
-interface RunServiceDeps {
-    runRepository: RunRepository;
+interface RunsServiceDeps {
+    runsRepository: RunsRepository;
     redis: Redis;
     idEncoder: IdEncoder;
 }
 
-export class RunService {
-    private repo: RunRepository;
+export class RunsService {
+    private repo: RunsRepository;
     private redis: Redis;
     private idEncoder: IdEncoder;
 
     private readonly RUN_CACHE_TTL = 15 * 60; // 15 minutes
     private readonly ENTITY_TYPE: EntityType = 'runs';
 
-    constructor(deps: RunServiceDeps) {
-        this.repo = deps.runRepository;
+    constructor(deps: RunsServiceDeps) {
+        this.repo = deps.runsRepository;
         this.redis = deps.redis;
         this.idEncoder = deps.idEncoder;
     }
