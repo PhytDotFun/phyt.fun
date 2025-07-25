@@ -3,32 +3,32 @@ import { PostSchema } from '@phyt/data-access/models/posts';
 import type { Redis } from 'ioredis';
 import type { IdEncoder } from '@phyt/core/contracts';
 
-import type { UserService } from '../users/service';
-import type { RunService } from '../runs/service';
+import type { UsersService } from '../users/service';
+import type { RunsService } from '../runs/service';
 
-import type { PostRepository } from './repository';
+import type { PostsRepository } from './repository';
 
-interface PostServiceDeps {
-    postRepository: PostRepository;
-    userService: UserService;
-    runService: RunService;
+interface PostsServiceDeps {
+    postsRepository: PostsRepository;
+    usersService: UsersService;
+    runsService: RunsService;
     redis: Redis;
     idEncoder: IdEncoder;
 }
 
-export class PostService {
-    private repo: PostRepository;
-    private userService: UserService;
-    private runService: RunService;
+export class PostsService {
+    private repo: PostsRepository;
+    private usersService: UsersService;
+    private runsService: RunsService;
     private redis: Redis;
     private idEncoder: IdEncoder;
 
     private readonly POST_CACHE_TTL = 10 * 60; // 10 minutes
 
-    constructor(deps: PostServiceDeps) {
-        this.repo = deps.postRepository;
-        this.userService = deps.userService;
-        this.runService = deps.runService;
+    constructor(deps: PostsServiceDeps) {
+        this.repo = deps.postsRepository;
+        this.usersService = deps.usersService;
+        this.runsService = deps.runsService;
         this.redis = deps.redis;
         this.idEncoder = deps.idEncoder;
     }
@@ -127,8 +127,8 @@ export class PostService {
 
             if (!post) throw new Error('Could not find post');
 
-            const user = await this.userService.getUserById(post.userId);
-            const run = await this.runService.getRunById(post.runId);
+            const user = await this.usersService.getUserById(post.userId);
+            const run = await this.runsService.getRunById(post.runId);
 
             if (!user) throw new Error('Could not find post author');
             if (!run) throw new Error('Could not find post run');
@@ -176,8 +176,8 @@ export class PostService {
             const newPost = await this.repo.insert(data);
 
             // Get the user and run data to return the full Post object
-            const user = await this.userService.getUserById(newPost.userId);
-            const run = await this.runService.getRunById(newPost.runId);
+            const user = await this.usersService.getUserById(newPost.userId);
+            const run = await this.runsService.getRunById(newPost.runId);
 
             if (!user) {
                 throw new Error('Could not find post author');
@@ -254,8 +254,8 @@ export class PostService {
             for (const post of posts) {
                 try {
                     const [user, run] = await Promise.all([
-                        this.userService.getUserById(post.userId),
-                        this.runService.getRunById(post.runId)
+                        this.usersService.getUserById(post.userId),
+                        this.runsService.getRunById(post.runId)
                     ]);
 
                     if (!user) {

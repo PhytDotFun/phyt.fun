@@ -12,7 +12,7 @@ export const postsRouter = router({
                 message: 'User ID not found in context'
             });
         }
-        const feedPosts = await ctx.postService.getFeed();
+        const feedPosts = await ctx.postsService.getFeed();
         return FeedPostsSchema.parse(feedPosts);
     }),
     getPostById: protectedProcedure
@@ -26,7 +26,7 @@ export const postsRouter = router({
                     message: 'User ID not found in context'
                 });
             }
-            const post = await ctx.postService.getPostByPublicId(postId);
+            const post = await ctx.postsService.getPostByPublicId(postId);
             if (!post) {
                 throw new TRPCError({
                     code: 'NOT_FOUND',

@@ -8,20 +8,20 @@ import {
     UpdatePostSchema
 } from '@phyt/data-access/models/posts';
 
-import type { UserRepository } from '../users/repository';
+import type { UsersRepository } from '../users/repository';
 
-interface PostRepositoryDeps {
+interface PostsRepositoryDeps {
     db: NodePgDatabase;
-    userRepository: UserRepository;
+    usersRepository: UsersRepository;
 }
 
-export class PostRepository {
+export class PostsRepository {
     private db: NodePgDatabase;
-    private userRepository: UserRepository;
+    private usersRepository: UsersRepository;
 
-    constructor(deps: PostRepositoryDeps) {
+    constructor(deps: PostsRepositoryDeps) {
         this.db = deps.db;
-        this.userRepository = deps.userRepository;
+        this.usersRepository = deps.usersRepository;
     }
 
     private async first(q: Promise<SelectPost[]>): Promise<SelectPost | null> {
@@ -43,7 +43,7 @@ export class PostRepository {
 
     async findByWalletAddress(walletAddress: string) {
         const user =
-            await this.userRepository.findByWalletAddress(walletAddress);
+            await this.usersRepository.findByWalletAddress(walletAddress);
 
         if (!user) throw new Error('User not found');
 
