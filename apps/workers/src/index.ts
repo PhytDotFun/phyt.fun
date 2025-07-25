@@ -70,32 +70,32 @@ setTimeout(() => {
     const elapsedTime = Number(endTime - startTime) / 1_000_000; // Convert to milliseconds
     console.log('');
     console.log(
-        chalk.magenta('  WORKERS v0.0.0  ') +
+        chalk.red('  WORKERS v0.0.0  ') +
             chalk.white(`ready in ${elapsedTime.toFixed(0)} ms`)
     );
     console.log('');
 
     console.log(
-        chalk.magenta('  ➜') +
+        chalk.red('  ➜') +
             chalk.white('  Concurrency: ') +
-            chalk.yellow(env.WORKER_CONCURRENCY.toString()) +
+            chalk.redBright(env.WORKER_CONCURRENCY.toString()) +
             chalk.gray(' (per queue)')
     );
     console.log(
-        chalk.magenta('  ➜') +
+        chalk.red('  ➜') +
             chalk.white('  Rate Limit:  ') +
-            chalk.yellow(`${env.WORKER_RATE_LIMIT.toString()} jobs/second`) +
+            chalk.redBright(`${env.WORKER_RATE_LIMIT.toString()} jobs/second`) +
             chalk.gray(' (per queue)')
     );
     console.log(
-        chalk.magenta('  ➜') +
+        chalk.red('  ➜') +
             chalk.white('  Auth Queue:  ') +
-            chalk.yellow(`CREATE_WALLET, SYNC_PRIVY_USER`)
+            chalk.redBright(`CREATE_WALLET, SYNC_PRIVY_USER`)
     );
     console.log(
-        chalk.magenta('  ➜') +
+        chalk.red('  ➜') +
             chalk.white('  Posts Queue: ') +
-            chalk.yellow(`CHECK_RUNS_TO_POST, POST_RUNS`)
+            chalk.redBright(`CHECK_RUNS_TO_POST, POST_RUNS`)
     );
 }, 100);
 
