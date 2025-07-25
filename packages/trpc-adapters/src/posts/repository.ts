@@ -1,4 +1,4 @@
-import { eq, and, isNull } from 'drizzle-orm';
+import { eq, and, isNull, desc } from 'drizzle-orm';
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { posts } from '@phyt/data-access/db/schema';
 import type { SelectPost, InsertPost } from '@phyt/data-access/models/posts';
@@ -119,5 +119,25 @@ export class PostRepository {
             .limit(1);
 
         return Boolean(result[0]);
+    }
+
+    async findBatchPosts(limit: number = 50): Promise<SelectPost[]> {
+        const feedPosts = await this.db
+            .select()
+            .from(posts)
+            .where(
+                and(
+                    eq(posts.visibility, 'public'),
+                    eq(posts.isProfile, false),
+                    isNull(posts.deletedAt)
+                )
+            )
+            .orderBy(desc(posts.createdAt))
+            .limit(limit);
+
+        return feedPosts.map((post) => {
+            SelectPostSchema.parse(post);
+            return post;
+        });
     }
 }
