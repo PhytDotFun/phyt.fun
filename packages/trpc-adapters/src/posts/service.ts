@@ -101,7 +101,16 @@ export class PostService {
             if (cached) {
                 const parsedJson: unknown = JSON.parse(cached);
                 const transformedData = this.transformCachedData(parsedJson);
-                return transformedData as Post;
+                const parsed = PostSchema.nullable().safeParse(transformedData);
+                if (parsed.success) {
+                    return parsed.data;
+                } else {
+                    console.log(
+                        '[cache] Schema validation failed:',
+                        parsed.error.issues
+                    );
+                    await this.redis.del(cacheKey);
+                }
             }
         } catch (error) {
             console.error(
@@ -112,37 +121,19 @@ export class PostService {
             );
         }
 
-        // Cache miss - fetch from database
+        // Cache miss - fetch from database and enrich
         try {
             const post = await this.repo.findByPostId(id);
 
             if (!post) throw new Error('Could not find post');
 
             const user = await this.userService.getUserById(post.userId);
-
             const run = await this.runService.getRunById(post.runId);
 
             if (!user) throw new Error('Could not find post author');
-
             if (!run) throw new Error('Could not find post run');
 
-            // Cache the result
-            try {
-                await this.redis.set(
-                    cacheKey,
-                    JSON.stringify(post),
-                    'EX',
-                    this.POST_CACHE_TTL
-                );
-            } catch (error) {
-                console.error(
-                    '[cache] Redis SET error for key',
-                    cacheKey,
-                    ':',
-                    error
-                );
-            }
-
+            // Create the enriched Post object
             const returnedPost = {
                 id: this.idEncoder.encode('posts', post.id),
                 content: post.content,
@@ -154,6 +145,23 @@ export class PostService {
             };
 
             PostSchema.parse(returnedPost);
+
+            // Cache the enriched Post object
+            try {
+                await this.redis.set(
+                    cacheKey,
+                    JSON.stringify(returnedPost),
+                    'EX',
+                    this.POST_CACHE_TTL
+                );
+            } catch (error) {
+                console.error(
+                    '[cache] Redis SET error for key',
+                    cacheKey,
+                    ':',
+                    error
+                );
+            }
 
             return returnedPost;
         } catch (error) {

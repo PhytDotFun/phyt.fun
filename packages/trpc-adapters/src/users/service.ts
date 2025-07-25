@@ -3,7 +3,7 @@ import type {
     SelectUser,
     User
 } from '@phyt/data-access/models/users';
-import { SelectUserSchema, UserSchema } from '@phyt/data-access/models/users';
+import { UserSchema } from '@phyt/data-access/models/users';
 import type { Redis } from 'ioredis';
 
 import type { UserRepository } from './repository';
@@ -53,6 +53,16 @@ export class UserService {
         return transformed;
     }
 
+    // Helper function to create filtered User object from SelectUser
+    private createUserFromSelectUser(selectUser: SelectUser): User {
+        return {
+            username: selectUser.username,
+            role: selectUser.role,
+            profilePictureUrl: selectUser.profilePictureUrl,
+            walletAddress: selectUser.walletAddress
+        };
+    }
+
     async syncPrivyData(data: InsertUser): Promise<SelectUser> {
         const user = await this.repo.upsertByPrivyId(data);
 
@@ -71,8 +81,7 @@ export class UserService {
             if (cached) {
                 const parsedJson: unknown = JSON.parse(cached);
                 const transformedData = this.transformCachedUser(parsedJson);
-                const parsed =
-                    SelectUserSchema.nullable().safeParse(transformedData);
+                const parsed = UserSchema.nullable().safeParse(transformedData);
 
                 if (parsed.success) {
                     return parsed.data;
@@ -97,9 +106,11 @@ export class UserService {
 
             if (!user) throw new Error('Could not find user in Cache or DB');
 
-            // Cache the result
+            const returnedUser = this.createUserFromSelectUser(user);
+
+            // Cache the filtered User object, not the full SelectUser
             try {
-                const serialized = JSON.stringify(user);
+                const serialized = JSON.stringify(returnedUser);
                 await this.redis.set(
                     cacheKey,
                     serialized,
@@ -114,13 +125,6 @@ export class UserService {
                     error
                 );
             }
-
-            const returnedUser = {
-                username: user.username,
-                role: user.role,
-                profilePictureUrl: user.profilePictureUrl,
-                walletAddress: user.walletAddress
-            };
 
             UserSchema.parse(returnedUser);
 
@@ -141,8 +145,7 @@ export class UserService {
             if (cached) {
                 const parsedJson: unknown = JSON.parse(cached);
                 const transformedData = this.transformCachedUser(parsedJson);
-                const parsed =
-                    SelectUserSchema.nullable().safeParse(transformedData);
+                const parsed = UserSchema.nullable().safeParse(transformedData);
 
                 if (parsed.success) {
                     return parsed.data;
@@ -169,9 +172,11 @@ export class UserService {
 
             if (!user) throw new Error('Could not find user in Cache or DB');
 
-            // Cache the result
+            const returnedUser = this.createUserFromSelectUser(user);
+
+            // Cache the filtered User object, not the full SelectUser
             try {
-                const serialized = JSON.stringify(user);
+                const serialized = JSON.stringify(returnedUser);
                 await this.redis.set(
                     cacheKey,
                     serialized,
@@ -186,13 +191,6 @@ export class UserService {
                     error
                 );
             }
-
-            const returnedUser = {
-                username: user.username,
-                role: user.role,
-                profilePictureUrl: user.profilePictureUrl,
-                walletAddress: user.walletAddress
-            };
 
             UserSchema.parse(returnedUser);
 
@@ -212,8 +210,7 @@ export class UserService {
             if (cached) {
                 const parsedJson: unknown = JSON.parse(cached);
                 const transformedData = this.transformCachedUser(parsedJson);
-                const parsed =
-                    SelectUserSchema.nullable().safeParse(transformedData);
+                const parsed = UserSchema.nullable().safeParse(transformedData);
                 if (parsed.success) {
                     return parsed.data;
                 }
@@ -226,20 +223,15 @@ export class UserService {
 
             if (!user) throw new Error();
 
-            // Cache the result
+            const returnedUser = this.createUserFromSelectUser(user);
+
+            // Cache the filtered User object, not the full SelectUser
             await this.redis.set(
                 cacheKey,
-                JSON.stringify(user),
+                JSON.stringify(returnedUser),
                 'EX',
                 this.USER_CACHE_TTL
             );
-
-            const returnedUser = {
-                username: user.username,
-                role: user.role,
-                profilePictureUrl: user.profilePictureUrl,
-                walletAddress: user.walletAddress
-            };
 
             UserSchema.parse(returnedUser);
 
