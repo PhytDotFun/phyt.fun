@@ -1,5 +1,12 @@
-import type { Post, InsertPost } from '@phyt/data-access/models/posts';
-import { PostSchema } from '@phyt/data-access/models/posts';
+import type {
+    Post,
+    InsertPost,
+    PaginatedFeed
+} from '@phyt/data-access/models/posts';
+import {
+    PostSchema,
+    PaginatedFeedSchema
+} from '@phyt/data-access/models/posts';
 import type { Redis } from 'ioredis';
 import type { IdEncoder } from '@phyt/core/contracts';
 
@@ -204,8 +211,19 @@ export class PostsService {
         }
     }
 
-    async getFeed(limit: number = 50): Promise<Post[]> {
-        const cacheKey = this.getCacheKey('feed', 'recent', limit.toString());
+    async getFeed(
+        limit: number = 20,
+        cursor?: string // ISO string of createdAt timestamp
+    ): Promise<PaginatedFeed> {
+        // Parse cursor if provided
+        const cursorDate = cursor ? new Date(cursor) : undefined;
+
+        const cacheKey = this.getCacheKey(
+            'feed',
+            'recent',
+            limit.toString(),
+            cursor || 'initial'
+        );
 
         // Try cache first
         try {
@@ -213,20 +231,9 @@ export class PostsService {
             if (cached) {
                 const parsedJson: unknown = JSON.parse(cached);
                 const transformedData = this.transformCachedData(parsedJson);
-                if (Array.isArray(transformedData)) {
-                    const posts = transformedData
-                        .map((item) => {
-                            const parsed = PostSchema.safeParse(item);
-                            if (parsed.success) {
-                                return parsed.data;
-                            }
-                            return null;
-                        })
-                        .filter((post): post is Post => post !== null);
-
-                    if (posts.length > 0) {
-                        return posts;
-                    }
+                const parsed = PaginatedFeedSchema.safeParse(transformedData);
+                if (parsed.success) {
+                    return parsed.data;
                 }
                 // Invalid cached data - delete it
                 await this.redis.del(cacheKey);
@@ -242,10 +249,14 @@ export class PostsService {
 
         // Cache miss - fetch from database and enrich
         try {
-            const posts = await this.repo.findBatchPosts(limit);
+            const posts = await this.repo.findBatchPosts(limit, cursorDate);
 
             if (posts.length === 0) {
-                return [];
+                return {
+                    posts: [],
+                    nextCursor: null,
+                    hasMore: false
+                };
             }
 
             // Enrich posts with user and run data
@@ -291,13 +302,29 @@ export class PostsService {
                 }
             }
 
-            // Cache the enriched feed
+            // Determine if there are more posts and create next cursor
+            const hasMore = enrichedPosts.length === limit;
+            const nextCursor =
+                hasMore && enrichedPosts.length > 0
+                    ? posts[posts.length - 1]?.createdAt.toISOString() || null
+                    : null;
+
+            const paginatedFeed: PaginatedFeed = {
+                posts: enrichedPosts,
+                nextCursor,
+                hasMore
+            };
+
+            // Validate the response
+            PaginatedFeedSchema.parse(paginatedFeed);
+
+            // Cache the paginated feed
             try {
                 await this.redis.set(
                     cacheKey,
-                    JSON.stringify(enrichedPosts),
+                    JSON.stringify(paginatedFeed),
                     'EX',
-                    300 // 5 minutes cache for feed
+                    120 // 2 minutes cache for feed pages (shorter for fresher content)
                 );
             } catch (error) {
                 console.error(
@@ -308,10 +335,172 @@ export class PostsService {
                 );
             }
 
-            return enrichedPosts;
+            return paginatedFeed;
         } catch (error) {
             console.error('Error fetching feed:', error);
-            return [];
+            return {
+                posts: [],
+                nextCursor: null,
+                hasMore: false
+            };
+        }
+    }
+
+    async getProfilePosts(
+        userIdentifier: { privyDID: string } | { walletAddress: string },
+        limit: number = 20,
+        cursor?: string // ISO string of createdAt timestamp
+    ): Promise<PaginatedFeed> {
+        // Determine cache key and identifier type
+        const isPrivyDID = 'privyDID' in userIdentifier;
+        const identifierValue = isPrivyDID
+            ? userIdentifier.privyDID
+            : userIdentifier.walletAddress;
+        const identifierType = isPrivyDID ? 'privyDID' : 'walletAddress';
+
+        // Parse cursor if provided
+        const cursorDate = cursor ? new Date(cursor) : undefined;
+
+        const cacheKey = this.getCacheKey(
+            'profile',
+            identifierType,
+            identifierValue,
+            limit.toString(),
+            cursor || 'initial'
+        );
+
+        // Try cache first
+        try {
+            const cached = await this.redis.get(cacheKey);
+            if (cached) {
+                const parsedJson: unknown = JSON.parse(cached);
+                const transformedData = this.transformCachedData(parsedJson);
+                const parsed = PaginatedFeedSchema.safeParse(transformedData);
+                if (parsed.success) {
+                    return parsed.data;
+                }
+                // Invalid cached data - delete it
+                await this.redis.del(cacheKey);
+            }
+        } catch (error) {
+            console.error(
+                '[cache] Redis GET error for key',
+                cacheKey,
+                ':',
+                error
+            );
+        }
+
+        // Cache miss - fetch from database and enrich
+        try {
+            // Use appropriate repository method based on identifier type
+            const posts = isPrivyDID
+                ? await this.repo.findPrivyDIDBatchPosts(
+                      identifierValue,
+                      limit,
+                      cursorDate
+                  )
+                : await this.repo.findWalletAddressBatchPosts(
+                      identifierValue,
+                      limit,
+                      cursorDate
+                  );
+
+            if (posts.length === 0) {
+                return {
+                    posts: [],
+                    nextCursor: null,
+                    hasMore: false
+                };
+            }
+
+            // Enrich posts with user and run data
+            const enrichedPosts: Post[] = [];
+
+            for (const post of posts) {
+                try {
+                    const [user, run] = await Promise.all([
+                        this.usersService.getUserById(post.userId),
+                        this.runsService.getRunById(post.runId)
+                    ]);
+
+                    if (!user) {
+                        console.warn(
+                            `User not found for post ${post.id.toString()}`
+                        );
+                        continue;
+                    }
+
+                    if (!run) {
+                        console.warn(
+                            `Run not found for post ${post.id.toString()}`
+                        );
+                        continue;
+                    }
+
+                    const enrichedPost: Post = {
+                        id: this.idEncoder.encode('posts', post.id),
+                        content: post.content,
+                        visibility: post.visibility,
+                        user: user,
+                        run: run
+                    };
+
+                    PostSchema.parse(enrichedPost);
+                    enrichedPosts.push(enrichedPost);
+                } catch (error) {
+                    console.error(
+                        `Error enriching post ${post.id.toString()}:`,
+                        error
+                    );
+                    // Continue processing other posts
+                }
+            }
+
+            // Determine if there are more posts and create next cursor
+            const hasMore = enrichedPosts.length === limit;
+            const nextCursor =
+                hasMore && enrichedPosts.length > 0
+                    ? posts[posts.length - 1]?.createdAt.toISOString() || null
+                    : null;
+
+            const paginatedFeed: PaginatedFeed = {
+                posts: enrichedPosts,
+                nextCursor,
+                hasMore
+            };
+
+            // Validate the response
+            PaginatedFeedSchema.parse(paginatedFeed);
+
+            // Cache the enriched profile posts
+            try {
+                await this.redis.set(
+                    cacheKey,
+                    JSON.stringify(paginatedFeed),
+                    'EX',
+                    600 // 10 minutes cache for profile posts (longer than feed)
+                );
+            } catch (error) {
+                console.error(
+                    '[cache] Redis SET error for key',
+                    cacheKey,
+                    ':',
+                    error
+                );
+            }
+
+            return paginatedFeed;
+        } catch (error) {
+            console.error(
+                `Error fetching profile posts for ${identifierType} ${identifierValue}:`,
+                error
+            );
+            return {
+                posts: [],
+                nextCursor: null,
+                hasMore: false
+            };
         }
     }
 }
