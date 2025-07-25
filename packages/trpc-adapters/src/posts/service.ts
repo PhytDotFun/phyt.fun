@@ -203,4 +203,115 @@ export class PostService {
             throw error;
         }
     }
+
+    async getFeed(limit: number = 50): Promise<Post[]> {
+        const cacheKey = this.getCacheKey('feed', 'recent', limit.toString());
+
+        // Try cache first
+        try {
+            const cached = await this.redis.get(cacheKey);
+            if (cached) {
+                const parsedJson: unknown = JSON.parse(cached);
+                const transformedData = this.transformCachedData(parsedJson);
+                if (Array.isArray(transformedData)) {
+                    const posts = transformedData
+                        .map((item) => {
+                            const parsed = PostSchema.safeParse(item);
+                            if (parsed.success) {
+                                return parsed.data;
+                            }
+                            return null;
+                        })
+                        .filter((post): post is Post => post !== null);
+
+                    if (posts.length > 0) {
+                        return posts;
+                    }
+                }
+                // Invalid cached data - delete it
+                await this.redis.del(cacheKey);
+            }
+        } catch (error) {
+            console.error(
+                '[cache] Redis GET error for key',
+                cacheKey,
+                ':',
+                error
+            );
+        }
+
+        // Cache miss - fetch from database and enrich
+        try {
+            const posts = await this.repo.findBatchPosts(limit);
+
+            if (posts.length === 0) {
+                return [];
+            }
+
+            // Enrich posts with user and run data
+            const enrichedPosts: Post[] = [];
+
+            for (const post of posts) {
+                try {
+                    const [user, run] = await Promise.all([
+                        this.userService.getUserById(post.userId),
+                        this.runService.getRunById(post.runId)
+                    ]);
+
+                    if (!user) {
+                        console.warn(
+                            `User not found for post ${post.id.toString()}`
+                        );
+                        continue;
+                    }
+
+                    if (!run) {
+                        console.warn(
+                            `Run not found for post ${post.id.toString()}`
+                        );
+                        continue;
+                    }
+
+                    const enrichedPost: Post = {
+                        id: this.idEncoder.encode('posts', post.id),
+                        content: post.content,
+                        visibility: post.visibility,
+                        user: user,
+                        run: run
+                    };
+
+                    PostSchema.parse(enrichedPost);
+                    enrichedPosts.push(enrichedPost);
+                } catch (error) {
+                    console.error(
+                        `Error enriching post ${post.id.toString()}:`,
+                        error
+                    );
+                    // Continue processing other posts
+                }
+            }
+
+            // Cache the enriched feed
+            try {
+                await this.redis.set(
+                    cacheKey,
+                    JSON.stringify(enrichedPosts),
+                    'EX',
+                    300 // 5 minutes cache for feed
+                );
+            } catch (error) {
+                console.error(
+                    '[cache] Redis SET error for key',
+                    cacheKey,
+                    ':',
+                    error
+                );
+            }
+
+            return enrichedPosts;
+        } catch (error) {
+            console.error('Error fetching feed:', error);
+            return [];
+        }
+    }
 }
