@@ -4,7 +4,7 @@ import {
     RunPostSchema,
     MarkRunPostedSchema
 } from '@phyt/data-access/models/runs';
-import type { IdEncoder } from '@phyt/core/contracts';
+import type { IdEncoder, EntityType } from '@phyt/core/contracts';
 
 import type { RunRepository } from './repository';
 
@@ -20,6 +20,7 @@ export class RunService {
     private idEncoder: IdEncoder;
 
     private readonly RUN_CACHE_TTL = 15 * 60; // 15 minutes
+    private readonly ENTITY_TYPE: EntityType = 'runs';
 
     constructor(deps: RunServiceDeps) {
         this.repo = deps.runRepository;
@@ -68,7 +69,7 @@ export class RunService {
 
     async getRunByPublicId(publicId: string): Promise<Run | null> {
         try {
-            const id = this.idEncoder.decode('runs', publicId);
+            const id = this.idEncoder.decode(this.ENTITY_TYPE, publicId);
             if (!id) throw new Error('Failed to find run id');
 
             return await this.getRunById(id);
@@ -121,7 +122,7 @@ export class RunService {
 
             const returnedRun = {
                 duration: run.duration,
-                id: this.idEncoder.encode('runs', run.id),
+                id: this.idEncoder.encode(this.ENTITY_TYPE, run.id),
                 startTime: run.startTime,
                 endTime: run.endTime,
                 distance: run.distance,
@@ -147,7 +148,10 @@ export class RunService {
         try {
             MarkRunPostedSchema.parse(update);
 
-            const internalId = this.idEncoder.decode('runs', update.id);
+            const internalId = this.idEncoder.decode(
+                this.ENTITY_TYPE,
+                update.id
+            );
             if (!internalId) {
                 throw new Error('Failed to decode run ID');
             }
@@ -164,7 +168,7 @@ export class RunService {
 
             const updatedRun = {
                 duration: result.duration,
-                id: this.idEncoder.encode('runs', result.id),
+                id: this.idEncoder.encode(this.ENTITY_TYPE, result.id),
                 startTime: result.startTime,
                 endTime: result.endTime,
                 distance: result.distance,

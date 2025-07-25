@@ -1,8 +1,7 @@
 import Hashids from 'hashids';
 import { z } from 'zod';
 import type { Dependencies } from '@phyt/core/di';
-
-type EntityType = keyof Dependencies['salts'];
+import type { EntityType } from '@phyt/core/contracts';
 
 export class IdEncoder {
     private hashers: Map<EntityType, Hashids> = new Map();
