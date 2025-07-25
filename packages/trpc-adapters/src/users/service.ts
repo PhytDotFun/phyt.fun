@@ -6,21 +6,21 @@ import type {
 import { UserSchema } from '@phyt/data-access/models/users';
 import type { Redis } from 'ioredis';
 
-import type { UserRepository } from './repository';
+import type { UsersRepository } from './repository';
 
-interface UserServiceDeps {
-    userRepository: UserRepository;
+interface UsersServiceDeps {
+    usersRepository: UsersRepository;
     redis: Redis;
 }
 
-export class UserService {
-    private repo: UserRepository;
+export class UsersService {
+    private repo: UsersRepository;
     private redis: Redis;
 
     private readonly USER_CACHE_TTL = 15 * 60; // 15 minutes
 
-    constructor(deps: UserServiceDeps) {
-        this.repo = deps.userRepository;
+    constructor(deps: UsersServiceDeps) {
+        this.repo = deps.usersRepository;
         this.redis = deps.redis;
     }
 
