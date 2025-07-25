@@ -19,7 +19,7 @@
         "db:stop": "docker compose stop postgres",
         "db:studio": "pnpm --filter @phyt/data-access db:studio",
         "db:up": "docker compose up -d",
-        "dev": "turbo run dev:gw dev:web dev:wrk --parallel",
+        "dev": "concurrently \"pnpm dev:web\" \"pnpm dev:gw\" \"pnpm dev:wrk\"",
         "dev:gw": "tooling/vault/inject.sh dev/hono-gateway pnpm --filter @phyt/hono-gateway dev",
         "dev:web": "tooling/vault/inject.sh dev/web           pnpm --filter @phyt/web            dev",
         "dev:wrk": "tooling/vault/inject.sh dev/workers       pnpm --filter @phyt/workers        dev",
