@@ -4,7 +4,7 @@ import { z } from 'zod';
 
 import { router, protectedProcedure } from '../trpc';
 
-export const userRouter = router({
+export const usersRouter = router({
     getCurrentUser: protectedProcedure.query(async ({ ctx }) => {
         if (!ctx.userId) {
             throw new TRPCError({
