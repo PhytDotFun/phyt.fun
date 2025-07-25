@@ -24,19 +24,19 @@
     },
     "dependencies": {},
     "devDependencies": {
-        "@phyt/tsconfig": "workspace:*",
         "@phyt/eslint": "workspace:*",
+        "@phyt/tsconfig": "workspace:*",
         "@privy-io/server-auth": "catalog:",
         "@types/node": "catalog:",
         "@types/pg": "catalog:",
         "bullmq": "catalog:",
         "drizzle-kit": "catalog:",
         "drizzle-orm": "catalog:",
-        "ioredis": "catalog:",
         "eslint": "catalog:",
+        "ioredis": "catalog:",
+        "prettier": "catalog:",
         "tsup": "catalog:",
         "typescript": "catalog:",
-        "prettier": "catalog:",
         "vitest": "catalog:",
         "zod": "catalog:"
     }

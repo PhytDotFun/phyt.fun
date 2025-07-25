@@ -1,7 +1,7 @@
 {
     "name": "@phyt/workers",
-    "private": true,
     "version": "0.0.0",
+    "private": true,
     "type": "module",
     "exports": {
         ".": {
@@ -15,19 +15,19 @@
         "clean": "pnpm rimraf dist && pnpm rimraf node_modules && pnpm rimraf .turbo",
         "dev": "tsx watch --tsconfig tsconfig.dev.json src/index.ts",
         "dev:debug": "tsx watch --inspect --tsconfig tsconfig.dev.json src/index.ts",
-        "start": "node dist/index.js",
         "format": "prettier --write . --ignore-unknown",
         "lint": "eslint",
         "lint:fix": "eslint --fix",
+        "start": "node dist/index.js",
         "test": "vitest run"
     },
     "dependencies": {
         "@phyt/core": "workspace:*",
         "@phyt/data-access": "workspace:*",
-        "@phyt/webhooks": "workspace:*",
         "@phyt/m-queue": "workspace:*",
         "@phyt/redis": "workspace:*",
         "@phyt/trpc-adapters": "workspace:*",
+        "@phyt/webhooks": "workspace:*",
         "@privy-io/server-auth": "catalog:",
         "@t3-oss/env-core": "catalog:",
         "bullmq": "catalog:",

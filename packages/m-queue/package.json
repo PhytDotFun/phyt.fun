@@ -1,7 +1,7 @@
 {
     "name": "@phyt/m-queue",
-    "private": true,
     "version": "0.0.0",
+    "private": true,
     "type": "module",
     "exports": {
         "./queue": {
@@ -29,10 +29,10 @@
         "zod": "catalog:"
     },
     "devDependencies": {
-        "ioredis": "catalog:",
         "@phyt/eslint": "workspace:*",
         "@phyt/tsconfig": "workspace:*",
         "eslint": "catalog:",
+        "ioredis": "catalog:",
         "prettier": "catalog:",
         "tsup": "catalog:",
         "typescript": "catalog:",
