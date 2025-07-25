@@ -68,7 +68,7 @@ export class RunService {
 
     async getRunByPublicId(publicId: string): Promise<Run | null> {
         try {
-            const id = this.idEncoder.decode('run', publicId);
+            const id = this.idEncoder.decode('runs', publicId);
             if (!id) throw new Error('Failed to find run id');
 
             return await this.getRunById(id);
@@ -121,7 +121,7 @@ export class RunService {
 
             const returnedRun = {
                 duration: run.duration,
-                id: this.idEncoder.encode('run', run.id),
+                id: this.idEncoder.encode('runs', run.id),
                 startTime: run.startTime,
                 endTime: run.endTime,
                 distance: run.distance,
@@ -147,7 +147,10 @@ export class RunService {
         try {
             MarkRunPostedSchema.parse(update);
 
-            const internalId = this.idEncoder.decode('run', update.id);
+            const internalId = this.idEncoder.decode('runs', update.id);
+            if (!internalId) {
+                throw new Error('Failed to decode run ID');
+            }
 
             const updateWithInternalId = {
                 id: internalId,
@@ -161,7 +164,7 @@ export class RunService {
 
             const updatedRun = {
                 duration: result.duration,
-                id: this.idEncoder.encode('run', result.id),
+                id: this.idEncoder.encode('runs', result.id),
                 startTime: result.startTime,
                 endTime: result.endTime,
                 distance: result.distance,
