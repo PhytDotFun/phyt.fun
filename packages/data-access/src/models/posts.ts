@@ -27,3 +27,7 @@ export const PostSchema = z.object({
 });
 
 export type Post = z.infer<typeof PostSchema>;
+
+export const FeedPostsSchema = z.array(PostSchema);
+
+export type Feed = z.infer<typeof FeedPostsSchema>;
