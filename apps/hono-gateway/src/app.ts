@@ -24,7 +24,7 @@ app.use(
 
 app.get('/api/health', (c) => c.json({ status: 'ok' }));
 
-app.route(env.WEBHOOK_ENDPOINT, privyWebhook);
+app.route(env.PRIVY_WEBHOOK_ENDPOINT, privyWebhook);
 
 app.use('*', authMiddleware);
 

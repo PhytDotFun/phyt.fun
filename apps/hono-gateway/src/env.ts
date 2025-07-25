@@ -14,7 +14,7 @@ export const env = createEnv({
         PRIVY_VERIFICATION_KEY: z.string(),
         PRIVY_WEBHOOK_SECRET: z.string().startsWith('whsec_'),
         REDIS_URL: z.string().url(),
-        WEBHOOK_ENDPOINT: z.string(),
+        PRIVY_WEBHOOK_ENDPOINT: z.string(),
         DATABASE_URL: z.string().url(),
         POSTS_SALT: z.string(),
         COMMENTS_SALT: z.string(),
