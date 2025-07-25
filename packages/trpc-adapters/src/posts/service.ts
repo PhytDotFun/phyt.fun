@@ -303,9 +303,9 @@ export class PostsService {
             }
 
             // Determine if there are more posts and create next cursor
-            const hasMore = enrichedPosts.length === limit;
+            const hasMore = posts.length === limit;
             const nextCursor =
-                hasMore && enrichedPosts.length > 0
+                hasMore && posts.length > 0
                     ? posts[posts.length - 1]?.createdAt.toISOString() || null
                     : null;
 
@@ -458,9 +458,9 @@ export class PostsService {
             }
 
             // Determine if there are more posts and create next cursor
-            const hasMore = enrichedPosts.length === limit;
+            const hasMore = posts.length === limit;
             const nextCursor =
-                hasMore && enrichedPosts.length > 0
+                hasMore && posts.length > 0
                     ? posts[posts.length - 1]?.createdAt.toISOString() || null
                     : null;
 
