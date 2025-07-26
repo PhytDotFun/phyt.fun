@@ -1,11 +1,12 @@
 import {
     usePrivy,
     useLoginWithOAuth,
+    useIdentityToken,
     type PrivyErrorCode
 } from '@privy-io/react-auth';
 import { useCallback, useMemo, useEffect } from 'react';
 
-import { clearTokenCache } from '@/lib/utils';
+import { clearTokenCache, setIdTokenGetter } from '@/lib/utils';
 
 export const useAuth = ({
     onSignInComplete,
@@ -15,6 +16,7 @@ export const useAuth = ({
     onSignInError?: (error: PrivyErrorCode) => void;
 } = {}) => {
     const { ready, authenticated, user, logout } = usePrivy();
+    const { identityToken } = useIdentityToken();
     const { initOAuth, loading } = useLoginWithOAuth({
         onComplete: () => {
             onSignInComplete?.();
@@ -23,6 +25,21 @@ export const useAuth = ({
             onSignInError?.(error);
         }
     });
+
+    // Set up the idToken getter function
+    useEffect(() => {
+        if (ready && authenticated) {
+            const getIdToken = () => {
+                try {
+                    return Promise.resolve(identityToken);
+                } catch (error: unknown) {
+                    console.warn('Failed to get idToken:', error);
+                    return Promise.resolve(null);
+                }
+            };
+            setIdTokenGetter(getIdToken);
+        }
+    }, [ready, authenticated, identityToken]);
 
     // Clear token cache when user becomes unauthenticated
     useEffect(() => {
