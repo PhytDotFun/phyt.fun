@@ -6,6 +6,7 @@ import type { AppDependencies } from './di';
 
 export interface AppContext extends Record<string, unknown>, AppDependencies {
     authClaims: AuthTokenClaims | null;
+    identityToken?: string;
     userId?: string;
 }
 
