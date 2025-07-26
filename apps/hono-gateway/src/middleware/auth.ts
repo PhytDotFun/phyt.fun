@@ -9,22 +9,25 @@ export type HonoEnv = {
 };
 
 export const authMiddleware: MiddlewareHandler<HonoEnv> = async (c, next) => {
+    const verificationKey = Buffer.from(
+        env.PRIVY_VERIFICATION_KEY,
+        'base64'
+    ).toString('utf-8');
+
     const authToken = c.req.header('Authorization')?.replace('Bearer ', '');
     if (authToken) {
         try {
-            console.log('[auth] Verifying token with Privy');
             const claims = await appDeps.privy.verifyAuthToken(
                 authToken,
-                env.PRIVY_VERIFICATION_KEY
+                verificationKey
             );
             c.set('authClaims', claims);
-            console.log('[auth] Auth successful for user:', claims.userId);
         } catch (error) {
-            console.log('[auth] Auth failed:', error);
+            console.log('[Auth] Auth failed:', error);
             /* ignore unauthenticated */
         }
     } else {
-        console.log('[auth] No auth token provided');
+        console.log('[Auth] No auth token provided');
     }
     await next();
 };

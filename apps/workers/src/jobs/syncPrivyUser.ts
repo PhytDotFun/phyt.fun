@@ -48,7 +48,7 @@ export async function syncPrivyUser(
 
     try {
         const newUser = InsertUserSchema.parse(record);
-        await appDeps.userService.syncPrivyData(newUser);
+        await appDeps.usersService.syncPrivyData(newUser);
 
         // Cache the successfully processed data (24 hour TTL)
         await appDeps.cache.set(cacheKey, data, 86400);

@@ -22,7 +22,7 @@ export async function postRuns(job: Job<PostRunsJob>): Promise<{ ok: true }> {
         console.log(`[POSTS] Posting run ${data.run.id} to feed...`);
 
         // Get the full run data from the database to access userId
-        const fullRunData = await appDeps.runRepository.findByRunId(runId);
+        const fullRunData = await appDeps.runsRepository.findByRunId(runId);
         if (!fullRunData) {
             throw new Error(
                 `Could not find run data for ID: ${runId.toString()}`
@@ -30,7 +30,7 @@ export async function postRuns(job: Job<PostRunsJob>): Promise<{ ok: true }> {
         }
 
         // Create a post in the posts table using the post service
-        const newPost = await appDeps.postService.createPost({
+        const newPost = await appDeps.postsService.createPost({
             userId: fullRunData.userId,
             runId: runId,
             content: null, // No custom content for auto-generated posts
@@ -43,7 +43,7 @@ export async function postRuns(job: Job<PostRunsJob>): Promise<{ ok: true }> {
         );
 
         // Mark the run as posted in the database
-        await appDeps.runService.markRunAsPosted({
+        await appDeps.runsService.markRunAsPosted({
             id: data.run.id,
             toPost: false,
             isPosted: true
