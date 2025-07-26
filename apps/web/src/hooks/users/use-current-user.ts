@@ -5,7 +5,7 @@ import {
     getRetryConfig,
     getRetryDelay,
     shouldShowLoadingForError
-} from '@/lib/error-utils';
+} from '@/lib/errors';
 
 export function useCurrentUser() {
     const query = useQuery({
