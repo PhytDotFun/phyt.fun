@@ -62,7 +62,6 @@ export class PostsService {
         const data = cachedData as Record<string, unknown>;
         const transformed = { ...data };
 
-        // Convert date strings back to Date objects
         if (typeof transformed.createdAt === 'string') {
             transformed.createdAt = new Date(transformed.createdAt);
         }
@@ -72,16 +71,22 @@ export class PostsService {
         if (typeof transformed.deletedAt === 'string') {
             transformed.deletedAt = new Date(transformed.deletedAt);
         }
-        if (typeof transformed.startTime === 'string') {
-            transformed.startTime = new Date(transformed.startTime);
-        }
 
-        // Transform nested objects
         if (transformed.user && typeof transformed.user === 'object') {
             transformed.user = this.transformCachedData(transformed.user);
         }
+
         if (transformed.run && typeof transformed.run === 'object') {
-            transformed.run = this.transformCachedData(transformed.run);
+            const runData = transformed.run as Record<string, unknown>;
+            const transformedRun = { ...runData };
+
+            if (typeof transformedRun.startTime === 'string') {
+                transformedRun.startTime = new Date(transformedRun.startTime);
+            }
+            if (typeof transformedRun.endTime === 'string') {
+                transformedRun.endTime = new Date(transformedRun.endTime);
+            }
+            transformed.run = transformedRun;
         }
 
         return transformed;
@@ -113,7 +118,7 @@ export class PostsService {
                     return parsed.data;
                 } else {
                     console.log(
-                        '[cache] Schema validation failed:',
+                        '[CACHE] Schema validation failed:',
                         parsed.error.issues
                     );
                     await this.redis.del(cacheKey);
@@ -121,7 +126,7 @@ export class PostsService {
             }
         } catch (error) {
             console.error(
-                '[cache] Redis GET error for key',
+                '[CACHE] Redis GET error for key',
                 cacheKey,
                 ':',
                 error
@@ -163,7 +168,7 @@ export class PostsService {
                 );
             } catch (error) {
                 console.error(
-                    '[cache] Redis SET error for key',
+                    '[CACHE] Redis SET error for key',
                     cacheKey,
                     ':',
                     error
@@ -240,7 +245,7 @@ export class PostsService {
             }
         } catch (error) {
             console.error(
-                '[cache] Redis GET error for key',
+                '[CACHE] Redis GET error for key',
                 cacheKey,
                 ':',
                 error
@@ -328,7 +333,7 @@ export class PostsService {
                 );
             } catch (error) {
                 console.error(
-                    '[cache] Redis SET error for key',
+                    '[CACHE] Redis SET error for key',
                     cacheKey,
                     ':',
                     error
@@ -384,7 +389,7 @@ export class PostsService {
             }
         } catch (error) {
             console.error(
-                '[cache] Redis GET error for key',
+                '[CACHE] Redis GET error for key',
                 cacheKey,
                 ':',
                 error
@@ -483,7 +488,7 @@ export class PostsService {
                 );
             } catch (error) {
                 console.error(
-                    '[cache] Redis SET error for key',
+                    '[CACHE] Redis SET error for key',
                     cacheKey,
                     ':',
                     error

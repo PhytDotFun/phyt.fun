@@ -50,7 +50,6 @@ export class RunsService {
         const data = cachedData as Record<string, unknown>;
         const transformed = { ...data };
 
-        // Convert date strings back to Date objects
         if (typeof transformed.createdAt === 'string') {
             transformed.createdAt = new Date(transformed.createdAt);
         }
@@ -62,6 +61,9 @@ export class RunsService {
         }
         if (typeof transformed.startTime === 'string') {
             transformed.startTime = new Date(transformed.startTime);
+        }
+        if (typeof transformed.endTime === 'string') {
+            transformed.endTime = new Date(transformed.endTime);
         }
 
         return transformed;
@@ -87,38 +89,25 @@ export class RunsService {
             if (cached) {
                 const parsedJson: unknown = JSON.parse(cached);
                 const transformedData = this.transformCachedData(parsedJson);
-                return transformedData as Run;
+                const parsed =
+                    RunPostSchema.nullable().safeParse(transformedData);
+                if (parsed.success) {
+                    return parsed.data;
+                }
+                await this.redis.del(cacheKey);
             }
         } catch (error) {
             console.error(
-                '[cache] Redis GET error for key',
+                '[CACHE] Redis GET error for key',
                 cacheKey,
                 ':',
                 error
             );
         }
-        // Cache miss - fetch from database
         try {
             const run = await this.repo.findByRunId(id);
 
             if (!run) throw new Error('Could not find run in Cache or DB');
-
-            // Cache the result
-            try {
-                await this.redis.set(
-                    cacheKey,
-                    JSON.stringify(run),
-                    'EX',
-                    this.RUN_CACHE_TTL
-                );
-            } catch (error) {
-                console.error(
-                    '[cache] Redis SET error for key',
-                    cacheKey,
-                    ':',
-                    error
-                );
-            }
 
             const returnedRun = {
                 duration: run.duration,
@@ -136,6 +125,22 @@ export class RunsService {
             };
 
             RunPostSchema.parse(returnedRun);
+
+            try {
+                await this.redis.set(
+                    cacheKey,
+                    JSON.stringify(returnedRun),
+                    'EX',
+                    this.RUN_CACHE_TTL
+                );
+            } catch (error) {
+                console.error(
+                    '[CACHE] Redis SET error for key',
+                    cacheKey,
+                    ':',
+                    error
+                );
+            }
 
             return returnedRun;
         } catch (error) {

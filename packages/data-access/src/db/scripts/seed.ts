@@ -3,13 +3,13 @@ import { createDb, createPgClient } from '../client';
 import { users, runs } from '../schema';
 // import { users, runs, posts, comments, reactions } from '../schema';
 
-const connectionString = process.argv[2];
-if (!connectionString) {
-    throw new Error('Connection string required as first argument');
+const databaseUrl = process.env.DATABASE_URL;
+if (!databaseUrl) {
+    throw new Error('DATABASE_URL environment variable is not set.');
 }
 
-const db = createDb(connectionString);
-const pgClient = createPgClient(connectionString);
+const db = createDb(databaseUrl);
+const pgClient = createPgClient(databaseUrl);
 
 // Sample data
 const sampleUsers = [
