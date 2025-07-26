@@ -4,13 +4,13 @@ import { createDb, createPgClient } from '../client';
 
 const KEEP_TABLES = ['_drizzle_migrations'];
 
-const connectionString = process.argv[2];
-if (!connectionString) {
-    throw new Error('Connection string required as first argument');
+const databaseUrl = process.env.DATABASE_URL;
+if (!databaseUrl) {
+    throw new Error('DATABASE_URL environment variable is not set.');
 }
 
-const db = createDb(connectionString);
-const pgClient = createPgClient(connectionString);
+const db = createDb(databaseUrl);
+const pgClient = createPgClient(databaseUrl);
 
 // Wrap the whole task in one async IIFE so ESLint is happy
 await (async () => {
