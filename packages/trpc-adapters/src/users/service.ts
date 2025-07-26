@@ -100,7 +100,7 @@ export class UsersService {
                     return parsed.data;
                 } else {
                     console.log(
-                        '[cache] Schema validation failed:',
+                        '[CACHE] Schema validation failed:',
                         parsed.error.issues
                     );
                     await this.redis.del(cacheKey);
@@ -108,7 +108,7 @@ export class UsersService {
             }
         } catch (error) {
             console.error(
-                '[cache] Redis GET error for key',
+                '[CACHE] Redis GET error for key',
                 cacheKey,
                 ':',
                 error
@@ -132,7 +132,7 @@ export class UsersService {
                 );
             } catch (error) {
                 console.error(
-                    '[cache] Redis SET error for key',
+                    '[CACHE] Redis SET error for key',
                     cacheKey,
                     ':',
                     error
@@ -164,7 +164,7 @@ export class UsersService {
                     return parsed.data;
                 } else {
                     console.log(
-                        '[cache] Schema validation failed:',
+                        '[CACHE] Schema validation failed:',
                         parsed.error.issues
                     );
                     await this.redis.del(cacheKey);
@@ -172,7 +172,7 @@ export class UsersService {
             }
         } catch (error) {
             console.error(
-                '[cache] Redis GET error for key',
+                '[CACHE] Redis GET error for key',
                 cacheKey,
                 ':',
                 error
@@ -198,7 +198,7 @@ export class UsersService {
                 );
             } catch (error) {
                 console.error(
-                    '[cache] Redis SET error for key',
+                    '[CACHE] Redis SET error for key',
                     cacheKey,
                     ':',
                     error
@@ -345,7 +345,7 @@ export class UsersService {
         }
 
         await Promise.all(promises);
-        console.log('[cache] Invalidated cache for user:', user.privyDID);
+        console.log('[CACHE] Invalidated cache for user:', user.privyDID);
     }
 
     // Public method to manually clear user cache (useful for admin operations)
@@ -355,7 +355,7 @@ export class UsersService {
             this.getCacheKey('privy', privyDID)
         );
         console.log(
-            '[cache] Cleared',
+            '[CACHE] Cleared',
             deletedCount.toString(),
             'cache entries for user:',
             privyDID
