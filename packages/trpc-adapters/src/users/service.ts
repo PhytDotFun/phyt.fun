@@ -264,8 +264,8 @@ export class UsersService {
             const user = await this.privy.getUser({ idToken });
             const timestamp = Date.now();
 
-            // Remove "privy:did:" prefix from the Privy DID
-            const cleanPrivyDID = user.id.replace(/^privy:did:/, '');
+            // Remove "did:privy:" prefix from the Privy DID
+            const cleanPrivyDID = user.id.replace(/^did:privy:/, '');
 
             const basePayload = {
                 privyDID: cleanPrivyDID,
