@@ -26,22 +26,29 @@ export const usersRouter = router({
                 );
 
                 try {
-                    // Trigger sync using identity token
                     await ctx.usersService.triggerUserSyncWithIdentityToken(
                         ctx.identityToken
                     );
 
-                    // Throw a specific error that frontend can handle with loading state
                     throw new TRPCError({
                         code: 'INTERNAL_SERVER_ERROR',
                         message: 'User sync in progress'
                     });
                 } catch (syncError) {
+                    // Check if this is the intentional "User sync in progress" error
+                    if (
+                        syncError instanceof TRPCError &&
+                        syncError.message === 'User sync in progress'
+                    ) {
+                        // Re-throw the intentional sync error
+                        throw syncError;
+                    }
+
                     console.error(
                         `[TRPC] Failed to trigger user sync:`,
                         syncError
                     );
-                    // Fall through to original error
+                    // Fall through to original error only for actual sync failures
                 }
             }
 
