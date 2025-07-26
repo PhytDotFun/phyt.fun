@@ -1,6 +1,6 @@
-import { eq, and, isNull } from 'drizzle-orm';
+import { eq, and, isNull, desc, lt } from 'drizzle-orm';
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
-import { posts } from '@phyt/data-access/db/schema';
+import { posts, users } from '@phyt/data-access/db/schema';
 import type { SelectPost, InsertPost } from '@phyt/data-access/models/posts';
 import {
     SelectPostSchema,
@@ -8,20 +8,20 @@ import {
     UpdatePostSchema
 } from '@phyt/data-access/models/posts';
 
-import type { UserRepository } from '../users/repository';
+import type { UsersRepository } from '../users/repository';
 
-interface PostRepositoryDeps {
+interface PostsRepositoryDeps {
     db: NodePgDatabase;
-    userRepository: UserRepository;
+    usersRepository: UsersRepository;
 }
 
-export class PostRepository {
+export class PostsRepository {
     private db: NodePgDatabase;
-    private userRepository: UserRepository;
+    private usersRepository: UsersRepository;
 
-    constructor(deps: PostRepositoryDeps) {
+    constructor(deps: PostsRepositoryDeps) {
         this.db = deps.db;
-        this.userRepository = deps.userRepository;
+        this.usersRepository = deps.usersRepository;
     }
 
     private async first(q: Promise<SelectPost[]>): Promise<SelectPost | null> {
@@ -43,7 +43,7 @@ export class PostRepository {
 
     async findByWalletAddress(walletAddress: string) {
         const user =
-            await this.userRepository.findByWalletAddress(walletAddress);
+            await this.usersRepository.findByWalletAddress(walletAddress);
 
         if (!user) throw new Error('User not found');
 
@@ -119,5 +119,117 @@ export class PostRepository {
             .limit(1);
 
         return Boolean(result[0]);
+    }
+
+    async findBatchPosts(
+        limit: number = 20,
+        cursor?: Date
+    ): Promise<SelectPost[]> {
+        const conditions = [
+            eq(posts.visibility, 'public'),
+            eq(posts.isProfile, false),
+            isNull(posts.deletedAt)
+        ];
+
+        // Add cursor condition for pagination
+        if (cursor) {
+            conditions.push(lt(posts.createdAt, cursor));
+        }
+
+        const batchPosts = await this.db
+            .select()
+            .from(posts)
+            .where(and(...conditions))
+            .orderBy(desc(posts.createdAt))
+            .limit(limit);
+
+        return batchPosts.map((post) => {
+            SelectPostSchema.parse(post);
+            return post;
+        });
+    }
+
+    async findPrivyDIDBatchPosts(
+        privyDID: string,
+        limit: number = 20,
+        cursor?: Date
+    ): Promise<SelectPost[]> {
+        const conditions = [
+            eq(users.privyDID, privyDID),
+            eq(posts.visibility, 'public'),
+            eq(posts.isProfile, false),
+            isNull(posts.deletedAt),
+            isNull(users.deletedAt)
+        ];
+
+        // Add cursor condition for pagination
+        if (cursor) {
+            conditions.push(lt(posts.createdAt, cursor));
+        }
+
+        const batchPosts = await this.db
+            .select({
+                id: posts.id,
+                userId: posts.userId,
+                runId: posts.runId,
+                content: posts.content,
+                visibility: posts.visibility,
+                isProfile: posts.isProfile,
+                createdAt: posts.createdAt,
+                updatedAt: posts.updatedAt,
+                deletedAt: posts.deletedAt
+            })
+            .from(posts)
+            .innerJoin(users, eq(posts.userId, users.id))
+            .where(and(...conditions))
+            .orderBy(desc(posts.createdAt))
+            .limit(limit);
+
+        return batchPosts.map((post) => {
+            SelectPostSchema.parse(post);
+            return post;
+        });
+    }
+
+    async findWalletAddressBatchPosts(
+        walletAddress: string,
+        limit: number = 20,
+        cursor?: Date
+    ): Promise<SelectPost[]> {
+        const conditions = [
+            eq(users.walletAddress, walletAddress),
+            eq(posts.visibility, 'public'),
+            eq(posts.isProfile, false),
+            isNull(posts.deletedAt),
+            isNull(users.deletedAt)
+        ];
+
+        // Add cursor condition for pagination
+        if (cursor) {
+            conditions.push(lt(posts.createdAt, cursor));
+        }
+
+        const batchPosts = await this.db
+            .select({
+                id: posts.id,
+                userId: posts.userId,
+                runId: posts.runId,
+                content: posts.content,
+                visibility: posts.visibility,
+                isProfile: posts.isProfile,
+                createdAt: posts.createdAt,
+                updatedAt: posts.updatedAt,
+                deletedAt: posts.deletedAt
+            })
+            .from(posts)
+            .innerJoin(users, eq(posts.userId, users.id))
+            .where(and(...conditions))
+            .orderBy(desc(posts.createdAt))
+            .limit(limit);
+
+        return batchPosts.map((post) => {
+            SelectPostSchema.parse(post);
+            return post;
+        });
     }
 }

@@ -16,6 +16,10 @@
             "types": "./dist/users/procedures.d.ts",
             "import": "./dist/users/procedures.js"
         },
+        "./posts/procedures": {
+            "types": "./dist/posts/procedures.d.ts",
+            "import": "./dist/posts/procedures.js"
+        },
         "./encoder": {
             "types": "./dist/encoder.d.ts",
             "import": "./dist/encoder.js"

@@ -27,3 +27,15 @@ export const PostSchema = z.object({
 });
 
 export type Post = z.infer<typeof PostSchema>;
+
+export const FeedPostsSchema = z.array(PostSchema);
+
+export type Feed = z.infer<typeof FeedPostsSchema>;
+
+export const PaginatedFeedSchema = z.object({
+    posts: z.array(PostSchema),
+    nextCursor: z.string().nullable(), // ISO string of the createdAt timestamp
+    hasMore: z.boolean()
+});
+
+export type PaginatedFeed = z.infer<typeof PaginatedFeedSchema>;

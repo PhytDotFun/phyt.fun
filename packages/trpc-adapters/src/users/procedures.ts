@@ -4,7 +4,7 @@ import { z } from 'zod';
 
 import { router, protectedProcedure } from '../trpc';
 
-export const userRouter = router({
+export const usersRouter = router({
     getCurrentUser: protectedProcedure.query(async ({ ctx }) => {
         if (!ctx.userId) {
             throw new TRPCError({
@@ -12,7 +12,9 @@ export const userRouter = router({
                 message: 'User ID not found in context'
             });
         }
-        const currentUser = await ctx.userService.getUserByPrivyDID(ctx.userId);
+        const currentUser = await ctx.usersService.getUserByPrivyDID(
+            ctx.userId
+        );
         if (!currentUser) {
             throw new TRPCError({
                 code: 'INTERNAL_SERVER_ERROR',
@@ -32,7 +34,7 @@ export const userRouter = router({
                     message: 'User ID not found in context'
                 });
             }
-            const user = await ctx.userService.getUserByPrivyDID(privyDID);
+            const user = await ctx.usersService.getUserByPrivyDID(privyDID);
             if (!user) {
                 throw new TRPCError({
                     code: 'INTERNAL_SERVER_ERROR',
@@ -53,7 +55,7 @@ export const userRouter = router({
                 });
             }
             const user =
-                await ctx.userService.getUserByWalletAddress(walletAddress);
+                await ctx.usersService.getUserByWalletAddress(walletAddress);
             if (!user) {
                 throw new TRPCError({
                     code: 'NOT_FOUND',

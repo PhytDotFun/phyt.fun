@@ -7,14 +7,14 @@ import {
     InsertUserSchema
 } from '@phyt/data-access/models/users';
 
-interface UserRepositoryDeps {
+interface UsersRepositoryDeps {
     db: NodePgDatabase;
 }
 
-export class UserRepository {
+export class UsersRepository {
     private db: NodePgDatabase;
 
-    constructor(deps: UserRepositoryDeps) {
+    constructor(deps: UsersRepositoryDeps) {
         this.db = deps.db;
     }
 
