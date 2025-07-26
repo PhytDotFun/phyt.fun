@@ -5,23 +5,36 @@ import type {
 } from '@phyt/data-access/models/users';
 import { UserSchema } from '@phyt/data-access/models/users';
 import type { Redis } from 'ioredis';
+import type { QueueWithContext } from '@phyt/core/contracts';
+import type { PrivyClient } from '@privy-io/server-auth';
+import {
+    JobName,
+    CreateWalletJobSchema,
+    SyncPrivyUserJobSchema
+} from '@phyt/m-queue/jobs';
 
 import type { UsersRepository } from './repository';
 
 interface UsersServiceDeps {
     usersRepository: UsersRepository;
     redis: Redis;
+    authQueue: QueueWithContext;
+    privy: PrivyClient;
 }
 
 export class UsersService {
     private repo: UsersRepository;
     private redis: Redis;
+    private authQueue: QueueWithContext;
+    private privy: PrivyClient;
 
     private readonly USER_CACHE_TTL = 15 * 60; // 15 minutes
 
     constructor(deps: UsersServiceDeps) {
         this.repo = deps.usersRepository;
         this.redis = deps.redis;
+        this.authQueue = deps.authQueue;
+        this.privy = deps.privy;
     }
 
     // Generate cache keys for different lookup types
@@ -239,6 +252,81 @@ export class UsersService {
         } catch (error) {
             console.error('Error fetching user by wallet address', error);
             return null;
+        }
+    }
+
+    async triggerUserSyncWithIdentityToken(idToken: string): Promise<void> {
+        console.log(
+            `[UsersService] Triggering user sync with identity token ${idToken}.`
+        );
+
+        try {
+            const user = await this.privy.getUser({ idToken });
+            const timestamp = Date.now();
+
+            // Remove "privy:did:" prefix from the Privy DID
+            const cleanPrivyDID = user.id.replace(/^privy:did:/, '');
+
+            const basePayload = {
+                privyDID: cleanPrivyDID,
+                username: user.twitter?.name ?? `phyt_user_${cleanPrivyDID}`,
+                profilePictureUrl:
+                    user.twitter?.profilePictureUrl ??
+                    'https://rsg5uys7zq.ufs.sh/f/AMgtrA9DGKkFPKXFAW7cBHPE73q0CDvFfpG2516T9UlQeJub',
+                walletAddress: user.wallet?.address,
+                email: user.email?.address ?? null,
+                role: 'user' as const
+            };
+
+            if (!user.wallet) {
+                // User does not have a wallet, so queue the create_wallet job.
+                console.log(
+                    `[UsersService] No wallet found for ${user.id}. Queuing create_wallet job.`
+                );
+
+                const payload = CreateWalletJobSchema.parse(basePayload);
+                const job = await this.authQueue.addJobWithContext(
+                    JobName.CREATE_WALLET,
+                    payload,
+                    {
+                        jobId: `create-wallet-${user.id}-${timestamp.toString()}`,
+                        removeOnComplete: { age: 3600 },
+                        removeOnFail: { age: 86400 }
+                    }
+                );
+
+                console.log(
+                    `[UsersService] Queued create_wallet job ${String(job)} for user ${user.id}`
+                );
+            } else {
+                // User has a wallet, so queue the sync_privy_user job.
+                console.log(
+                    `[UsersService] Wallet found for ${user.id}. Queuing sync_privy_user job.`
+                );
+
+                const payload = SyncPrivyUserJobSchema.parse({
+                    ...basePayload,
+                    walletAddress: user.wallet.address
+                });
+                const job = await this.authQueue.addJobWithContext(
+                    JobName.SYNC_PRIVY_USER,
+                    payload,
+                    {
+                        jobId: `auto-sync-${user.id}-${timestamp.toString()}`,
+                        removeOnComplete: { age: 3600 },
+                        removeOnFail: { age: 86400 }
+                    }
+                );
+
+                console.log(
+                    `[UsersService] Queued sync_privy_user job ${String(job)} for user ${user.id}`
+                );
+            }
+        } catch (error) {
+            console.error(
+                `[UsersService] Failed to trigger user sync for token ${idToken}`
+            );
+            throw error;
         }
     }
 
