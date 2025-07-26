@@ -1247,8 +1247,8 @@ packages:
     peerDependencies:
       '@babel/core': ^7.0.0-0
 
-  '@babel/runtime-corejs3@7.28.0':
-    resolution: {integrity: sha512-nlIXnSqLcBij8K8TtkxbBJgfzfvi75V1pAKSM7dUXejGw12vJAqez74jZrHTsJ3Z+Aczc5Q/6JgNjKRMsVU44g==}
+  '@babel/runtime-corejs3@7.28.2':
+    resolution: {integrity: sha512-FVFaVs2/dZgD3Y9ZD+AKNKjyGKzwu0C54laAXWUXgLcVXcCX6YZ6GhK2cp7FogSN2OA0Fu+QT8dP3FUdo9ShSQ==}
     engines: {node: '>=6.9.0'}
 
   '@babel/runtime@7.27.6':
@@ -7941,7 +7941,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@babel/runtime-corejs3@7.28.0':
+  '@babel/runtime-corejs3@7.28.2':
     dependencies:
       core-js-pure: 3.44.0
 
@@ -13613,7 +13613,7 @@ snapshots:
 
   node-plop@0.26.3:
     dependencies:
-      '@babel/runtime-corejs3': 7.28.0
+      '@babel/runtime-corejs3': 7.28.2
       '@types/inquirer': 6.5.0
       change-case: 3.1.0
       del: 5.1.0
