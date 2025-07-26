@@ -23,7 +23,9 @@ export function createAppDependencies(core: CoreDeps): AppDependencies {
 
     const usersService = new UsersService({
         usersRepository: usersRepository,
-        redis: core.redis
+        redis: core.redis,
+        authQueue: core.authQueue,
+        privy: core.privy
     });
 
     const runsRepository = new RunsRepository({
