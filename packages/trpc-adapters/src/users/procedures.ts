@@ -12,15 +12,45 @@ export const usersRouter = router({
                 message: 'User ID not found in context'
             });
         }
+
         const currentUser = await ctx.usersService.getUserByPrivyDID(
             ctx.userId
         );
+
         if (!currentUser) {
+            // User exists in auth context but not in database
+            // Trigger automatic sync if we have an identity token
+            if (ctx.identityToken) {
+                console.log(
+                    `[TRPC] User ${ctx.userId} missing from database, triggering sync with identity token`
+                );
+
+                try {
+                    // Trigger sync using identity token
+                    await ctx.usersService.triggerUserSyncWithIdentityToken(
+                        ctx.identityToken
+                    );
+
+                    // Throw a specific error that frontend can handle with loading state
+                    throw new TRPCError({
+                        code: 'INTERNAL_SERVER_ERROR',
+                        message: 'User sync in progress'
+                    });
+                } catch (syncError) {
+                    console.error(
+                        `[TRPC] Failed to trigger user sync:`,
+                        syncError
+                    );
+                    // Fall through to original error
+                }
+            }
+
             throw new TRPCError({
                 code: 'INTERNAL_SERVER_ERROR',
                 message: 'Error fetching user'
             });
         }
+
         return UserSchema.parse(currentUser);
     }),
     getUserByPrivyDID: protectedProcedure
