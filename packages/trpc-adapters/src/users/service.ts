@@ -257,7 +257,7 @@ export class UsersService {
 
     async triggerUserSyncWithIdentityToken(idToken: string): Promise<void> {
         console.log(
-            `[UsersService] Triggering user sync with identity token ${idToken}.`
+            `[USERS SERVICE] Triggering user sync with identity token ${idToken}.`
         );
 
         try {
@@ -281,7 +281,7 @@ export class UsersService {
             if (!user.wallet) {
                 // User does not have a wallet, so queue the create_wallet job.
                 console.log(
-                    `[UsersService] No wallet found for ${user.id}. Queuing create_wallet job.`
+                    `[USERS SERVICE] No wallet found for ${user.id}. Queuing create_wallet job.`
                 );
 
                 const payload = CreateWalletJobSchema.parse(basePayload);
@@ -296,12 +296,12 @@ export class UsersService {
                 );
 
                 console.log(
-                    `[UsersService] Queued create_wallet job ${String(job)} for user ${user.id}`
+                    `[USERS SERVICE] Queued create_wallet job ${job.toString()} for user ${user.id}`
                 );
             } else {
                 // User has a wallet, so queue the sync_privy_user job.
                 console.log(
-                    `[UsersService] Wallet found for ${user.id}. Queuing sync_privy_user job.`
+                    `[USER SERVICE] Wallet found for ${user.id}. Queuing sync_privy_user job.`
                 );
 
                 const payload = SyncPrivyUserJobSchema.parse({
@@ -319,12 +319,12 @@ export class UsersService {
                 );
 
                 console.log(
-                    `[UsersService] Queued sync_privy_user job ${String(job)} for user ${user.id}`
+                    `[USERS SERVICE] Queued sync_privy_user job ${job.toString()} for user ${user.id}`
                 );
             }
         } catch (error) {
             console.error(
-                `[UsersService] Failed to trigger user sync for token ${idToken}`
+                `[USERS SERVICE] Failed to trigger user sync for token ${idToken}`
             );
             throw error;
         }
