@@ -24,7 +24,7 @@ export async function checkRunsToPost(
     console.log('[POSTS] Checking for runs that need to be posted...');
 
     try {
-        const runsToCheck = await appDeps.runService.checkRunsToPost();
+        const runsToCheck = await appDeps.runsService.checkRunsToPost();
 
         let queuedCount = 0;
         let cleanedCount = 0;
@@ -69,7 +69,7 @@ export async function checkRunsToPost(
                 );
             } else {
                 // Run is already posted but to_post is still true - clean it up
-                await appDeps.runService.fixPostedRunToPost(run.id);
+                await appDeps.runsService.fixPostedRunToPost(run.id);
 
                 cleanedCount++;
                 console.log(
