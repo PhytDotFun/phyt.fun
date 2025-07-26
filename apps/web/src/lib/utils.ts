@@ -23,8 +23,9 @@ export function getIconComponent(iconName: string): LucideIcon {
 }
 
 // Token caching utility with metrics
-interface CachedToken {
-    token: string | null;
+interface CachedTokens {
+    accessToken: string | null;
+    idToken: string | null;
     expires: number;
     fetchedAt: number;
 }
@@ -36,7 +37,7 @@ interface TokenMetrics {
     lastPrivyCall: number;
 }
 
-let tokenCache: CachedToken | null = null;
+let tokenCache: CachedTokens | null = null;
 const metrics: TokenMetrics = {
     cacheHits: 0,
     cacheMisses: 0,
@@ -47,11 +48,22 @@ const metrics: TokenMetrics = {
 // Cache tokens for 55 minutes (tokens typically expire in 60 minutes)
 const TOKEN_CACHE_DURATION = 55 * 60 * 1000; // 55 minutes in milliseconds
 
-export async function getCachedAccessToken(): Promise<string | null> {
+// Store the getIdToken function reference when available
+let getIdTokenFn: (() => Promise<string | null>) | null = null;
+
+// Function to set the idToken getter (to be called from React components)
+export function setIdTokenGetter(getter: () => Promise<string | null>) {
+    getIdTokenFn = getter;
+}
+
+export async function getCachedTokens(): Promise<{
+    accessToken: string | null;
+    idToken: string | null;
+}> {
     const now = Date.now();
 
-    // Return cached token if it's still valid
-    if (tokenCache && tokenCache.expires > now && tokenCache.token) {
+    // Return cached tokens if they're still valid
+    if (tokenCache && tokenCache.expires > now && tokenCache.accessToken) {
         metrics.cacheHits++;
 
         // Log cache efficiency every 10 hits
@@ -59,7 +71,10 @@ export async function getCachedAccessToken(): Promise<string | null> {
             logTokenMetrics();
         }
 
-        return tokenCache.token;
+        return {
+            accessToken: tokenCache.accessToken,
+            idToken: tokenCache.idToken
+        };
     }
 
     // Cache miss - need to fetch from Privy
@@ -69,7 +84,7 @@ export async function getCachedAccessToken(): Promise<string | null> {
 
     const timeSinceLastCall = tokenCache ? now - tokenCache.fetchedAt : 0;
     console.log(
-        `🔄 Fetching fresh token from Privy (cache miss #${metrics.cacheMisses.toString()})`,
+        `🔄 Fetching fresh tokens from Privy (cache miss #${metrics.cacheMisses.toString()})`,
         {
             timeSinceLastFetch:
                 timeSinceLastCall > 0
@@ -79,31 +94,56 @@ export async function getCachedAccessToken(): Promise<string | null> {
                 ? 'no cache'
                 : tokenCache.expires <= now
                   ? 'expired'
-                  : 'invalid token'
+                  : 'invalid tokens'
         }
     );
 
     try {
-        // Get fresh token from Privy
-        const token = await getAccessToken();
+        // Get fresh tokens from Privy
+        const accessToken = await getAccessToken();
+        let idToken: string | null = null;
 
-        // Cache the token with expiration
+        // Try to get idToken if the getter function is available
+        if (getIdTokenFn) {
+            try {
+                idToken = await getIdTokenFn();
+            } catch (error) {
+                console.warn('Failed to get idToken:', error);
+                // Continue without idToken - don't fail the entire request
+            }
+        }
+
+        // Cache the tokens with expiration
         tokenCache = {
-            token,
+            accessToken,
+            idToken,
             expires: now + TOKEN_CACHE_DURATION,
             fetchedAt: now
         };
 
         console.log(
-            `✅ Fresh token cached for ${(TOKEN_CACHE_DURATION / 60000).toString()} minutes`
+            `✅ Fresh tokens cached for ${(TOKEN_CACHE_DURATION / 60000).toString()} minutes`,
+            { hasIdToken: !!idToken }
         );
         logTokenMetrics();
 
-        return token;
+        return { accessToken, idToken };
     } catch (error) {
-        console.warn('❌ Failed to get access token from Privy:', error);
-        return null;
+        console.warn('❌ Failed to get tokens from Privy:', error);
+        return { accessToken: null, idToken: null };
     }
+}
+
+// Backwards compatibility for existing accessToken usage
+export async function getCachedAccessToken(): Promise<string | null> {
+    const { accessToken } = await getCachedTokens();
+    return accessToken;
+}
+
+// New function for getting cached idToken
+export async function getCachedIdToken(): Promise<string | null> {
+    const { idToken } = await getCachedTokens();
+    return idToken;
 }
 
 // Clear the token cache (useful for logout or auth errors)
