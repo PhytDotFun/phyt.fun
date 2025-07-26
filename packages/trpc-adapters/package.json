@@ -36,6 +36,7 @@
     },
     "dependencies": {
         "@phyt/data-access": "workspace:*",
+        "@phyt/m-queue": "workspace:*",
         "@privy-io/server-auth": "catalog:",
         "@t3-oss/env-core": "catalog:",
         "@trpc/server": "catalog:",
