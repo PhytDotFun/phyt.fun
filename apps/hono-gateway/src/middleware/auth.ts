@@ -5,7 +5,10 @@ import { env } from '../env';
 import { appDeps } from '../di';
 
 export type HonoEnv = {
-    Variables: { authClaims: AuthTokenClaims };
+    Variables: {
+        authClaims: AuthTokenClaims;
+        identityToken?: string;
+    };
 };
 
 export const authMiddleware: MiddlewareHandler<HonoEnv> = async (c, next) => {
@@ -15,6 +18,8 @@ export const authMiddleware: MiddlewareHandler<HonoEnv> = async (c, next) => {
     ).toString('utf-8');
 
     const authToken = c.req.header('Authorization')?.replace('Bearer ', '');
+    const idToken = c.req.header('privy-id-token');
+
     if (authToken) {
         try {
             const claims = await appDeps.privy.verifyAuthToken(
@@ -22,8 +27,14 @@ export const authMiddleware: MiddlewareHandler<HonoEnv> = async (c, next) => {
                 verificationKey
             );
             c.set('authClaims', claims);
+
+            if (idToken) {
+                c.set('identityToken', idToken);
+            } else {
+                console.log('[AUTH] No identity token provided');
+            }
         } catch (error) {
-            console.log('[Auth] Auth failed:', error);
+            console.log('[AUTH] Auth failed:', error);
             /* ignore unauthenticated */
         }
     } else {
