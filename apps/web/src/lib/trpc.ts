@@ -5,7 +5,7 @@ import type { ApiRouter } from '@phyt/hono-gateway/router';
 import superjson from 'superjson';
 
 import { env } from '@/env';
-import { getCachedAccessToken, clearTokenCache } from '@/lib/utils';
+import { getCachedTokens, clearTokenCache } from '@/lib/utils';
 
 export const queryClient = new QueryClient();
 
@@ -14,11 +14,20 @@ const trpcClient = createTRPCClient<ApiRouter>({
         httpBatchLink({
             url: env.VITE_BASE_URL,
             async headers() {
-                const token = await getCachedAccessToken();
-                return {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${token || ''}`
+                const { accessToken, idToken } = await getCachedTokens();
+                const headers: Record<string, string> = {
+                    'Content-Type': 'application/json'
                 };
+
+                if (accessToken) {
+                    headers['Authorization'] = `Bearer ${accessToken}`;
+                }
+
+                if (idToken) {
+                    headers['privy-id-token'] = idToken;
+                }
+
+                return headers;
             },
             transformer: superjson,
             // Handle 401 errors by clearing stale tokens
@@ -30,15 +39,23 @@ const trpcClient = createTRPCClient<ApiRouter>({
                     console.warn('401 Unauthorized - clearing token cache');
                     clearTokenCache();
 
-                    // Retry the request with a fresh token
-                    const freshToken = await getCachedAccessToken();
+                    // Retry the request with fresh tokens
+                    const {
+                        accessToken: freshAccessToken,
+                        idToken: freshIdToken
+                    } = await getCachedTokens();
 
-                    // Create new headers object with fresh token
+                    // Create new headers object with fresh tokens
                     const newHeaders = new Headers(options?.headers);
-                    newHeaders.set(
-                        'Authorization',
-                        `Bearer ${freshToken || ''}`
-                    );
+                    if (freshAccessToken) {
+                        newHeaders.set(
+                            'Authorization',
+                            `Bearer ${freshAccessToken}`
+                        );
+                    }
+                    if (freshIdToken) {
+                        newHeaders.set('privy-id-token', freshIdToken);
+                    }
 
                     const retryOptions = {
                         ...options,

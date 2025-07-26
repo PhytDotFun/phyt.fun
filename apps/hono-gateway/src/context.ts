@@ -10,5 +10,6 @@ export const createContext = (
     c: Context<HonoEnv>
 ): AppContext => ({
     ...appDeps,
-    authClaims: c.get('authClaims')
+    authClaims: c.get('authClaims'),
+    identityToken: c.get('identityToken')
 });

@@ -16,7 +16,7 @@ app.use(
     '*',
     cors({
         origin: env.CORS_ORIGIN,
-        allowHeaders: ['Content-Type', 'Authorization'],
+        allowHeaders: ['Content-Type', 'Authorization', 'privy-id-token'],
         allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
         credentials: true
     })

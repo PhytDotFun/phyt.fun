@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 
-import { getRetryConfig, getRetryDelay } from '@/lib/error-utils';
+import { getRetryConfig, getRetryDelay } from '@/lib/errors';
 import { trpc } from '@/lib/trpc';
 
 export function useUserWithPrivyDID(privyDID: string) {

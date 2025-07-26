@@ -16,9 +16,10 @@ export function isUserSyncError(error: unknown): boolean {
     } | null;
 
     return (
-        errorData !== null &&
+        !!errorData &&
         errorData.code === 'INTERNAL_SERVER_ERROR' &&
-        errorData.message === 'Error fetching user'
+        (errorData.message === 'Error fetching user' ||
+            errorData.message === 'User sync in progress')
     );
 }
 
@@ -32,8 +33,8 @@ export function getRetryConfig(
 ): RetryConfig {
     if (isUserSyncError(error)) {
         return {
-            shouldRetry: failureCount < 10,
-            maxRetries: 10
+            shouldRetry: failureCount < 15,
+            maxRetries: 15
         };
     }
 
@@ -45,6 +46,7 @@ export function getRetryConfig(
 }
 
 export function getRetryDelay(attemptIndex: number): number {
-    // Exponential backoff starting at 1s: 1s, 2s, 4s, 8s, etc. up to 30s max
-    return Math.min(1000 * Math.pow(2, attemptIndex), 30000);
+    // For user sync errors, use a shorter initial delay but still exponential backoff
+    // Start at 500ms: 500ms, 1s, 2s, 4s, etc. up to 10s max for faster recovery
+    return Math.min(500 * Math.pow(2, attemptIndex), 10000);
 }
