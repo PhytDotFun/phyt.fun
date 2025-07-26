@@ -32,27 +32,27 @@ export function getRedisClient(cfg: RedisConfig): Redis {
 
     redisInstance
         .on('error', (e) => {
-            console.error('[Redis] Error:', e);
+            console.error('[REDIS] Error:', e);
         })
         .on('connect', () => {
-            console.info('[Redis] Connected');
+            console.info('[REDIS] Connected');
         })
         .on('reconnecting', () => {
-            console.info('[Redis] Reconnecting…');
+            console.info('[REDIS] Reconnecting…');
         })
         .on('ready', () => {
-            console.info('[Redis] Ready');
+            console.info('[REDIS] Ready');
         })
         .on('close', () => {
-            console.info('[Redis] Closed');
+            console.info('[REDIS] Closed');
         });
 
     const shutdown = async (sig: string) => {
-        console.info(`[redis] ${sig} received, quitting…`);
+        console.info(`[REDIS] ${sig} received, quitting…`);
         try {
             await redisInstance?.quit();
             redisInstance = null;
-            console.info('[redis] Quit cleanly');
+            console.info('[REDIS] Quit cleanly');
         } finally {
             process.exit(0);
         }
