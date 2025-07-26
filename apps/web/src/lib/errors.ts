@@ -16,9 +16,10 @@ export function isUserSyncError(error: unknown): boolean {
     } | null;
 
     return (
-        errorData !== null &&
+        !!errorData &&
         errorData.code === 'INTERNAL_SERVER_ERROR' &&
-        errorData.message === 'Error fetching user'
+        (errorData.message === 'Error fetching user' ||
+            errorData.message === 'User sync in progress')
     );
 }
 
