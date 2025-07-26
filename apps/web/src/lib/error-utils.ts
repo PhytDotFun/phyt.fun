@@ -5,9 +5,6 @@ export interface RetryConfig {
     maxRetries: number;
 }
 
-/**
- * Checks if a TRPC error is a user sync error (user hasn't been synced from Privy yet)
- */
 export function isUserSyncError(error: unknown): boolean {
     if (!(error instanceof TRPCClientError)) {
         return false;
@@ -25,16 +22,10 @@ export function isUserSyncError(error: unknown): boolean {
     );
 }
 
-/**
- * Determines if we should show a loading state instead of throwing error for user sync issues
- */
 export function shouldShowLoadingForError(error: unknown): boolean {
     return isUserSyncError(error);
 }
 
-/**
- * Determines retry configuration based on error type
- */
 export function getRetryConfig(
     failureCount: number,
     error: unknown
@@ -53,9 +44,6 @@ export function getRetryConfig(
     };
 }
 
-/**
- * Calculates retry delay with exponential backoff
- */
 export function getRetryDelay(attemptIndex: number): number {
     // Exponential backoff starting at 1s: 1s, 2s, 4s, 8s, etc. up to 30s max
     return Math.min(1000 * Math.pow(2, attemptIndex), 30000);
