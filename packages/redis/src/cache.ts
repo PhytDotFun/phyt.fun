@@ -15,7 +15,7 @@ export function createCache(redis: Redis): Cache {
                     const result = schema.safeParse(parsed);
                     if (!result.success) {
                         console.error(
-                            `[cache] Invalid data for key ${key}:`,
+                            `[CACHE] Invalid data for key ${key}:`,
                             result.error
                         );
                         await this.delete(key);
@@ -25,7 +25,7 @@ export function createCache(redis: Redis): Cache {
                 }
                 return parsed as T;
             } catch (error) {
-                console.error(`[cache] Invalid data for key ${key}:`, error);
+                console.error(`[CACHE] Invalid data for key ${key}:`, error);
                 return null;
             }
         }
@@ -43,7 +43,7 @@ export function createCache(redis: Redis): Cache {
                     await redis.set(key, serialized);
                 }
             } catch (error) {
-                console.error(`[cache] Error setting key ${key}:`, error);
+                console.error(`[CACHE] Error setting key ${key}:`, error);
                 throw error;
             }
         }
@@ -52,7 +52,7 @@ export function createCache(redis: Redis): Cache {
             try {
                 await redis.del(key);
             } catch (error) {
-                console.error(`[cache] Error deleting key ${key}:`, error);
+                console.error(`[CACHE] Error deleting key ${key}:`, error);
                 throw error;
             }
         }
@@ -80,13 +80,13 @@ export function createCache(redis: Redis): Cache {
                             .exec()
                             .then(() => {
                                 console.info(
-                                    `[cache] Invalidated ${count.toString()}. Keys matching ${pattern}`
+                                    `[CACHE] Invalidated ${count.toString()}. Keys matching ${pattern}`
                                 );
                                 resolve(count);
                             })
                             .catch((error: unknown) => {
                                 console.error(
-                                    '[cache] Error executing pipeline:',
+                                    '[CACHE] Error executing pipeline:',
                                     error
                                 );
                                 reject(
@@ -101,7 +101,7 @@ export function createCache(redis: Redis): Cache {
                 });
 
                 stream.on('error', (err) => {
-                    console.error('[cache] Error during invalidation:', err);
+                    console.error('[CACHE] Error during invalidation:', err);
                     reject(err);
                 });
             });
@@ -125,7 +125,7 @@ export function createCache(redis: Redis): Cache {
                 const result = schema.safeParse(value);
                 if (!result.success) {
                     throw new Error(
-                        `Value from facotry does not match schema: ${result.error.message}`
+                        `[CACHE] Value from facotry does not match schema: ${result.error.message}`
                     );
                 }
             }
