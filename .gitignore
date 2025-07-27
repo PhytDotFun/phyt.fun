@@ -41,3 +41,7 @@ yarn-error.log*
 # Tanstack
 .cta.json
 count.txt
+
+# Contracts
+cache/
+out/
