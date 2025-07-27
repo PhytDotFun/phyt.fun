@@ -1,5 +1,6 @@
 [profile.ci]
 fuzz = { runs = 10_000 }
+verbosity = 4
 
 [profile.default]
 libs = ["dependencies"]
@@ -7,6 +8,8 @@ test = "test"
 src = "src"
 out = "out"
 gas_reports = ["*"]
+optimizer = true
+optimizer_runs = 20_000
 
 [dependencies]
 forge-std = "1.9.7"
