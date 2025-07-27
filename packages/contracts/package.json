@@ -10,19 +10,17 @@
         }
     },
     "scripts": {
-        "scripts": {
-            "build": "forge build",
-            "test": "forge test",
-            "test:ci": "forge test --profile ci",
-            "clean": "forge clean",
-            "deps:install": "forge soldeer install",
-            "deps:update": "forge soldeer update",
-            "format": "forge fmt",
-            "lint": "forge fmt --check",
-            "deploy": "forge script Deploy --rpc-url $RPC_URL --private-key $PRIVATE_KEY",
-            "deploy:verify": "forge script Deploy --rpc-url $RPC_URL --private-key $PRIVATE_KEY --verify",
-            "verify": "forge verify-contract $CONTRACT_ADDRESS src/Contract.sol:Contract --etherscan-api-key $ETHERSCAN_API_KEY"
-        }
+        "build": "forge build",
+        "clean": "forge clean",
+        "deploy": "forge script Deploy --rpc-url $RPC_URL --private-key $PRIVATE_KEY",
+        "deploy:verify": "forge script Deploy --rpc-url $RPC_URL --private-key $PRIVATE_KEY --verify",
+        "deps:install": "forge soldeer install",
+        "deps:update": "forge soldeer update",
+        "format": "forge fmt",
+        "lint": "forge fmt --check",
+        "test": "forge test",
+        "test:ci": "forge test --profile ci",
+        "verify": "forge verify-contract $CONTRACT_ADDRESS src/Contract.sol:Contract --etherscan-api-key $ETHERSCAN_API_KEY"
     },
     "devDependencies": {
         "@phyt/eslint": "workspace:*",
