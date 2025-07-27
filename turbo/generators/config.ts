@@ -43,37 +43,37 @@ export default function generator(plop: PlopTypes.NodePlopAPI): void {
             },
             {
                 type: 'add',
-                path: 'packages/{{ name }}/eslint.config.js',
+                path: '{{ directory }}/{{ name }}/eslint.config.js',
                 templateFile: 'templates/eslint.config.js.hbs'
             },
             {
                 type: 'add',
-                path: 'packages/{{ name }}/package.json',
+                path: '{{ directory }}/{{ name }}/package.json',
                 templateFile: 'templates/package.json.hbs'
             },
             {
                 type: 'add',
-                path: 'packages/{{ name }}/tsconfig.json',
+                path: '{{ directory }}/{{ name }}/tsconfig.json',
                 templateFile: 'templates/tsconfig.json.hbs'
             },
             {
                 type: 'add',
-                path: 'packages/{{ name }}/tsup.config.ts',
+                path: '{{ directory }}/{{ name }}/tsup.config.ts',
                 templateFile: 'templates/tsup.config.ts.hbs'
             },
             {
                 type: 'add',
-                path: 'packages/{{ name }}/README.md',
+                path: '{{ directory }}/{{ name }}/README.md',
                 templateFile: 'templates/README.md.hbs'
             },
             {
                 type: 'add',
-                path: 'packages/{{ name }}/.lintstagedrc.json',
+                path: '{{ directory }}/{{ name }}/.lintstagedrc.json',
                 templateFile: 'templates/.lintstagedrc.json.hbs'
             },
             {
                 type: 'add',
-                path: 'packages/{{ name }}/src/index.ts',
+                path: '{{ directory }}/{{ name }}/src/index.ts',
                 template: "export const name = '{{ name }}';"
             },
             {
