@@ -302,3 +302,17 @@
 .accent-color-hover:hover {
     animation: accent-color-cycle 5s infinite ease-in-out;
 }
+
+@keyframes pulse-bg {
+    0%,
+    100% {
+        background-color: #fffff4;
+    }
+    50% {
+        background-color: #cfcfc5;
+    }
+}
+
+.animate-pulse-bg {
+    animation: pulse-bg 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
