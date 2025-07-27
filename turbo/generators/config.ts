@@ -12,12 +12,18 @@ export default function generator(plop: PlopTypes.NodePlopAPI): void {
     plop.addHelper('eq', (a, b) => a === b);
 
     plop.setGenerator('init', {
-        description: 'Generate a new package',
+        description: 'Generate a new module in either apps/ or packages/',
         prompts: [
+            {
+                type: 'list',
+                name: 'directory',
+                message: 'Where should the new module be created?',
+                choices: ['packages', 'apps']
+            },
             {
                 type: 'input',
                 name: 'name',
-                message: 'What is the name of the package?'
+                message: 'What is the name of the new module?'
             },
             {
                 type: 'input',
@@ -72,7 +78,7 @@ export default function generator(plop: PlopTypes.NodePlopAPI): void {
             },
             {
                 type: 'modify',
-                path: 'packages/{{ name }}/package.json',
+                path: '{{ directory }}/{{ name }}/package.json',
                 async transform(content, answers) {
                     if ('deps' in answers && typeof answers.deps === 'string') {
                         const pkg = JSON.parse(content) as PackageJson;
