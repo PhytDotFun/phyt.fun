@@ -8,20 +8,12 @@ import {
 
 import { appDeps } from '../di';
 
-/**
- * Processor for check_runs_to_post.
- * Runs as a CRON job to check for runs that need posting.
- *
- * - Find runs where to_post = true
- * - If is_posted = false: queue for posting
- * - If is_posted = true: mark to_post = false (cleanup)
- */
 export async function checkRunsToPost(
     job: Job<CheckRunsToPostJob>
 ): Promise<{ ok: true; queued: number; cleaned: number }> {
     CheckRunsToPostJobSchema.parse(job.data);
 
-    console.log('[POSTS] Checking for runs that need to be posted...');
+    console.log('[CHECK RUNS JOB] Checking for runs that need to be posted...');
 
     try {
         const runsToCheck = await appDeps.runsService.checkRunsToPost();
@@ -65,7 +57,7 @@ export async function checkRunsToPost(
 
                 queuedCount++;
                 console.log(
-                    `[POSTS] Queued run ${run.id.toString()} for posting`
+                    `[CHECK RUNS JOB] Queued run ${run.id.toString()} for posting`
                 );
             } else {
                 // Run is already posted but to_post is still true - clean it up
@@ -73,20 +65,20 @@ export async function checkRunsToPost(
 
                 cleanedCount++;
                 console.log(
-                    `[POSTS] Cleaned up posted run ${run.id.toString()} (marked to_post = false)`
+                    `[CHECK RUNS JOB] Cleaned up posted run ${run.id.toString()} (marked to_post = false)`
                 );
             }
         }
 
         console.log(
-            `[POSTS] Check complete: ${queuedCount.toString()} runs queued for posting, ${cleanedCount.toString()} runs cleaned up`
+            `[CHECK RUNS JOB] Check complete: ${queuedCount.toString()} runs queued for posting, ${cleanedCount.toString()} runs cleaned up`
         );
 
         return { ok: true, queued: queuedCount, cleaned: cleanedCount };
     } catch (error) {
         console.error(
-            `❌ [POSTS] Failed to check runs to post:`,
-            error instanceof Error ? error.message : 'Unknown error'
+            `[CHECK RUNS JOB] Failed to check runs to post:`
+            // error instanceof Error ? error.message : 'Unknown error'
         );
         throw error;
     }
