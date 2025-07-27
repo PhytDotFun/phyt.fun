@@ -8,19 +8,14 @@ import {
 
 import { appDeps } from '../di';
 
-/**
- * Processor for create_wallet.
- * 1. Creates wallet via Privy.
- * 2. Enqueues sync_privy_user with wallet address.
- *
- * Uses DI pattern consistent with other job processors.
- */
 export async function createWallet(
     job: Job<CreateWalletJob>
 ): Promise<{ ok: true }> {
     const data = CreateWalletJobSchema.parse(job.data);
 
-    console.log(`[AUTH] Creating wallet for user ${data.privyDID}`);
+    console.log(
+        `[CREATE WALLET JOB] Creating wallet for user ${data.privyDID}`
+    );
 
     try {
         // Create Privy wallet
@@ -30,7 +25,7 @@ export async function createWallet(
         });
 
         console.log(
-            `[AUTH] Created wallet ${wallet.address} for user ${data.privyDID}`
+            `[CREATE WALLET JOB] Created wallet ${wallet.address} for user ${data.privyDID}`
         );
 
         // Enqueue sync_privy_user
@@ -53,12 +48,14 @@ export async function createWallet(
             }
         );
 
-        console.log(`[AUTH] Queued sync job for user ${data.privyDID}`);
+        console.log(
+            `[CREATE WALLET JOB] Queued sync job for user ${data.privyDID}`
+        );
         return { ok: true };
     } catch (error) {
         console.error(
-            `❌ [AUTH] Failed to create wallet for user ${data.privyDID}:`,
-            error instanceof Error ? error.message : 'Unknown error'
+            `[CREATE WALLET JOB] Failed to create wallet for user ${data.privyDID}:`
+            // error instanceof Error ? error.message : 'Unknown error'
         );
         throw error;
     }
