@@ -130,17 +130,18 @@ export default function generator(plop: PlopTypes.NodePlopAPI): void {
                 /**
                  * Install deps and format everything
                  */
-                if ('name' in answers && typeof answers.name === 'string') {
-                    // execSync("pnpm dlx sherif@latest --fix", {
-                    //   stdio: "inherit",
-                    // });
+                if (
+                    'name' in answers &&
+                    typeof answers.name === 'string' &&
+                    'directory' in answers
+                ) {
                     execSync('pnpm i', { stdio: 'inherit' });
                     execSync(
-                        `pnpm prettier --write packages/${answers.name}/** --list-different`
+                        `pnpm prettier --write ${answers.directory}/${answers.name}/** --list-different`
                     );
-                    return 'Package scaffolded';
+                    return 'Module scaffolded';
                 }
-                return 'Package not scaffolded';
+                return 'Module not scaffolded';
             }
         ]
     });
