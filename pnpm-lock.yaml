@@ -365,6 +365,9 @@ importers:
       syncpack:
         specifier: 'catalog:'
         version: 14.0.0-alpha.18
+      tsx:
+        specifier: 'catalog:'
+        version: 4.20.3
       turbo:
         specifier: ^2.5.5
         version: 2.5.5
