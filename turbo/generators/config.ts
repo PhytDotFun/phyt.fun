@@ -9,13 +9,21 @@ interface PackageJson {
 }
 
 export default function generator(plop: PlopTypes.NodePlopAPI): void {
+    plop.addHelper('eq', (a, b) => a === b);
+
     plop.setGenerator('init', {
-        description: 'Generate a new package',
+        description: 'Generate a new module in either apps/ or packages/',
         prompts: [
+            {
+                type: 'list',
+                name: 'directory',
+                message: 'Where should the new module be created?',
+                choices: ['packages', 'apps']
+            },
             {
                 type: 'input',
                 name: 'name',
-                message: 'What is the name of the package?'
+                message: 'What is the name of the new module?'
             },
             {
                 type: 'input',
@@ -35,42 +43,42 @@ export default function generator(plop: PlopTypes.NodePlopAPI): void {
             },
             {
                 type: 'add',
-                path: 'packages/{{ name }}/eslint.config.js',
+                path: '{{ directory }}/{{ name }}/eslint.config.js',
                 templateFile: 'templates/eslint.config.js.hbs'
             },
             {
                 type: 'add',
-                path: 'packages/{{ name }}/package.json',
+                path: '{{ directory }}/{{ name }}/package.json',
                 templateFile: 'templates/package.json.hbs'
             },
             {
                 type: 'add',
-                path: 'packages/{{ name }}/tsconfig.json',
+                path: '{{ directory }}/{{ name }}/tsconfig.json',
                 templateFile: 'templates/tsconfig.json.hbs'
             },
             {
                 type: 'add',
-                path: 'packages/{{ name }}/tsup.config.ts',
+                path: '{{ directory }}/{{ name }}/tsup.config.ts',
                 templateFile: 'templates/tsup.config.ts.hbs'
             },
             {
                 type: 'add',
-                path: 'packages/{{ name }}/README.md',
+                path: '{{ directory }}/{{ name }}/README.md',
                 templateFile: 'templates/README.md.hbs'
             },
             {
                 type: 'add',
-                path: 'packages/{{ name }}/.lintstagedrc.json',
+                path: '{{ directory }}/{{ name }}/.lintstagedrc.json',
                 templateFile: 'templates/.lintstagedrc.json.hbs'
             },
             {
                 type: 'add',
-                path: 'packages/{{ name }}/src/index.ts',
+                path: '{{ directory }}/{{ name }}/src/index.ts',
                 template: "export const name = '{{ name }}';"
             },
             {
                 type: 'modify',
-                path: 'packages/{{ name }}/package.json',
+                path: '{{ directory }}/{{ name }}/package.json',
                 async transform(content, answers) {
                     if ('deps' in answers && typeof answers.deps === 'string') {
                         const pkg = JSON.parse(content) as PackageJson;
@@ -122,17 +130,18 @@ export default function generator(plop: PlopTypes.NodePlopAPI): void {
                 /**
                  * Install deps and format everything
                  */
-                if ('name' in answers && typeof answers.name === 'string') {
-                    // execSync("pnpm dlx sherif@latest --fix", {
-                    //   stdio: "inherit",
-                    // });
+                if (
+                    'name' in answers &&
+                    typeof answers.name === 'string' &&
+                    'directory' in answers
+                ) {
                     execSync('pnpm i', { stdio: 'inherit' });
                     execSync(
-                        `pnpm prettier --write packages/${answers.name}/** --list-different`
+                        `pnpm prettier --write ${answers.directory}/${answers.name}/** --list-different`
                     );
-                    return 'Package scaffolded';
+                    return 'Module scaffolded';
                 }
-                return 'Package not scaffolded';
+                return 'Module not scaffolded';
             }
         ]
     });
