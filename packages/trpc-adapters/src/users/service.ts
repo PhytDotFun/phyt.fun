@@ -106,18 +106,21 @@ export class UsersService {
                     await this.redis.del(cacheKey);
                 }
             }
-        } catch (error) {
+        } catch /*(error)*/ {
             console.error(
                 '[CACHE] Redis GET error for key',
-                cacheKey,
-                ':',
-                error
+                cacheKey
+                // ':',
+                // error
             );
         }
         try {
             const user = await this.repo.findByUserId(id);
 
-            if (!user) throw new Error('Could not find user in Cache or DB');
+            if (!user)
+                throw new Error(
+                    '[USERS SERVICE] Could not find user in Cache or DB'
+                );
 
             const returnedUser = this.createUserFromSelectUser(user);
 
@@ -130,20 +133,22 @@ export class UsersService {
                     'EX',
                     this.USER_CACHE_TTL
                 );
-            } catch (error) {
+            } catch /*(error)*/ {
                 console.error(
                     '[CACHE] Redis SET error for key',
-                    cacheKey,
-                    ':',
-                    error
+                    cacheKey
+                    // ':',
+                    // error
                 );
             }
 
             UserSchema.parse(returnedUser);
 
             return returnedUser;
-        } catch (error) {
-            console.error('Error fetching user by id', error);
+        } catch /*(error)*/ {
+            console.error(
+                '[USERS SERVICE] Error fetching user by id' /*, error*/
+            );
             return null;
         }
     }
@@ -170,12 +175,12 @@ export class UsersService {
                     await this.redis.del(cacheKey);
                 }
             }
-        } catch (error) {
+        } catch /*(error)*/ {
             console.error(
                 '[CACHE] Redis GET error for key',
-                cacheKey,
-                ':',
-                error
+                cacheKey
+                // ':',
+                // error
             );
         }
 
@@ -208,8 +213,10 @@ export class UsersService {
             UserSchema.parse(returnedUser);
 
             return returnedUser;
-        } catch (error) {
-            console.error('Error fetching user by privyDID', error);
+        } catch /*(error)*/ {
+            console.error(
+                '[USERS SERVICE] Error fetching user by Privy DID' /*, error*/
+            );
             return null;
         }
     }
@@ -249,16 +256,16 @@ export class UsersService {
             UserSchema.parse(returnedUser);
 
             return returnedUser;
-        } catch (error) {
-            console.error('Error fetching user by wallet address', error);
+        } catch /*(error)*/ {
+            console.error(
+                '[USERS SERVICE] Error fetching user by wallet address' /*, error*/
+            );
             return null;
         }
     }
 
     async triggerUserSyncWithIdentityToken(idToken: string): Promise<void> {
-        console.log(
-            `[USERS SERVICE] Triggering user sync with identity token ${idToken}.`
-        );
+        console.log(`[USERS SERVICE] Triggering user sync with identity token`);
 
         try {
             const user = await this.privy.getUser({ idToken });
@@ -268,7 +275,7 @@ export class UsersService {
             const cleanPrivyDID = user.id.replace(/^did:privy:/, '');
 
             const basePayload = {
-                privyDID: cleanPrivyDID,
+                privyDID: user.id,
                 username: user.twitter?.name ?? `phyt_user_${cleanPrivyDID}`,
                 profilePictureUrl:
                     user.twitter?.profilePictureUrl ??
@@ -301,7 +308,7 @@ export class UsersService {
             } else {
                 // User has a wallet, so queue the sync_privy_user job.
                 console.log(
-                    `[USER SERVICE] Wallet found for ${user.id}. Queuing sync_privy_user job.`
+                    `[USERS SERVICE] Wallet found for ${user.id}. Queuing sync_privy_user job.`
                 );
 
                 const payload = SyncPrivyUserJobSchema.parse({
@@ -323,9 +330,7 @@ export class UsersService {
                 );
             }
         } catch (error) {
-            console.error(
-                `[USERS SERVICE] Failed to trigger user sync for token ${idToken}`
-            );
+            console.error(`[USERS SERVICE] Failed to trigger user sync`);
             throw error;
         }
     }
