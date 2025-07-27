@@ -3,7 +3,7 @@
     "private": true,
     "scripts": {
         "bootstrap": "tooling/vault/bootstrap.sh",
-        "build": "turbo run build && pnpm contracts:build",
+        "build": "turbo run build",
         "check:compiler": "turbo run check:compiler",
         "check:types": "turbo run check:types",
         "clean:root": "rm -rf node_modules && rm -rf .turbo && pnpm store prune",
