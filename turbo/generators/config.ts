@@ -9,6 +9,8 @@ interface PackageJson {
 }
 
 export default function generator(plop: PlopTypes.NodePlopAPI): void {
+    plop.addHelper('eq', (a, b) => a === b);
+
     plop.setGenerator('init', {
         description: 'Generate a new package',
         prompts: [
