@@ -3,15 +3,10 @@ import { PostRunsJob, PostRunsJobSchema } from '@phyt/m-queue/jobs';
 
 import { appDeps } from '../di';
 
-/**
- * Processor for post_runs.
- * Handles the actual posting of runs to social media/feed.
- * This is where the actual posting logic would go.
- */
 export async function postRuns(job: Job<PostRunsJob>): Promise<{ ok: true }> {
     const data = PostRunsJobSchema.parse(job.data);
 
-    console.log(`[POSTS] Processing POST_RUNS for run ${data.run.id}`);
+    console.log(`[POST RUNS JOB] Processing POST_RUNS for run ${data.run.id}`);
 
     try {
         const runId = appDeps.idEncoder.decode('runs', data.run.id);
@@ -19,7 +14,7 @@ export async function postRuns(job: Job<PostRunsJob>): Promise<{ ok: true }> {
             throw new Error(`Invalid run ID: ${data.run.id}`);
         }
 
-        console.log(`[POSTS] Posting run ${data.run.id} to feed...`);
+        console.log(`[POST RUNS JOB] Posting run ${data.run.id} to feed...`);
 
         // Get the full run data from the database to access userId
         const fullRunData = await appDeps.runsRepository.findByRunId(runId);
@@ -39,7 +34,7 @@ export async function postRuns(job: Job<PostRunsJob>): Promise<{ ok: true }> {
         });
 
         console.log(
-            `[POSTS] Created post ${newPost.id} for run ${data.run.id}`
+            `[POST RUNS JOB] Created post ${newPost.id} for run ${data.run.id}`
         );
 
         // Mark the run as posted in the database
@@ -50,7 +45,7 @@ export async function postRuns(job: Job<PostRunsJob>): Promise<{ ok: true }> {
         });
 
         console.log(
-            `[POSTS] Successfully posted run ${data.run.id} and marked as posted`
+            `[POST RUNS JOB] Successfully posted run ${data.run.id} and marked as posted`
         );
 
         // TODO: Send notifications to followers about the new post
@@ -62,8 +57,8 @@ export async function postRuns(job: Job<PostRunsJob>): Promise<{ ok: true }> {
         return { ok: true };
     } catch (error) {
         console.error(
-            `❌ [POSTS] Failed to post run ${data.run.id}:`,
-            error instanceof Error ? error.message : 'Unknown error'
+            `[POST RUNS JOB] Failed to post run ${data.run.id}:`
+            // error instanceof Error ? error.message : 'Unknown error'
         );
         throw error;
     }
