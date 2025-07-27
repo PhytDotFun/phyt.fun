@@ -151,24 +151,24 @@ const setupCronJobs = async () => {
 setupCronJobs().catch(console.error);
 authWorker.on('completed', (job) => {
     console.log(
-        `✅ [AUTH] ${job.name} (${job.id?.toString() ?? 'unknown'}) done`
+        `[AUTH QUEUE WORKER] ${job.name} (${job.id?.toString() ?? 'unknown'}) DONE`
     );
 });
 authWorker.on('failed', (job, err) => {
     console.error(
-        `❌ [AUTH] ${job?.name ?? 'unknown'} (${job?.id?.toString() ?? 'unknown'}) failed:`,
+        `[AUTH QUEUE WORKER] ${job?.name ?? 'unknown'} (${job?.id?.toString() ?? 'unknown'}) FAILED:`,
         err
     );
 });
 
 postsWorker.on('completed', (job) => {
     console.log(
-        `✅ [POSTS] ${job.name} (${job.id?.toString() ?? 'unknown'}) done`
+        `[POSTS QUEUE WORKER] ${job.name} (${job.id?.toString() ?? 'unknown'}) DONE`
     );
 });
 postsWorker.on('failed', (job, err) => {
     console.error(
-        `❌ [POSTS] ${job?.name ?? 'unknown'} (${job?.id?.toString() ?? 'unknown'}) failed:`,
+        `[POSTS QUEUE WORKER] ${job?.name ?? 'unknown'} (${job?.id?.toString() ?? 'unknown'}) FAILED:`,
         err
     );
 });
