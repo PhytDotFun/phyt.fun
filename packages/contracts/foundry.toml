@@ -1,8 +1,12 @@
-[profile.ci.fuzz]
-runs = 10_000
+[profile.ci]
+fuzz = { runs = 10_000 }
 
 [profile.default]
 libs = ["dependencies"]
+test = "test"
+src = "src"
+out = "out"
+gas_reports = ["*"]
 
 [dependencies]
 forge-std = "1.9.7"
