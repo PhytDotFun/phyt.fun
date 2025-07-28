@@ -6,6 +6,7 @@ verbosity = 4
 libs = ["dependencies"]
 test = "test"
 src = "src"
+script = "script"
 out = "out"
 gas_reports = ["*"]
 optimizer = true
