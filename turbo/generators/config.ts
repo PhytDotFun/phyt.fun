@@ -58,11 +58,6 @@ export default function generator(plop: PlopTypes.NodePlopAPI): void {
             },
             {
                 type: 'add',
-                path: '{{ directory }}/{{ name }}/tsup.config.ts',
-                templateFile: 'templates/tsup.config.ts.hbs'
-            },
-            {
-                type: 'add',
                 path: '{{ directory }}/{{ name }}/README.md',
                 templateFile: 'templates/README.md.hbs'
             },

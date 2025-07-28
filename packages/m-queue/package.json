@@ -14,7 +14,7 @@
         }
     },
     "scripts": {
-        "build": "tsup",
+        "build": "rm -rf dist && bun build src/queue.ts src/jobs.ts --outdir dist --target node --format esm --minify && tsc --declaration --emitDeclarationOnly --outDir dist",
         "check:types": "tsc --noEmit",
         "clean": "pnpm rimraf dist && pnpm rimraf node_modules && pnpm rimraf .turbo",
         "format": "prettier --write . --ignore-unknown",
@@ -34,7 +34,6 @@
         "eslint": "catalog:",
         "ioredis": "catalog:",
         "prettier": "catalog:",
-        "tsup": "catalog:",
         "typescript": "catalog:",
         "vitest": "catalog:"
     }

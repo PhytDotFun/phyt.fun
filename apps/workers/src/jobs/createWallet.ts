@@ -1,10 +1,10 @@
 import { Job } from 'bullmq';
 import {
     CreateWalletJobSchema,
-    CreateWalletJob,
     JobName,
     SyncPrivyUserJobSchema
 } from '@phyt/m-queue/jobs';
+import type { CreateWalletJob } from '@phyt/m-queue/jobs';
 
 import { appDeps } from '../di';
 

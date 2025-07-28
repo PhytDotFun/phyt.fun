@@ -20,13 +20,17 @@
             "types": "./dist/posts/procedures.d.ts",
             "import": "./dist/posts/procedures.js"
         },
+        "./runs/procedures": {
+            "types": "./dist/runs/procedures.d.ts",
+            "import": "./dist/runs/procedures.js"
+        },
         "./encoder": {
             "types": "./dist/encoder.d.ts",
             "import": "./dist/encoder.js"
         }
     },
     "scripts": {
-        "build": "tsup",
+        "build": "rm -rf dist && bun build src/trpc.ts src/di.ts src/users/procedures.ts src/posts/procedures.ts src/runs/procedures.ts src/encoder.ts --outdir dist --target node --format esm --minify && tsc --declaration --emitDeclarationOnly --outDir dist",
         "check:types": "tsc --noEmit",
         "clean": "pnpm rimraf dist && pnpm rimraf node_modules && pnpm rimraf .turbo",
         "format": "prettier --write . --ignore-unknown",
@@ -53,7 +57,6 @@
         "@types/hashids": "catalog:",
         "eslint": "catalog:",
         "ioredis": "catalog:",
-        "tsup": "catalog:",
         "typescript": "catalog:",
         "vitest": "catalog:"
     }

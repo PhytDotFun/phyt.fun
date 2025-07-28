@@ -1,10 +1,10 @@
 import { Job } from 'bullmq';
 import {
-    CheckRunsToPostJob,
     CheckRunsToPostJobSchema,
     JobName,
     PostRunsJobSchema
 } from '@phyt/m-queue/jobs';
+import type { CheckRunsToPostJob } from '@phyt/m-queue/jobs';
 
 import { appDeps } from '../di';
 
