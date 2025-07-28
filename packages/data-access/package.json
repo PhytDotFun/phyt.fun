@@ -26,7 +26,7 @@
         }
     },
     "scripts": {
-        "build": "tsup",
+        "build": "rm -rf dist && bun build src/db/client.ts src/db/schema.ts src/models/users.ts src/models/posts.ts src/models/runs.ts --outdir dist --target node --format esm --minify && tsc --declaration --emitDeclarationOnly --outDir dist",
         "check:types": "tsc --noEmit",
         "clean": "pnpm rimraf dist && pnpm rimraf node_modules && pnpm rimraf .turbo",
         "db:check": "pnpm drizzle-kit check --config=./src/db/drizzle.config.js",
