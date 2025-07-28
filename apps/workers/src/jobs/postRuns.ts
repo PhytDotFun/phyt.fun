@@ -1,5 +1,6 @@
 import { Job } from 'bullmq';
-import { PostRunsJob, PostRunsJobSchema } from '@phyt/m-queue/jobs';
+import { PostRunsJobSchema } from '@phyt/m-queue/jobs';
+import type { PostRunsJob } from '@phyt/m-queue/jobs';
 
 import { appDeps } from '../di';
 

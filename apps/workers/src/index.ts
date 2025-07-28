@@ -1,6 +1,6 @@
 import { Worker, Job, Queue } from 'bullmq';
-import {
-    JobName,
+import { JobName } from '@phyt/m-queue/jobs';
+import type {
     CreateWalletJob,
     SyncPrivyUserJob,
     CheckRunsToPostJob,
@@ -14,8 +14,6 @@ import { syncPrivyUser } from './jobs/syncPrivyUser';
 import { checkRunsToPost } from './jobs/checkRunsToPost';
 import { postRuns } from './jobs/postRuns';
 import { env } from './env';
-
-console.clear();
 
 const startTime = process.hrtime.bigint();
 

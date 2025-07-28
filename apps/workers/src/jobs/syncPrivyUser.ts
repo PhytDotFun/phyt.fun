@@ -1,5 +1,6 @@
 import { Job } from 'bullmq';
-import { SyncPrivyUserJob, SyncPrivyUserJobSchema } from '@phyt/m-queue/jobs';
+import { SyncPrivyUserJobSchema } from '@phyt/m-queue/jobs';
+import type { SyncPrivyUserJob } from '@phyt/m-queue/jobs';
 import { InsertUserSchema } from '@phyt/data-access/models/users';
 
 import { appDeps } from '../di';
