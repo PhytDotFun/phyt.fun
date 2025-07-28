@@ -3,6 +3,18 @@
 # Spin up containers
 docker compose up -d
 
+# Wait for containers to be ready
+echo "Waiting for containers to be ready..."
+sleep 5
+
+# Run database migrations
+echo "Running database migrations..."
+pnpm db:migrate
+
+# # WIP Deploy contracts for development
+# echo "Deploying contracts for development..."
+# pnpm contracts:deploy:dev
+
 # Function to cleanup on exit
 cleanup() {
     # Prevent double cleanup
