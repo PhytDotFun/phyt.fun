@@ -52,5 +52,13 @@
         "workers": "robot",
         "vault": "constant"
     },
-    "cSpell.words": ["bullmq", "phyt", "viem"]
+
+    "[solidity]": {
+        "editor.defaultFormatter": "JuanBlanco.solidity",
+        "editor.formatOnSave": true
+    },
+
+    "solidity.formatter": "forge",
+    "solidity.packageDefaultDependenciesContractsDirectory": "src",
+    "solidity.packageDefaultDependenciesDirectory": "dependencies"
 }

@@ -1,0 +1,36 @@
+{
+    "name": "@phyt/contracts",
+    "version": "0.0.0",
+    "private": true,
+    "type": "module",
+    "exports": {
+        ".": {
+            "types": "./dist/index.d.ts",
+            "import": "./dist/index.js"
+        }
+    },
+    "scripts": {
+        "build": "forge build && tsup",
+        "build:solidity": "forge build",
+        "build:typescript": "tsup",
+        "clean": "forge clean && rm -rf dist",
+        "deploy": "forge script Deploy --rpc-url $RPC_URL --private-key $PRIVATE_KEY",
+        "deploy:verify": "forge script Deploy --rpc-url $RPC_URL --private-key $PRIVATE_KEY --verify",
+        "deps:install": "forge soldeer install",
+        "deps:update": "forge soldeer update",
+        "format": "forge fmt",
+        "lint": "forge fmt --check",
+        "test": "forge test",
+        "test:ci": "forge test --profile ci",
+        "verify": "forge verify-contract $CONTRACT_ADDRESS src/Contract.sol:Contract --etherscan-api-key $ETHERSCAN_API_KEY"
+    },
+    "devDependencies": {
+        "@phyt/eslint": "workspace:*",
+        "@phyt/tsconfig": "workspace:*",
+        "eslint": "catalog:",
+        "prettier": "catalog:",
+        "tsup": "catalog:",
+        "typescript": "catalog:",
+        "vitest": "catalog:"
+    }
+}

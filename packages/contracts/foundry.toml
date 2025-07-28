@@ -1,0 +1,21 @@
+[profile.ci]
+fuzz = { runs = 10_000 }
+verbosity = 4
+
+[profile.default]
+libs = ["dependencies"]
+test = "test"
+src = "src"
+script = "script"
+out = "out"
+gas_reports = ["*"]
+optimizer = true
+optimizer_runs = 20_000
+
+[dependencies]
+forge-std = "1.9.7"
+"@openzeppelin-contracts" = "5.0.2"
+uniswap-v4-core = "4"
+
+[soldeer]
+remappings_generate = true
