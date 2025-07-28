@@ -1,3 +1,3 @@
 # `@phyt/contracts`
 
-A package that does something.
+Foundry + OpenZepplin + Uniswap V4 smart contracts, deployed to the Base protocol.
