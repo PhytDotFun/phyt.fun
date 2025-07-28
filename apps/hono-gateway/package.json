@@ -13,7 +13,7 @@
         }
     },
     "scripts": {
-        "build": "rm -rf dist && bun build src/index.ts --outdir dist --target node --format esm --minify --sourcemap --outfile index.js && tsc --declaration --emitDeclarationOnly --outDir dist",
+        "build": "rm -rf dist && bun build src/index.ts --outfile dist/index.js --target node --format esm --minify --sourcemap && tsc --declaration --emitDeclarationOnly --outDir dist",
         "build:types": "tsc --declaration --emitDeclarationOnly --outDir dist/types src/router.ts",
         "check:types": "tsc --noEmit",
         "clean": "pnpm rimraf dist && pnpm rimraf node_modules && pnpm rimraf .turbo",
