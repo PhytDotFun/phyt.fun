@@ -10,8 +10,10 @@
         }
     },
     "scripts": {
-        "build": "forge build",
-        "clean": "forge clean",
+        "build": "forge build && tsup",
+        "build:solidity": "forge build",
+        "build:typescript": "tsup",
+        "clean": "forge clean && rm -rf dist",
         "deploy": "forge script Deploy --rpc-url $RPC_URL --private-key $PRIVATE_KEY",
         "deploy:verify": "forge script Deploy --rpc-url $RPC_URL --private-key $PRIVATE_KEY --verify",
         "deps:install": "forge soldeer install",
