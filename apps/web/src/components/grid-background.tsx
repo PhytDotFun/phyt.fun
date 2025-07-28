@@ -6,7 +6,7 @@ export const GridBackground = () => {
     const cols = isMobile ? 8 : 12;
     const rows = isMobile ? 6 : 8;
     const totalCells = cols * rows;
-    const animationDuration = totalCells * 0.2 + 8;
+    const animationDuration = totalCells * 0.5 + 8;
 
     const getAnimationDelay = (index: number) => {
         const row = Math.floor(index / cols);
@@ -24,7 +24,7 @@ export const GridBackground = () => {
 
     return (
         <div
-            className={`fixed inset-0 pointer-events-none z-0 opacity-20`}
+            className={`fixed inset-0 pointer-events-none z-0 opacity-50 bg-main`}
             style={
                 {
                     '--snake-animation-duration': `${animationDuration.toString()}s`
