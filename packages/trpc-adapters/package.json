@@ -53,7 +53,6 @@
         "@types/hashids": "catalog:",
         "eslint": "catalog:",
         "ioredis": "catalog:",
-        "tsup": "catalog:",
         "typescript": "catalog:",
         "vitest": "catalog:"
     }

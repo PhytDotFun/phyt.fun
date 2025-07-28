@@ -41,7 +41,6 @@
         "@types/node": "catalog:",
         "eslint": "catalog:",
         "prettier": "catalog:",
-        "tsup": "catalog:",
         "typescript": "catalog:",
         "vitest": "catalog:"
     }

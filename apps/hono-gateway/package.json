@@ -50,7 +50,6 @@
         "@types/node": "catalog:",
         "chalk": "catalog:",
         "eslint": "catalog:",
-        "tsup": "catalog:",
         "typescript": "catalog:",
         "vitest": "catalog:"
     }

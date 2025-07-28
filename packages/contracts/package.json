@@ -29,7 +29,6 @@
         "@phyt/tsconfig": "workspace:*",
         "eslint": "catalog:",
         "prettier": "catalog:",
-        "tsup": "catalog:",
         "typescript": "catalog:",
         "vitest": "catalog:"
     }

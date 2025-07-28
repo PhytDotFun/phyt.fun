@@ -35,7 +35,6 @@
         "eslint": "catalog:",
         "ioredis": "catalog:",
         "prettier": "catalog:",
-        "tsup": "catalog:",
         "typescript": "catalog:",
         "vitest": "catalog:",
         "zod": "catalog:"
