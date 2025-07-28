@@ -9,7 +9,7 @@ contract TestContract is Test {
     Contract c;
 
     function setUp() public {
-        c = new Contract();
+        c = new Contract("Test Contract");
     }
 
     function testBar() public pure {
