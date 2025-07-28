@@ -8,6 +8,7 @@
         "check:types": "turbo run check:types",
         "clean:root": "rm -rf node_modules && rm -rf .turbo && pnpm store prune",
         "clean:workspaces": "turbo run clean && cd packages/contracts && forge clean",
+        "cleanup": "tooling/scripts/cleanup.sh",
         "contracts:build": "pnpm --filter @phyt/contracts build",
         "contracts:clean": "pnpm --filter @phyt/contracts clean",
         "contracts:deploy:dev": "tooling/vault/inject.sh dev/contracts pnpm --filter @phyt/contracts deploy",
