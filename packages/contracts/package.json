@@ -10,9 +10,9 @@
         }
     },
     "scripts": {
-        "build": "forge build && tsup",
+        "build": "forge build && rm -rf dist && bun build src/index.ts --outdir dist --target node --format esm --minify && tsc --declaration --emitDeclarationOnly --outDir dist",
         "build:solidity": "forge build",
-        "build:typescript": "tsup",
+        "build:typescript": "rm -rf dist && bun build src/index.ts --outdir dist --target node --format esm --minify && tsc --declaration --emitDeclarationOnly --outDir dist",
         "clean": "forge clean && rm -rf dist",
         "deploy": "forge script Deploy --rpc-url $RPC_URL --private-key $PRIVATE_KEY",
         "deploy:verify": "forge script Deploy --rpc-url $RPC_URL --private-key $PRIVATE_KEY --verify",
