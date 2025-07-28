@@ -46,7 +46,18 @@ export default defineConfig({
             }
         }
     },
+    // Optimize for Bun's bundler capabilities
+    optimizeDeps: {
+        include: [
+            'react',
+            'react-dom',
+            '@tanstack/react-query',
+            '@tanstack/react-router'
+        ]
+    },
     build: {
+        // Target modern browsers for better Bun compatibility
+        target: 'esnext',
         rollupOptions: {
             output: {
                 manualChunks(id) {
