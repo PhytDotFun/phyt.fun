@@ -76,6 +76,7 @@
     },
     "devDependencies": {
         "@phyt/core": "workspace:*",
+        "@phyt/data-access": "workspace:*",
         "@phyt/eslint": "workspace:*",
         "@phyt/hono-gateway": "workspace:*",
         "@phyt/tsconfig": "workspace:*",

@@ -619,6 +619,9 @@ importers:
       '@phyt/core':
         specifier: workspace:*
         version: link:../../packages/core
+      '@phyt/data-access':
+        specifier: workspace:*
+        version: link:../../packages/data-access
       '@phyt/eslint':
         specifier: workspace:*
         version: link:../../tooling/eslint
