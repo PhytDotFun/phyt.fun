@@ -1,18 +1,14 @@
+import type { Post } from '@phyt/data-access/models/posts';
+
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-
-// Infer the Post type from the useFeed hook return type
-type Post = NonNullable<
-    ReturnType<typeof import('@/hooks/feed/use-feed').useFeed>['posts'][0]
->;
 
 interface FeedPostProps {
     post: Post;
 }
 
 export const FeedPost = ({ post }: FeedPostProps) => {
-    // Helper function to format pace (seconds per meter to min/km)
     const formatPace = (averagePace: number | null) => {
         if (!averagePace) return 'N/A';
         const paceMinPerKm = (averagePace * 1000) / 60;
