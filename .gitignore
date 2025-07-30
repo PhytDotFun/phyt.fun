@@ -46,3 +46,6 @@ count.txt
 cache/
 out/
 dependencies/
+
+# Logging
+logs/
