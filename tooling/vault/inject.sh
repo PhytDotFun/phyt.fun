@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Inject Vault KV‑v2 secrets then exec the given command
+# Inject vault kv‑v2 secrets then exec the given command
 set -euo pipefail
 
 [[ $# -lt 2 ]] && { echo "Usage: $0 <vault-path> <cmd…>" >&2; exit 1; }
@@ -22,9 +22,9 @@ fi
 VAULT_TOKEN=$(<"$token_file")
 export VAULT_TOKEN
 
-if ! vault token lookup &> /dev/null; then
-    echo "ERROR: Token for $app has expired or is invalid"
-    echo "TIP: Run './bootstrap.sh' to refresh your tokens"
+if ! vault kv metadata get "kv/$path" >/dev/null 2>&1; then
+    echo "ERROR: Token for $app cannot read kv/$path (invalid/expired or wrong policy)"
+    echo "TIP: Run './bootstrap.sh' to mint a fresh $app token, or check the policy ($app-read)"
     exit 1
 fi
 
