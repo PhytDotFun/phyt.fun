@@ -45,6 +45,8 @@
         "redis:stop": "docker compose stop redis"
     },
     "devDependencies": {
+        "@commitlint/cli": "catalog:",
+        "@commitlint/config-conventional": "catalog:",
         "@turbo/gen": "catalog:",
         "concurrently": "catalog:",
         "husky": "catalog:",
@@ -59,5 +61,5 @@
         "node": ">=22",
         "bun": ">=1.2.19"
     },
-    "packageManager": "pnpm@10.13.1"
+    "packageManager": "pnpm@10.14.0"
 }
