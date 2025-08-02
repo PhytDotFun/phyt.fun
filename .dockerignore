@@ -1,0 +1,11 @@
+.git
+node_modules
+**/node_modules
+dist
+build
+.tmp
+turbo/out
+.turbo
+.vscode
+.DS_Store
+.env*
