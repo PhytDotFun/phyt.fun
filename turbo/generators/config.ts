@@ -9,16 +9,15 @@ interface PackageJson {
 }
 
 export default function generator(plop: PlopTypes.NodePlopAPI): void {
-    plop.addHelper('eq', (a, b) => a === b);
-
     plop.setGenerator('init', {
-        description: 'Generate a new module in either apps/ or packages/',
+        description:
+            'Generate a new module in either apps/, packages/, or tooling/',
         prompts: [
             {
                 type: 'list',
                 name: 'directory',
                 message: 'Where should the new module be created?',
-                choices: ['packages', 'apps']
+                choices: ['packages', 'apps', 'tooling']
             },
             {
                 type: 'input',
