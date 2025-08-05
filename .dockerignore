@@ -9,3 +9,4 @@ turbo/out
 .vscode
 .DS_Store
 .env*
+out
