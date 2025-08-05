@@ -20,6 +20,7 @@ services:
             interval: 5s
             timeout: 5s
             retries: 5
+        restart: always
 
     redis:
         image: redis:7-alpine
@@ -34,14 +35,12 @@ services:
             interval: 5s
             timeout: 5s
             retries: 5
+        restart: always
 
     tailscale:
         image: tailscale/tailscale
         container_name: ${COMPOSE_PROJECT_NAME:-phyt}-tailscale
-        hostname: phyt-docker-dev
-        ports:
-            - '3000:3000'
-            - '4983:4983'
+        hostname: phyt-docker-prod
         environment:
             - TS_AUTHKEY=${TS_AUTHKEY}
             - TS_STATE_DIR=/var/lib/tailscale
@@ -52,7 +51,7 @@ services:
         cap_add:
             - net_admin
             - sys_module
-        restart: unless-stopped
+        restart: always
 
     vault-agent:
         image: hashicorp/vault:latest
@@ -67,15 +66,19 @@ services:
         volumes:
             - ./tooling/vault:/vault/config
             - vault-secrets:/vault/secrets
-        entrypoint: /bin/sh
-        command: -c "echo \"$VAULT_ROLE_ID\" > /vault/config/role-id && echo \"$VAULT_SECRET_ID\" > /vault/config/secret-id && vault agent -config=/vault/config/agent.hcl -log-level=debug"
-        restart: unless-stopped
+        command: >
+            -c "
+            echo \"$VAULT_ROLE_ID\" > /vault/config/role-id &&
+            echo \"$VAULT_SECRET_ID\" > /vault/config/secret-id &&
+            vault agent -config=/vault/config/agent.hcl -log-level=info
+            "
+        restart: always
 
     hono-gateway:
         build:
             context: .
             dockerfile: Dockerfile
-            target: development
+            target: hono-gateway-prod
         network_mode: 'service:tailscale'
         depends_on:
             vault-agent:
@@ -86,40 +89,34 @@ services:
                 condition: service_healthy
         volumes:
             - vault-secrets:/vault/secrets:ro
-            - ./apps/hono-gateway:/usr/src/app/apps/hono-gateway
-            - ./packages:/usr/src/app/packages
-        entrypoint: /usr/local/bin/docker-entrypoint.dev.sh
-        command:
+        entrypoint:
             [
-                '/vault/secrets/hono-gateway.env',
-                'pnpm',
-                '--filter',
-                '@phyt/hono-gateway',
-                'dev'
+                '/bin/sh',
+                '-c',
+                "until [ -f /vault/secrets/hono-gateway.env ]; do echo 'Waiting for hono-gateway secrets...'; sleep 2; done; . /vault/secrets/hono-gateway.env; exec pnpm --filter @phyt/hono-gateway start"
             ]
+        restart: always
 
     workers:
         build:
             context: .
             dockerfile: Dockerfile
-            target: development
+            target: workers-prod
         network_mode: 'service:tailscale'
         depends_on:
-            - vault-agent
-            - redis
+            vault-agent:
+                condition: service_started
+            redis:
+                condition: service_healthy
         volumes:
             - vault-secrets:/vault/secrets:ro
-            - ./apps/workers:/usr/src/app/apps/workers
-            - ./packages:/usr/src/app/packages
-        entrypoint: /usr/local/bin/docker-entrypoint.dev.sh
-        command:
+        entrypoint:
             [
-                '/vault/secrets/workers.env',
-                'pnpm',
-                '--filter',
-                '@phyt/workers',
-                'dev'
+                '/bin/sh',
+                '-c',
+                "until [ -f /vault/secrets/workers.env ]; do echo 'Waiting for workers secrets...'; sleep 2; done; . /vault/secrets/workers.env; exec pnpm --filter @phyt/workers start"
             ]
+        restart: always
 
 volumes:
     phyt-postgres-data:

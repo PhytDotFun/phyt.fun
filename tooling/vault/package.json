@@ -2,28 +2,5 @@
     "name": "@phyt/vault",
     "version": "0.0.0",
     "private": true,
-    "type": "module",
-    "exports": {
-        ".": {
-            "types": "./dist/index.d.ts",
-            "import": "./dist/index.js"
-        }
-    },
-    "scripts": {
-        "build": "rm -rf dist && bun build src/index.ts --outdir dist --target node --format esm --minify && tsc --declaration --emitDeclarationOnly --outDir dist",
-        "check:types": "tsc --noEmit",
-        "clean": "pnpm rimraf dist && pnpm rimraf node_modules && pnpm rimraf .turbo",
-        "format": "prettier --write . --ignore-unknown",
-        "lint": "eslint",
-        "lint:fix": "eslint --fix",
-        "test": "vitest run"
-    },
-    "devDependencies": {
-        "@phyt/eslint": "workspace:*",
-        "@phyt/tsconfig": "workspace:*",
-        "eslint": "catalog:",
-        "prettier": "catalog:",
-        "typescript": "catalog:",
-        "vitest": "catalog:"
-    }
+    "type": "module"
 }
