@@ -37,7 +37,6 @@ export default defineConfig({
             '/trpc': { target: API_ORIGIN, changeOrigin: true }
         }
     },
-    // Optimize for Bun's bundler capabilities
     optimizeDeps: {
         include: [
             'react',
@@ -47,7 +46,6 @@ export default defineConfig({
         ]
     },
     build: {
-        // Target modern browsers for better Bun compatibility
         target: 'esnext',
         rollupOptions: {
             output: {
