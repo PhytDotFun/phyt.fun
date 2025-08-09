@@ -54,6 +54,7 @@ logs/
 .vault-tokens/
 *.pem
 *.key
+credentials/
 
 # Temporary files
 tmp/
