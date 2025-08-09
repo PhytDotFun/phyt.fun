@@ -10,15 +10,15 @@
         }
     },
     "scripts": {
-        "build": "tsup",
+        "build": "rm -rf dist && bun build ./src/index.ts --outdir ./dist --target node --format esm --minify --sourcemap && tsc --declaration --emitDeclarationOnly --outDir ./dist",
         "check:types": "tsc --noEmit",
         "clean": "pnpm rimraf dist && pnpm rimraf node_modules && pnpm rimraf .turbo",
-        "dev": "tsx watch --tsconfig tsconfig.dev.json src/index.ts",
-        "dev:debug": "tsx watch --inspect --tsconfig tsconfig.dev.json src/index.ts",
+        "dev": "bun --watch --tsconfig-override tsconfig.dev.json src/index.ts",
+        "dev:debug": "bun --watch --inspect --tsconfig-override tsconfig.dev.json src/index.ts",
         "format": "prettier --write . --ignore-unknown",
         "lint": "eslint",
         "lint:fix": "eslint --fix",
-        "start": "node dist/index.js",
+        "start": "bun run dist/index.js",
         "test": "vitest run"
     },
     "dependencies": {
@@ -42,8 +42,6 @@
         "chalk": "catalog:",
         "eslint": "catalog:",
         "prettier": "catalog:",
-        "tsup": "catalog:",
-        "tsx": "catalog:",
         "typescript": "catalog:",
         "vitest": "catalog:"
     }

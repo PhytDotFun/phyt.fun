@@ -15,6 +15,8 @@ import { checkRunsToPost } from './jobs/checkRunsToPost';
 import { postRuns } from './jobs/postRuns';
 import { env } from './env';
 
+const startTime = process.hrtime.bigint();
+
 // Auth worker - handles user authentication and wallet creation
 const authWorker = new Worker(
     'auth',
@@ -61,32 +63,39 @@ const postsWorker = new Worker(
     }
 );
 
-console.log('');
-console.log(chalk.bold.red('  WORKERS ') + chalk.red('v0.0.0'));
-console.log('');
+setTimeout(() => {
+    const endTime = process.hrtime.bigint();
+    const elapsedTime = Number(endTime - startTime) / 1_000_000; // Convert to milliseconds
+    console.log('');
+    console.log(
+        chalk.red('  WORKERS v0.0.0  ') +
+            chalk.white(`ready in ${elapsedTime.toFixed(0)} ms`)
+    );
+    console.log('');
 
-console.log(
-    chalk.red('  ➜') +
-        chalk.bold('  Concurrency: ') +
-        chalk.redBright(env.WORKER_CONCURRENCY.toString()) +
-        chalk.gray(' (per queue)')
-);
-console.log(
-    chalk.red('  ➜') +
-        chalk.bold('  Rate Limit:  ') +
-        chalk.redBright(`${env.WORKER_RATE_LIMIT.toString()} jobs/second`) +
-        chalk.gray(' (per queue)')
-);
-console.log(
-    chalk.red('  ➜') +
-        chalk.bold('  Auth Queue:  ') +
-        chalk.redBright(`CREATE_WALLET, SYNC_PRIVY_USER`)
-);
-console.log(
-    chalk.red('  ➜') +
-        chalk.bold('  Posts Queue: ') +
-        chalk.redBright(`CHECK_RUNS_TO_POST, POST_RUNS`)
-);
+    console.log(
+        chalk.red('  ➜') +
+            chalk.white('  Concurrency: ') +
+            chalk.redBright(env.WORKER_CONCURRENCY.toString()) +
+            chalk.gray(' (per queue)')
+    );
+    console.log(
+        chalk.red('  ➜') +
+            chalk.white('  Rate Limit:  ') +
+            chalk.redBright(`${env.WORKER_RATE_LIMIT.toString()} jobs/second`) +
+            chalk.gray(' (per queue)')
+    );
+    console.log(
+        chalk.red('  ➜') +
+            chalk.white('  Auth Queue:  ') +
+            chalk.redBright(`CREATE_WALLET, SYNC_PRIVY_USER`)
+    );
+    console.log(
+        chalk.red('  ➜') +
+            chalk.white('  Posts Queue: ') +
+            chalk.redBright(`CHECK_RUNS_TO_POST, POST_RUNS`)
+    );
+}, 100);
 
 const setupCronJobs = async () => {
     const cronQueue = new Queue('posts', { connection: appDeps.bull });

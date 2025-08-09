@@ -50,11 +50,7 @@
         "tsconfig": "typescript",
         "webhooks": "connection",
         "workers": "robot",
-        "ops": "command"
-        // Icons have to be placed inside of ~/.vscode/extensions/icons
-        // Drop this line into user settings
-        // "vault": "../../../../icons/folder-vault"
-        // "golang": "../../../../icons/folder-golang"
+        "vault": "constant"
     },
 
     "[solidity]": {

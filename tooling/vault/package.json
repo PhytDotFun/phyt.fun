@@ -1,6 +1,5 @@
 {
     "name": "@phyt/vault",
     "version": "0.0.0",
-    "private": true,
-    "type": "module"
+    "private": true
 }
