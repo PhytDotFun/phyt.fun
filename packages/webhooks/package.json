@@ -18,7 +18,7 @@
         }
     },
     "scripts": {
-        "build": "rm -rf dist && bun build src/idempotency.ts src/privy-handler.ts src/ops.ts --outdir dist --target node --format esm --minify && tsc --declaration --emitDeclarationOnly --outDir dist",
+        "build": "tsup",
         "check:types": "tsc --noEmit",
         "clean": "pnpm rimraf dist && pnpm rimraf node_modules && pnpm rimraf .turbo",
         "format": "prettier --write . --ignore-unknown",
@@ -41,6 +41,7 @@
         "@types/node": "catalog:",
         "eslint": "catalog:",
         "prettier": "catalog:",
+        "tsup": "catalog:",
         "typescript": "catalog:",
         "vitest": "catalog:"
     }

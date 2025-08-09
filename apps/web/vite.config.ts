@@ -5,6 +5,8 @@ import tailwindcss from '@tailwindcss/vite';
 
 import { resolve } from 'path';
 
+const API_ORIGIN = process.env.API_ORIGIN ?? 'http://localhost:3000';
+
 // https://vitejs.dev/config/
 export default defineConfig({
     plugins: [
@@ -30,23 +32,11 @@ export default defineConfig({
     },
     server: {
         host: '0.0.0.0',
-        allowedHosts: ['on-marmot-finer.ngrok-free.app'],
         proxy: {
-            '/api': {
-                target: 'http://localhost:3000',
-                changeOrigin: true
-            },
-            '/trpc': {
-                target: 'http://localhost:3000',
-                changeOrigin: true
-            },
-            '/wh': {
-                target: 'http://localhost:3000',
-                changeOrigin: true
-            }
+            '/api': { target: API_ORIGIN, changeOrigin: true },
+            '/trpc': { target: API_ORIGIN, changeOrigin: true }
         }
     },
-    // Optimize for Bun's bundler capabilities
     optimizeDeps: {
         include: [
             'react',
@@ -56,7 +46,6 @@ export default defineConfig({
         ]
     },
     build: {
-        // Target modern browsers for better Bun compatibility
         target: 'esnext',
         rollupOptions: {
             output: {

@@ -1,0 +1,15 @@
+services:
+    hono-gateway:
+        restart: always
+
+    workers:
+        restart: always
+
+    postgres:
+        restart: always
+
+    redis:
+        restart: always
+
+    vault-agent:
+        restart: always

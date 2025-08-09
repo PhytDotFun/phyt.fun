@@ -1,55 +1,108 @@
 services:
+    vault-agent:
+        image: hashicorp/vault:latest
+        container_name: vault-agent
+        cap_add:
+            - IPC_LOCK
+        user: root
+        security_opt:
+            - no-new-privileges:true
+        volumes:
+            - ./tooling/vault:/vault/config:ro
+            - ${CREDENTIALS_DIR:-./tooling/vault/credentials}:/vault/credentials:ro
+            - ./tooling/vault/templates:/vault/templates:ro
+            - vault-secrets:/vault/secrets # RW mount
+        environment:
+            - VAULT_ENV=dev
+        entrypoint: >
+            sh -c "mkdir -p /vault/secrets &&
+                   chmod 0775 /vault/secrets &&
+                   chown root:root /vault/secrets &&
+                   exec vault agent -config=/vault/config/agent.hcl"
+        restart: unless-stopped
+
+    hono-gateway:
+        image: phyt/hono-gateway
+        build:
+            context: .
+            dockerfile: Dockerfile
+            args:
+                PROJECT: 'hono-gateway'
+                NODE_ENV: 'production'
+        container_name: hono-gateway
+        depends_on:
+            vault-agent:
+                condition: service_started
+            postgres:
+                condition: service_healthy
+            redis:
+                condition: service_started
+        volumes:
+            - vault-secrets:/vault/secrets:ro # RO mount
+            - ./tooling/ops/docker-entrypoint.sh:/usr/local/bin/docker-entrypoint.sh
+        entrypoint: ['/usr/local/bin/docker-entrypoint.sh']
+        environment:
+            - WAIT_FOR_SECRET_FILE=/vault/secrets/hono-gateway.env
+        command: ['node', 'dist/index.js']
+        restart: unless-stopped
+
+    workers:
+        image: phyt/workers
+        build:
+            context: .
+            dockerfile: Dockerfile
+            args:
+                PROJECT: 'workers'
+                NODE_ENV: 'production'
+        container_name: workers
+        depends_on:
+            vault-agent:
+                condition: service_started
+            postgres:
+                condition: service_healthy
+            redis:
+                condition: service_started
+        volumes:
+            - vault-secrets:/vault/secrets:ro # RO mount
+            - ./tooling/ops/docker-entrypoint.sh:/usr/local/bin/docker-entrypoint.sh
+        entrypoint: ['/usr/local/bin/docker-entrypoint.sh']
+        environment:
+            - WAIT_FOR_SECRET_FILE=/vault/secrets/workers.env
+        command: ['node', 'dist/index.js']
+        restart: unless-stopped
+
     postgres:
         image: postgres:17
-        container_name: phyt-postgres
-        environment:
-            POSTGRES_USER: phyt_user
-            POSTGRES_PASSWORD: phyt_password
-            POSTGRES_DB: phyt_db
-        ports:
-            - 5432:5432
+        container_name: postgres
+        depends_on:
+            - vault-agent
         volumes:
-            - phyt-postgres-data:/var/lib/postgresql/data
+            - postgres-data:/var/lib/postgresql/data
+            - ./tooling/ops/docker-entrypoint.sh:/usr/local/bin/wait-for-secrets.sh:ro
+            - vault-secrets:/vault/secrets:ro
+
+        entrypoint:
+            [
+                '/usr/local/bin/wait-for-secrets.sh',
+                'docker-entrypoint.sh',
+                'postgres'
+            ]
+        environment:
+            - WAIT_FOR_SECRET_FILE=/vault/secrets/postgres.env
+            - POSTGRES_INITDB_ARGS=--auth=scram-sha-256 --auth-host=scram-sha-256 --auth-local=scram-sha-256
         healthcheck:
-            test: ['CMD-SHELL', 'pg_isready -U phyt_user -d phyt_db']
-            interval: 5s
-            timeout: 5s
-            retries: 5
+            test: ['CMD-SHELL', 'pg_isready -q -h 127.0.0.1 -p 5432']
+            interval: 3s
+            timeout: 3s
+            start_period: 30s
+            retries: 20
+        restart: unless-stopped
 
     redis:
         image: redis:7-alpine
-        container_name: phyt-redis
-        ports:
-            - 6379:6379
-        volumes:
-            - phyt-redis-data:/data
-        healthcheck:
-            test: ['CMD', 'redis-cli', 'ping']
-            interval: 5s
-            timeout: 5s
-            retries: 5
-
-    # workers:
-    #     build:
-    #         context: .
-    #         dockerfile: apps/workers/Dockerfile
-    #     platform: linux/amd64
-    #     container_name: phyt-workers
-    #     depends_on:
-    #         postgres:
-    #             condition: service_healthy
-    #         redis:
-    #             condition: service_healthy
-    #     environment:
-    #         NODE_ENV: production
-    #         DATABASE_URL: postgresql://phyt_user:phyt_password@postgres:5432/phyt_db
-    #         REDIS_URL: redis://redis:6379
-    #         PRIVY_APP_ID: ${PRIVY_APP_ID}
-    #         PRIVY_SECRET_KEY: ${PRIVY_SECRET_KEY}
-    #         WORKER_CONCURRENCY: 3
-    #         WORKER_RATE_LIMIT: 10
-    #     restart: unless-stopped
+        container_name: redis
+        restart: unless-stopped
 
 volumes:
-    phyt-postgres-data:
-    phyt-redis-data:
+    vault-secrets:
+    postgres-data:

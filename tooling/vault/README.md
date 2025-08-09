@@ -1,3 +1,3 @@
 # `@phyt/vault`
 
-Collection of internal vault scripts.
+A package that does something.

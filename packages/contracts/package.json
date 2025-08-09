@@ -10,9 +10,9 @@
         }
     },
     "scripts": {
-        "build": "forge build && rm -rf dist && bun build src/index.ts --outdir dist --target node --format esm --minify && tsc --declaration --emitDeclarationOnly --outDir dist",
+        "build": "forge build && tsup",
         "build:solidity": "forge build",
-        "build:typescript": "rm -rf dist && bun build src/index.ts --outdir dist --target node --format esm --minify && tsc --declaration --emitDeclarationOnly --outDir dist",
+        "build:typescript": "tsup",
         "clean": "forge clean && rm -rf dist",
         "deploy": "forge script Deploy --rpc-url $RPC_URL --private-key $PRIVATE_KEY",
         "deploy:verify": "forge script Deploy --rpc-url $RPC_URL --private-key $PRIVATE_KEY --verify",
@@ -29,6 +29,7 @@
         "@phyt/tsconfig": "workspace:*",
         "eslint": "catalog:",
         "prettier": "catalog:",
+        "tsup": "catalog:",
         "typescript": "catalog:",
         "vitest": "catalog:"
     }

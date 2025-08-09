@@ -4,15 +4,15 @@
     "private": true,
     "type": "module",
     "scripts": {
-        "build": "bun run vite build",
+        "build": "vite build",
         "check:compiler": "pnpm dlx react-compiler-healthcheck@latest",
         "check:types": "tsc --noEmit",
         "clean": "pnpm rimraf dist && pnpm rimraf node_modules && pnpm rimraf .turbo && rimraf .tanstack",
-        "dev": "bun run vite",
+        "dev": "vite",
         "format": "prettier --ignore-path ../../.prettierignore --write .",
         "lint": "eslint",
         "lint:fix": "eslint --fix",
-        "serve": "bun run vite preview",
+        "serve": "vite preview",
         "test": "vitest run"
     },
     "dependencies": {

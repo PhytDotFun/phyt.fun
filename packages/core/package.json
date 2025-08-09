@@ -14,7 +14,7 @@
         }
     },
     "scripts": {
-        "build": "rm -rf dist && bun build src/di.ts --outdir dist --target node --format esm --minify && bun build src/contracts.ts --outdir dist --target node --format esm --minify && tsc --declaration --emitDeclarationOnly --outDir dist",
+        "build": "tsup",
         "check:types": "tsc --noEmit",
         "clean": "pnpm rimraf dist && pnpm rimraf node_modules && pnpm rimraf .turbo",
         "format": "prettier --write . --ignore-unknown",
@@ -35,6 +35,7 @@
         "eslint": "catalog:",
         "ioredis": "catalog:",
         "prettier": "catalog:",
+        "tsup": "catalog:",
         "typescript": "catalog:",
         "vitest": "catalog:",
         "zod": "catalog:"
