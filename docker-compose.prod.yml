@@ -1,129 +1,15 @@
 services:
-    postgres:
-        image: postgres:17
-        container_name: ${COMPOSE_PROJECT_NAME:-phyt}-postgres
-        network_mode: 'service:tailscale'
-        depends_on:
-            - vault-agent
-        volumes:
-            - phyt-postgres-data:/var/lib/postgresql/data
-            - vault-secrets:/vault/secrets:ro
-            - ./tooling/ops/pg-entrypoint.sh:/usr/local/bin/postgres-vault-entrypoint.sh
-        entrypoint: /usr/local/bin/postgres-vault-entrypoint.sh
-        command: docker-entrypoint.sh postgres
-        healthcheck:
-            test:
-                [
-                    'CMD-SHELL',
-                    '. /vault/secrets/postgres.env && pg_isready -U "$$POSTGRES_USER" -d "$$POSTGRES_DB"'
-                ]
-            interval: 5s
-            timeout: 5s
-            retries: 5
-        restart: always
-
-    redis:
-        image: redis:7-alpine
-        container_name: ${COMPOSE_PROJECT_NAME:-phyt}-redis
-        network_mode: 'service:tailscale'
-        depends_on:
-            - tailscale
-        volumes:
-            - phyt-redis-data:/data
-        healthcheck:
-            test: ['CMD', 'redis-cli', 'ping']
-            interval: 5s
-            timeout: 5s
-            retries: 5
-        restart: always
-
-    tailscale:
-        image: tailscale/tailscale
-        container_name: ${COMPOSE_PROJECT_NAME:-phyt}-tailscale
-        hostname: phyt-docker-prod
-        environment:
-            - TS_AUTHKEY=${TS_AUTHKEY}
-            - TS_STATE_DIR=/var/lib/tailscale
-            - TS_EXTRA_ARGS=--advertise-exit-node
-        volumes:
-            - tailscale-state:/var/lib/tailscale
-            - /dev/net/tun:/dev/net/tun
-        cap_add:
-            - net_admin
-            - sys_module
-        restart: always
-
-    vault-agent:
-        image: hashicorp/vault:latest
-        container_name: ${COMPOSE_PROJECT_NAME:-phyt}-vault-agent
-        network_mode: 'service:tailscale'
-        depends_on:
-            - tailscale
-        environment:
-            - VAULT_ADDR=${VAULT_ADDR}
-            - VAULT_ROLE_ID=${VAULT_ROLE_ID}
-            - VAULT_SECRET_ID=${VAULT_SECRET_ID}
-        volumes:
-            - ./tooling/vault:/vault/config
-            - vault-secrets:/vault/secrets
-        command: >
-            -c "
-            echo \"$VAULT_ROLE_ID\" > /vault/config/role-id &&
-            echo \"$VAULT_SECRET_ID\" > /vault/config/secret-id &&
-            vault agent -config=/vault/config/agent.hcl -log-level=info
-            "
-        restart: always
-
     hono-gateway:
-        build:
-            context: .
-            dockerfile: Dockerfile
-            target: hono-gateway-prod
-        network_mode: 'service:tailscale'
-        depends_on:
-            vault-agent:
-                condition: service_started
-            postgres:
-                condition: service_healthy
-            redis:
-                condition: service_healthy
-        volumes:
-            - vault-secrets:/vault/secrets:ro
-        entrypoint:
-            [
-                '/bin/sh',
-                '-c',
-                "until [ -f /vault/secrets/hono-gateway.env ]; do echo 'Waiting for hono-gateway secrets...'; sleep 2; done; . /vault/secrets/hono-gateway.env; exec pnpm --filter @phyt/hono-gateway start"
-            ]
         restart: always
 
     workers:
-        build:
-            context: .
-            dockerfile: Dockerfile
-            target: workers-prod
-        network_mode: 'service:tailscale'
-        depends_on:
-            vault-agent:
-                condition: service_started
-            redis:
-                condition: service_healthy
-        volumes:
-            - vault-secrets:/vault/secrets:ro
-        entrypoint:
-            [
-                '/bin/sh',
-                '-c',
-                "until [ -f /vault/secrets/workers.env ]; do echo 'Waiting for workers secrets...'; sleep 2; done; . /vault/secrets/workers.env; exec pnpm --filter @phyt/workers start"
-            ]
         restart: always
 
-volumes:
-    phyt-postgres-data:
-        name: ${COMPOSE_PROJECT_NAME:-phyt}-postgres-data
-    phyt-redis-data:
-        name: ${COMPOSE_PROJECT_NAME:-phyt}-redis-data
-    tailscale-state:
-        name: ${COMPOSE_PROJECT_NAME:-phyt}-tailscale-state
-    vault-secrets:
-        name: ${COMPOSE_PROJECT_NAME:-phyt}-vault-secrets
+    postgres:
+        restart: always
+
+    redis:
+        restart: always
+
+    vault-agent:
+        restart: always
