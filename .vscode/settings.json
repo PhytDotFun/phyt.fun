@@ -53,7 +53,8 @@
         "ops": "command"
         // Icons have to be placed inside of ~/.vscode/extensions/icons
         // Drop this line into user settings
-        // "vault": "../../../../icons/folder-sample"
+        // "vault": "../../../../icons/folder-vault"
+        // "golang": "../../../../icons/folder-golang"
     },
 
     "[solidity]": {
