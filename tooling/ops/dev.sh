@@ -7,11 +7,6 @@ if [ -f .env ]; then
   set +a
 fi
 
-if [ -z "${TS_AUTHKEY:-}" ] || [ -z "${VAULT_ROLE_ID:-}" ] || [ -z "${VAULT_SECRET_ID:-}" ]; then
-  echo "Error: TS_AUTHKEY, VAULT_ROLE_ID, and VAULT_SECRET_ID must be set in .env"
-  exit 1
-fi
-
 echo "Starting development environment with Docker Compose..."
 docker compose up -d --build
 
