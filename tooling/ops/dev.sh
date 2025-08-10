@@ -22,4 +22,4 @@ cleanup() {
 }
 trap cleanup EXIT
 
-docker compose logs -f hono-gateway workers
+docker compose logs -f hono-api workers
