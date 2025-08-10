@@ -21,15 +21,15 @@ services:
                    exec vault agent -config=/vault/config/agent.hcl"
         restart: unless-stopped
 
-    hono-gateway:
-        image: phyt/hono-gateway
+    hono-api:
+        image: phyt/hono-api
         build:
             context: .
             dockerfile: Dockerfile
             args:
-                PROJECT: 'hono-gateway'
+                PROJECT: 'hono-api'
                 NODE_ENV: 'production'
-        container_name: hono-gateway
+        container_name: hono-api
         depends_on:
             vault-agent:
                 condition: service_started
@@ -42,7 +42,7 @@ services:
             - ./tooling/ops/docker-entrypoint.sh:/usr/local/bin/docker-entrypoint.sh
         entrypoint: ['/usr/local/bin/docker-entrypoint.sh']
         environment:
-            - WAIT_FOR_SECRET_FILE=/vault/secrets/hono-gateway.env
+            - WAIT_FOR_SECRET_FILE=/vault/secrets/hono-api.env
         command: ['node', 'dist/index.js']
         restart: unless-stopped
 
