@@ -121,7 +121,7 @@ catalog:
   vite: ^7.0.0
   vitest: ^3.2.4
   web-vitals: ^4.2.4
-  zod: 3.25.76
+  zod: 4.0.17
 
 catalogMode: prefer
 
