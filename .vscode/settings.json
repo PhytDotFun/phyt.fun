@@ -39,7 +39,7 @@
 
     "material-icon-theme.folders.associations": {
         "web": "react-components",
-        "hono-gateway": "server",
+        "hono-api": "server",
         "data-access": "log",
         "eslint": "tasks",
         "m-queue": "queue",
