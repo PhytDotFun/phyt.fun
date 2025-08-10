@@ -4,7 +4,7 @@ import type { Cache } from '@phyt/core/contracts';
 
 export function createCache(redis: Redis): Cache {
     return new (class implements Cache {
-        async get<T>(key: string, schema?: z.ZodSchema<T>): Promise<T | null> {
+        async get<T>(key: string, schema?: z.ZodType<T>): Promise<T | null> {
             try {
                 const value = await redis.get(key);
                 if (!value) {
@@ -112,7 +112,7 @@ export function createCache(redis: Redis): Cache {
             key: string,
             factory: () => Promise<T>,
             ttlSeconds?: number,
-            schema?: z.ZodSchema<T>
+            schema?: z.ZodType<T>
         ): Promise<T> {
             const cached = await this.get(key, schema);
             if (cached !== null) {
