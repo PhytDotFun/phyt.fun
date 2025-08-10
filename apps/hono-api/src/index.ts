@@ -6,7 +6,7 @@ import { app } from './app';
 import { env } from './env';
 
 console.log('');
-console.log(chalk.bold.magenta('  HONO-GATEWAY ') + chalk.magenta(`v0.0.0`));
+console.log(chalk.bold.magenta('  HONO-API ') + chalk.magenta(`v0.0.0`));
 
 console.log('');
 console.log(
