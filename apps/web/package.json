@@ -78,7 +78,7 @@
         "@phyt/core": "workspace:*",
         "@phyt/data-access": "workspace:*",
         "@phyt/eslint": "workspace:*",
-        "@phyt/hono-gateway": "workspace:*",
+        "@phyt/hono-api": "workspace:*",
         "@phyt/tsconfig": "workspace:*",
         "@tanstack/react-router-devtools": "catalog:",
         "@tanstack/router-plugin": "catalog:",
