@@ -11,8 +11,8 @@ export enum JobName {
 export const CreateWalletJobSchema = z.object({
     privyDID: z.string(),
     username: z.string().min(3),
-    profilePictureUrl: z.string().url(),
-    email: z.string().email().nullable(),
+    profilePictureUrl: z.url(),
+    email: z.email().nullable(),
     role: z.enum(['user', 'admin', 'runner'])
 });
 export type CreateWalletJob = z.infer<typeof CreateWalletJobSchema>;
@@ -20,9 +20,9 @@ export type CreateWalletJob = z.infer<typeof CreateWalletJobSchema>;
 export const SyncPrivyUserJobSchema = z.object({
     privyDID: z.string(),
     username: z.string().min(3),
-    profilePictureUrl: z.string().url(),
+    profilePictureUrl: z.url(),
     walletAddress: z.string().min(1),
-    email: z.string().email().nullable(),
+    email: z.email().nullable(),
     role: z.enum(['user', 'admin', 'runner'])
 });
 export type SyncPrivyUserJob = z.infer<typeof SyncPrivyUserJobSchema>;

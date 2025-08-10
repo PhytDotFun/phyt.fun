@@ -9,7 +9,7 @@ export const env = createEnv({
             .default('development'),
         VITE_PRIVY_CLIENT_ID: z.string(),
         VITE_PRIVY_APP_ID: z.string(),
-        VITE_BASE_URL: z.string().url()
+        VITE_BASE_URL: z.url()
     },
     runtimeEnv: {
         VITE_NODE_ENV: import.meta.env.VITE_NODE_ENV,

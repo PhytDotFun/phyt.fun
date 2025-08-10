@@ -4,7 +4,7 @@ import type { Queue, JobsOptions } from 'bullmq';
 export type EntityType = 'users' | 'posts' | 'comments' | 'reactions' | 'runs';
 
 export interface Cache {
-    get<T>(key: string, schema?: z.ZodSchema<T>): Promise<T | null>;
+    get<T>(key: string, schema?: z.ZodType<T>): Promise<T | null>;
     set(key: string, value: unknown, ttlSeconds?: number): Promise<void>;
     delete(key: string): Promise<void>;
     invalidate(pattern: string): Promise<number>;
@@ -12,7 +12,7 @@ export interface Cache {
         key: string,
         factory: () => Promise<T>,
         ttlSeconds?: number,
-        schema?: z.ZodSchema<T>
+        schema?: z.ZodType<T>
     ): Promise<T>;
 }
 
@@ -39,5 +39,5 @@ export interface IdEncoder {
     encodedMany(entityType: EntityType, ids: number[]): string[];
     decodeMany(entityType: EntityType, encodedIds: string[]): number[];
     isValidEncodedId(entityType: EntityType, encodedId: string): boolean;
-    createValidationSchema(entityType: EntityType): z.ZodSchema<string>;
+    createValidationSchema(entityType: EntityType): z.ZodType<string>;
 }
