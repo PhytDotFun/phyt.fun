@@ -58,7 +58,7 @@ catalog:
   '@types/pg': ^8.15.4
   '@types/react': ^19.1.8
   '@types/react-dom': ^19.1.6
-  '@vitejs/plugin-react': ^4.6.0
+  '@vitejs/plugin-react': ^5.0.0
   babel-plugin-react-compiler: 19.1.0-rc.2
   bullmq: 5.56.9
   chalk: 5.5.0
