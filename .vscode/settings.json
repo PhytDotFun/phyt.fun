@@ -23,8 +23,6 @@
         "**/routeTree.gen.ts": true
     },
 
-    "typescript.preferences.exclude": ["**/node_modules"],
-
     "editor.defaultFormatter": "esbenp.prettier-vscode",
 
     "[typescript]": {
@@ -53,8 +51,14 @@
         "ops": "command"
         // Icons have to be placed inside of ~/.vscode/extensions/icons
         // Drop this line into user settings
-        // "vault": "../../../../icons/folder-vault"
-        // "golang": "../../../../icons/folder-golang"
+        // "material-icon-theme.folders.associations": {
+        //     "vault": "../../../../icons/folder-vault",
+        //     "golang": "../../../../icons/folder-golang",
+        //     "go": "../../../../icons/folder-golang"
+        // },
+        // "material-icon-theme.files.associations": {
+        //     "*.mergify.yml": "../../icons/mergify"
+        // }
     },
 
     "[solidity]": {
