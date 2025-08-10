@@ -10,7 +10,8 @@ export default [
         ignores: [
             'src/components/ui/**/*',
             '*.gen.ts',
-            'src/reportWebVitals.ts'
+            'src/reportWebVitals.ts',
+            'package.json'
         ]
     }
 ];

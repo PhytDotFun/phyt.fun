@@ -38,8 +38,8 @@ template {
 }
 
 template {
-    source = "/vault/templates/hono-gateway.tmpl.env"
-    destination = "/vault/secrets/hono-gateway.env"
+    source = "/vault/templates/hono-api.tmpl.env"
+    destination = "/vault/secrets/hono-api.env"
     perms = "0644"
 }
 

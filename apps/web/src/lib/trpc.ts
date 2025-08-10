@@ -1,7 +1,7 @@
 import { QueryClient } from '@tanstack/react-query';
 import { createTRPCClient, httpBatchLink } from '@trpc/client';
 import { createTRPCOptionsProxy } from '@trpc/tanstack-react-query';
-import type { ApiRouter } from '@phyt/hono-gateway/router';
+import type { ApiRouter } from '@phyt/hono-api/router';
 import superjson from 'superjson';
 
 import { env } from '@/env';

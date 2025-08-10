@@ -1,5 +1,5 @@
 {
-    "name": "@phyt/hono-gateway",
+    "name": "@phyt/hono-api",
     "version": "0.0.0",
     "private": true,
     "type": "module",
