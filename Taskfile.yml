@@ -1,0 +1,66 @@
+version: '3'
+
+vars:
+    COMPOSE: docker compose
+    PROFILE: dev
+
+tasks:
+    install:
+        cmds:
+            - pnpm -w install
+
+    build:web:
+        cmds:
+            - pnpm -w --filter "@phyt/web" build
+
+    tunnel:start:
+        desc: Start cloudflare tunnel for webhooks
+        cmds:
+            - cloudflared tunnel run local-dev-tunnel
+
+    tunnel:stop:
+        desc: Stop cloudflare tunnel
+        cmds:
+            - pkill -f "cloudflared tunnel run" || true
+
+    tunnel:status:
+        desc: Check if tunnel is running
+        cmds:
+            - ps aux | grep -v grep | grep "cloudflared tunnel run" || echo "Tunnel not running"
+
+    up:
+        deps: [install]
+        cmds:
+            - '{{.COMPOSE}} --profile {{.PROFILE}} up -d --remove-orphans'
+
+    up:dev:
+        cmds:
+            - task: up
+        vars:
+            PROFILE: dev
+
+    up:staging:
+        cmds:
+            - task: build:web
+            - task: up
+        vars:
+            PROFILE: staging
+
+    dev:full:
+        desc: Start full dev environment with tunnel
+        deps: [up:dev]
+        cmds:
+            - echo "🚀 Dev environment ready!"
+            - 'echo "Frontend: http://localhost:8080"'
+            - 'echo "Webhook tunnel: https://local-dev.phyt.fun"'
+            - echo ""
+            - echo "Starting tunnel... (Ctrl+C to stop)"
+            - task: tunnel:start
+    down:
+        cmds:
+            - '{{.COMPOSE}} down -v'
+            - task: tunnel:stop
+
+    logs:
+        cmds:
+            - '{{.COMPOSE}} logs -f --tail=200'
