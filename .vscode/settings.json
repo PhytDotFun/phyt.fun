@@ -39,9 +39,8 @@
 
     "material-icon-theme.folders.associations": {
         "web": "react-components",
-        "hono-api": "server",
+        "hono-api": "api",
         "data-access": "log",
-        "eslint": "tasks",
         "m-queue": "queue",
         "redis": "class",
         "trpc-adapters": "examples",
@@ -54,7 +53,9 @@
         // "material-icon-theme.folders.associations": {
         //     "vault": "../../../../icons/folder-vault",
         //     "golang": "../../../../icons/folder-golang",
-        //     "go": "../../../../icons/folder-golang"
+        //     "go": "../../../../icons/folder-golang",
+        //     "eslint": "../../../../icons/folder-eslint",
+        //     "eslint-config": "../../../../icons/folder-eslint"
         // },
         // "material-icon-theme.files.associations": {
         //     "*.mergify.yml": "../../icons/mergify"
