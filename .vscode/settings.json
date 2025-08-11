@@ -48,19 +48,25 @@
         "webhooks": "connection",
         "workers": "robot",
         "ops": "command"
-        // Icons have to be placed inside of ~/.vscode/extensions/icons
-        // Drop this line into user settings
-        // "material-icon-theme.folders.associations": {
-        //     "vault": "../../../../icons/folder-vault",
-        //     "golang": "../../../../icons/folder-golang",
-        //     "go": "../../../../icons/folder-golang",
-        //     "eslint": "../../../../icons/folder-eslint",
-        //     "eslint-config": "../../../../icons/folder-eslint"
-        // },
-        // "material-icon-theme.files.associations": {
-        //     "*.mergify.yml": "../../icons/mergify"
-        // }
     },
+
+    "material-icon-theme.files.associations": {
+        "*.nginx.conf": "nginx"
+    },
+
+    // Icons have to be placed inside of ~/.vscode/extensions/icons
+    // Drop this line into user settings
+    // "material-icon-theme.folders.associations": {
+    //     "vault": "../../../../icons/folder-vault",
+    //     "golang": "../../../../icons/folder-golang",
+    //     "go": "../../../../icons/folder-golang",
+    //     "eslint": "../../../../icons/folder-eslint",
+    //     "eslint-config": "../../../../icons/folder-eslint",
+    //     "nginx": "../../../../icons/folder-nginx",
+    // },
+    // "material-icon-theme.files.associations": {
+    //     "*.mergify.yml": "../../icons/mergify"
+    // }
 
     "[solidity]": {
         "editor.defaultFormatter": "JuanBlanco.solidity",
