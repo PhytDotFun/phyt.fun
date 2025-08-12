@@ -48,3 +48,9 @@ template {
     destination = "/vault/secrets/workers.env"
     perms = "0644"
 }
+
+template {
+    source = "/vault/templates/web.tmpl.env"
+    destination = "/vault/secrets/web.env"
+    perms = "0644"
+}
