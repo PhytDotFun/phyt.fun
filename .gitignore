@@ -1,4 +1,5 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+# Internal docs
+docs/
 
 # Dependencies
 node_modules
@@ -50,11 +51,12 @@ dependencies/
 # Logging
 logs/
 
-# Vault tokens (security)
+# Security
 .vault-tokens/
 *.pem
 *.key
 credentials/
+secrets/
 
 # Temporary files
 tmp/
@@ -62,3 +64,20 @@ temp/
 
 # Direnv
 .direnv/
+
+# Terraform
+*.tfstate
+*.tfstate.*
+*.tfvars
+!*.tfvars.example
+.terraform/
+.terraform.lock.hcl
+crash.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Jetbrains .idea
+/shelf
+workspace.xml
