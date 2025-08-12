@@ -42,20 +42,20 @@
         "hono-api": "api",
         "data-access": "log",
         "m-queue": "queue",
-        "redis": "class",
-        "trpc-adapters": "examples",
         "tsconfig": "typescript",
         "webhooks": "connection",
         "workers": "robot",
-        "ops": "command"
+        "ops": "command",
+        "infra": "pipe"
     },
 
     "material-icon-theme.files.associations": {
         "*.nginx.conf": "nginx"
     },
 
-    // Icons have to be placed inside of ~/.vscode/extensions/icons
-    // Drop this line into user settings
+    // Icons have to be placed inside of ~/.vscode (or ~/.cursor)/extensions/icons
+    // Drop these lines into user settings
+
     // "material-icon-theme.folders.associations": {
     //     "vault": "../../../../icons/folder-vault",
     //     "golang": "../../../../icons/folder-golang",
@@ -63,6 +63,9 @@
     //     "eslint": "../../../../icons/folder-eslint",
     //     "eslint-config": "../../../../icons/folder-eslint",
     //     "nginx": "../../../../icons/folder-nginx",
+    //     "redis": "../../../../icons/folder-redis",
+    //     "trpc": "../../../../icons/folder-trpc",
+    //     "trpc-adapters": "../../../../icons/folder-trpc",
     // },
     // "material-icon-theme.files.associations": {
     //     "*.mergify.yml": "../../icons/mergify"
