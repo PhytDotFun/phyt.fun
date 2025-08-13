@@ -1,0 +1,109 @@
+version: '3'
+
+vars:
+    COMPOSE: docker compose
+
+tasks:
+    # Environment management
+    up:dev:
+        desc: Start development environment
+        deps: [install]
+        cmds:
+            - '{{.COMPOSE}} -f ../../docker-compose.yml -f ../../docker-compose.dev.yml --profile dev up -d --remove-orphans'
+
+    up:prod:
+        desc: Start production environment
+        deps: [build:all]
+        cmds:
+            - '{{.COMPOSE}} -f ../../docker-compose.yml -f ../../docker-compose.prod.yml --profile prod up -d --remove-orphans'
+
+    # Environment shutdown
+    down:
+        desc: Stop all services and remove volumes
+        cmds:
+            - '{{.COMPOSE}} down -v --remove-orphans'
+            - task: cloudflare:tunnel:stop
+
+    down:keep-data:
+        desc: Stop all services but keep volumes
+        cmds:
+            - '{{.COMPOSE}} down --remove-orphans'
+            - task: cloudflare:tunnel:stop
+
+    # Development workflow
+    dev:
+        desc: Start development environment
+        cmds:
+            - task: up:dev
+
+    dev:full:
+        desc: Start full dev environment with tunnel
+        deps: [up:dev]
+        cmds:
+            - echo "🚀 Dev environment ready!"
+            - 'echo "Frontend: http://localhost:8080"'
+            - 'echo "API: http://localhost:3000"'
+            - 'echo "Database: localhost:5432"'
+            - 'echo "Redis: localhost:6379"'
+            - 'echo "Webhook tunnel: https://local-dev.phyt.fun"'
+            - echo ""
+            - echo "Starting tunnel... (Ctrl+C to stop)"
+            - task: cloudflare:tunnel:start
+
+    # Logging
+    logs:
+        desc: Show logs for all services
+        cmds:
+            - '{{.COMPOSE}} logs -f --tail=200'
+
+    logs:api:
+        desc: Show API logs
+        cmds:
+            - '{{.COMPOSE}} logs -f --tail=200 hono-api'
+
+    logs:workers:
+        desc: Show worker logs
+        cmds:
+            - '{{.COMPOSE}} logs -f --tail=200 workers'
+
+    logs:db:
+        desc: Show database logs
+        cmds:
+            - '{{.COMPOSE}} logs -f --tail=200 postgres'
+
+    # Database management
+    db:migrate:
+        desc: Run database migrations
+        cmds:
+            - pnpm db:migrate
+
+    db:seed:
+        desc: Seed database with test data
+        cmds:
+            - pnpm db:seed
+
+    db:studio:
+        desc: Open database studio
+        cmds:
+            - pnpm db:studio
+
+    # Health checks
+    health:
+        desc: Check service health
+        cmds:
+            - '{{.COMPOSE}} ps --services --filter "status=running"'
+            - echo "Services running:"
+            - '{{.COMPOSE}} ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"'
+
+    # Load balancing and scaling tasks
+    docker:scale:
+        desc: Scale services for load testing
+        cmds:
+            - echo "Scaling services for load balancing..."
+            - docker-compose -f ../../docker-compose.staging.yml up -d --scale hono-api-1=1 --scale hono-api-2=1
+
+    docker:test-lb:
+        desc: Test load balancer configuration
+        cmds:
+            - echo "🔍 Testing nginx load balancer configurations..."
+            - ../ops/test-nginx-config.sh all

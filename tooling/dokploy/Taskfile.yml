@@ -1,0 +1,55 @@
+version: '3'
+
+tasks:
+    # Staging deployment
+    staging:deploy:
+        desc: Deploy to staging.phyt.fun (via Dokploy or CI/CD)
+        cmds:
+            - ../ops/deploy-staging.sh
+
+    # Deployment verification
+    staging:verify:
+        desc: Verify staging deployment health
+        cmds:
+            - ../ops/health-check.sh staging
+
+    prod:verify:
+        desc: Verify production deployment health
+        cmds:
+            - ../ops/health-check.sh prod
+
+    dev:verify:
+        desc: Verify development environment health
+        cmds:
+            - ../ops/health-check.sh dev
+
+    health:all:
+        desc: Verify health of all environments
+        cmds:
+            - ../ops/health-check.sh all
+
+    # Dokploy Integration
+    dokploy:test:
+        desc: Test Dokploy connection
+        cmds:
+            - ../ops/dokploy-helpers.sh test
+
+    dokploy:projects:
+        desc: List Dokploy projects
+        cmds:
+            - ../ops/dokploy-helpers.sh projects
+
+    dokploy:deploy:
+        desc: Deploy via Dokploy
+        cmds:
+            - ../ops/dokploy-helpers.sh deploy
+
+    dokploy:monitor:
+        desc: Monitor Dokploy deployment
+        cmds:
+            - ../ops/dokploy-helpers.sh monitor
+
+    dokploy:logs:
+        desc: Get Dokploy deployment logs
+        cmds:
+            - ../ops/dokploy-helpers.sh logs

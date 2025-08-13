@@ -1,66 +1,240 @@
 version: '3'
 
+includes:
+    infra: ./infra/Taskfile.yml
+    cloudflare: ./tooling/cloudflare/Taskfile.yml
+    dev: ./tooling/dev/Taskfile.yml
+    deploy: ./tooling/deploy/Taskfile.yml
+    web: ./apps/web/Taskfile.yml
+    api: ./apps/hono-api/Taskfile.yml
+    workers: ./apps/workers/Taskfile.yml
+    core: ./packages/core/Taskfile.yml
+
 vars:
     COMPOSE: docker compose
-    PROFILE: dev
+    ENV: dev
 
 tasks:
+    # Root-level tasks
     install:
+        desc: Install all dependencies
         cmds:
             - pnpm -w install
 
-    build:web:
+    build:all:
+        desc: Build all applications and packages
         cmds:
-            - pnpm -w --filter "@phyt/web" build
+            - pnpm build
 
+    build:web:
+        desc: Build web application
+        cmds:
+            - task: web:build
+
+    build:staging:
+        desc: Build staging deployment files
+        deps: [build:all]
+        cmds:
+            - echo "🏗️ Building staging deployment..."
+            - echo "Built apps ready for staging.phyt.fun deployment"
+
+    # Legacy tasks (redirects to new environment-specific tasks)
+    up:
+        desc: Start environment (defaults to dev)
+        cmds:
+            - task: dev:up:dev
+
+    # Quick access aliases
+    dev:
+        desc: Start development environment
+        cmds:
+            - task: dev:dev
+
+    dev:full:
+        desc: Start full dev environment with tunnel
+        cmds:
+            - task: dev:dev:full
+
+    down:
+        desc: Stop all services and remove volumes
+        cmds:
+            - task: dev:down
+
+    down:keep-data:
+        desc: Stop all services but keep volumes
+        cmds:
+            - task: dev:down:keep-data
+
+    # Logging shortcuts
+    logs:
+        desc: Show logs for all services
+        cmds:
+            - task: dev:logs
+
+    logs:api:
+        desc: Show API logs
+        cmds:
+            - task: dev:logs:api
+
+    logs:workers:
+        desc: Show worker logs
+        cmds:
+            - task: dev:logs:workers
+
+    logs:db:
+        desc: Show database logs
+        cmds:
+            - task: dev:logs:db
+
+    # Database shortcuts
+    db:migrate:
+        desc: Run database migrations
+        cmds:
+            - task: dev:db:migrate
+
+    db:seed:
+        desc: Seed database with test data
+        cmds:
+            - task: dev:db:seed
+
+    db:studio:
+        desc: Open database studio
+        cmds:
+            - task: dev:db:studio
+
+    # Health check shortcuts
+    health:
+        desc: Check service health
+        cmds:
+            - task: dev:health
+
+    # Infrastructure shortcuts
+    infra:init:
+        desc: Initialize Terraform infrastructure
+        cmds:
+            - task: infra:terraform:init
+
+    infra:plan:
+        desc: Plan infrastructure changes
+        cmds:
+            - task: infra:terraform:plan
+
+    infra:apply:
+        desc: Apply infrastructure changes
+        cmds:
+            - task: infra:terraform:apply
+
+    infra:destroy:
+        desc: Destroy infrastructure (DANGEROUS)
+        cmds:
+            - task: infra:terraform:destroy
+
+    infra:validate:
+        desc: Validate Terraform configuration
+        cmds:
+            - task: infra:terraform:validate
+
+    # Cloudflare shortcuts
     tunnel:start:
         desc: Start cloudflare tunnel for webhooks
         cmds:
-            - cloudflared tunnel run local-dev-tunnel
+            - task: cloudflare:tunnel:start
 
     tunnel:stop:
         desc: Stop cloudflare tunnel
         cmds:
-            - pkill -f "cloudflared tunnel run" || true
+            - task: cloudflare:tunnel:stop
 
     tunnel:status:
         desc: Check if tunnel is running
         cmds:
-            - ps aux | grep -v grep | grep "cloudflared tunnel run" || echo "Tunnel not running"
+            - task: cloudflare:tunnel:status
 
-    up:
-        deps: [install]
+    # Deployment shortcuts
+    staging:deploy:
+        desc: Deploy to staging.phyt.fun
         cmds:
-            - '{{.COMPOSE}} --profile {{.PROFILE}} up -d --remove-orphans'
+            - task: deploy:staging:deploy
 
-    up:dev:
+    staging:verify:
+        desc: Verify staging deployment health
         cmds:
-            - task: up
-        vars:
-            PROFILE: dev
+            - task: deploy:staging:verify
 
-    up:staging:
+    prod:verify:
+        desc: Verify production deployment health
         cmds:
-            - task: build:web
-            - task: up
-        vars:
-            PROFILE: staging
+            - task: deploy:prod:verify
 
-    dev:full:
-        desc: Start full dev environment with tunnel
-        deps: [up:dev]
+    dev:verify:
+        desc: Verify development environment health
         cmds:
-            - echo "🚀 Dev environment ready!"
-            - 'echo "Frontend: http://localhost:8080"'
-            - 'echo "Webhook tunnel: https://local-dev.phyt.fun"'
-            - echo ""
-            - echo "Starting tunnel... (Ctrl+C to stop)"
-            - task: tunnel:start
-    down:
-        cmds:
-            - '{{.COMPOSE}} down -v'
-            - task: tunnel:stop
+            - task: deploy:dev:verify
 
-    logs:
+    health:all:
+        desc: Verify health of all environments
         cmds:
-            - '{{.COMPOSE}} logs -f --tail=200'
+            - task: deploy:health:all
+
+    # SSL shortcuts
+    ssl:setup:staging:
+        desc: Setup SSL certificates for staging
+        cmds:
+            - task: cloudflare:ssl:setup:staging
+
+    ssl:setup:prod:
+        desc: Setup SSL certificates for production
+        cmds:
+            - task: cloudflare:ssl:setup:prod
+
+    ssl:renew:
+        desc: Renew SSL certificates
+        cmds:
+            - task: cloudflare:ssl:renew
+
+    ssl:check:
+        desc: Check SSL certificate status
+        cmds:
+            - task: cloudflare:ssl:check
+
+    ssl:test:
+        desc: Test SSL configuration for staging
+        cmds:
+            - task: cloudflare:ssl:test
+
+    # Dokploy shortcuts
+    dokploy:test:
+        desc: Test Dokploy connection
+        cmds:
+            - task: deploy:dokploy:test
+
+    dokploy:projects:
+        desc: List Dokploy projects
+        cmds:
+            - task: deploy:dokploy:projects
+
+    dokploy:deploy:
+        desc: Deploy via Dokploy
+        cmds:
+            - task: deploy:dokploy:deploy
+
+    dokploy:monitor:
+        desc: Monitor Dokploy deployment
+        cmds:
+            - task: deploy:dokploy:monitor
+
+    dokploy:logs:
+        desc: Get Dokploy deployment logs
+        cmds:
+            - task: deploy:dokploy:logs
+
+    # Load balancing shortcuts
+    docker:scale:
+        desc: Scale services for load testing
+        cmds:
+            - task: dev:docker:scale
+
+    docker:test-lb:
+        desc: Test load balancer configuration
+        cmds:
+            - task: dev:docker:test-lb

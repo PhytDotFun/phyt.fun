@@ -1,0 +1,32 @@
+version: '3'
+
+tasks:
+    build:
+        desc: Build workers application
+        cmds:
+            - pnpm build
+
+    dev:
+        desc: Start workers development mode
+        cmds:
+            - pnpm dev
+
+    start:
+        desc: Start workers production mode
+        cmds:
+            - pnpm start
+
+    lint:
+        desc: Lint workers application
+        cmds:
+            - pnpm lint
+
+    type-check:
+        desc: Run TypeScript type checking
+        cmds:
+            - pnpm type-check
+
+    test:
+        desc: Run workers tests
+        cmds:
+            - pnpm test

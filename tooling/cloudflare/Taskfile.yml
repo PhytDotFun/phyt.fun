@@ -1,0 +1,44 @@
+version: '3'
+
+tasks:
+    # Tunnel management
+    tunnel:start:
+        desc: Start cloudflare tunnel for webhooks
+        cmds:
+            - cloudflared tunnel run local-dev-tunnel
+
+    tunnel:stop:
+        desc: Stop cloudflare tunnel
+        cmds:
+            - pkill -f "cloudflared tunnel run" || true
+
+    tunnel:status:
+        desc: Check if tunnel is running
+        cmds:
+            - ps aux | grep -v grep | grep "cloudflared tunnel run" || echo "Tunnel not running"
+
+    # SSL Certificate Management
+    ssl:setup:staging:
+        desc: Setup SSL certificates for staging
+        cmds:
+            - sudo ../ops/ssl-setup.sh staging
+
+    ssl:setup:prod:
+        desc: Setup SSL certificates for production
+        cmds:
+            - sudo ../ops/ssl-setup.sh production
+
+    ssl:renew:
+        desc: Renew SSL certificates
+        cmds:
+            - sudo ../ops/ssl-setup.sh renew
+
+    ssl:check:
+        desc: Check SSL certificate status
+        cmds:
+            - ../ops/ssl-setup.sh check
+
+    ssl:test:
+        desc: Test SSL configuration for staging
+        cmds:
+            - ../ops/ssl-setup.sh test staging.phyt.fun

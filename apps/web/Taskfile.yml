@@ -1,0 +1,32 @@
+version: '3'
+
+tasks:
+    build:
+        desc: Build web application
+        cmds:
+            - pnpm build
+
+    dev:
+        desc: Start web development server
+        cmds:
+            - pnpm dev
+
+    preview:
+        desc: Preview production build
+        cmds:
+            - pnpm preview
+
+    lint:
+        desc: Lint web application
+        cmds:
+            - pnpm lint
+
+    type-check:
+        desc: Run TypeScript type checking
+        cmds:
+            - pnpm type-check
+
+    test:
+        desc: Run web application tests
+        cmds:
+            - pnpm test

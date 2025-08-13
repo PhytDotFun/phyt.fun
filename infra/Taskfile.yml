@@ -1,0 +1,47 @@
+version: '3'
+
+vars:
+    ENV: dev
+
+tasks:
+    # Infrastructure as Code (Terraform)
+    terraform:init:
+        desc: Initialize Terraform infrastructure
+        cmds:
+            - ../tooling/ops/terraform-init.sh {{.ENV}} init
+
+    terraform:plan:
+        desc: Plan infrastructure changes
+        cmds:
+            - ../tooling/ops/terraform-init.sh {{.ENV}} plan
+
+    terraform:apply:
+        desc: Apply infrastructure changes
+        cmds:
+            - ../tooling/ops/terraform-init.sh {{.ENV}} apply
+
+    terraform:destroy:
+        desc: Destroy infrastructure (DANGEROUS)
+        cmds:
+            - ../tooling/ops/terraform-init.sh {{.ENV}} destroy
+
+    terraform:validate:
+        desc: Validate Terraform configuration
+        cmds:
+            - ../tooling/ops/terraform-init.sh {{.ENV}} validate
+
+    # Environment-specific infrastructure tasks
+    terraform:init:dev:
+        desc: Initialize dev infrastructure
+        cmds:
+            - ../tooling/ops/terraform-init.sh dev init
+
+    terraform:init:staging:
+        desc: Initialize staging infrastructure
+        cmds:
+            - ../tooling/ops/terraform-init.sh staging init
+
+    terraform:init:prod:
+        desc: Initialize production infrastructure
+        cmds:
+            - ../tooling/ops/terraform-init.sh prod init
