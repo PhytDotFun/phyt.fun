@@ -22,5 +22,3 @@ fi
 
 echo "Starting Vault Agent..."
 exec vault agent -config=/vault/config/agent.hcl
-
-
