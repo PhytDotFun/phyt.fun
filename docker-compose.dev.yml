@@ -1,0 +1,42 @@
+# Development environment overrides
+# Use: docker-compose -f docker-compose.yml -f docker-compose.dev.yml --profile dev up
+
+services:
+    hono-api:
+        environment:
+            - NODE_ENV=development
+            - WAIT_FOR_SECRET_FILE=/vault/secrets/hono-api.env
+        ports:
+            - '3000:8000'
+        restart: unless-stopped
+        
+    workers:
+        environment:
+            - NODE_ENV=development
+            - WAIT_FOR_SECRET_FILE=/vault/secrets/workers.env
+        restart: unless-stopped
+
+    postgres:
+        environment:
+            - WAIT_FOR_SECRET_FILE=/vault/secrets/postgres.env
+        ports:
+            - '5432:5432'
+        restart: unless-stopped
+
+    redis:
+        ports:
+            - '6379:6379'
+        restart: unless-stopped
+
+    vault-agent:
+        environment:
+            - VAULT_ENV=dev
+        restart: unless-stopped
+
+    vite:
+        environment:
+            - NODE_ENV=development
+        restart: unless-stopped
+
+    nginx:
+        restart: unless-stopped

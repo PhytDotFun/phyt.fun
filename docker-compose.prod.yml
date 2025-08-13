@@ -1,15 +1,74 @@
 services:
     hono-api:
         restart: always
+        environment:
+            - NODE_ENV=production
+            - WAIT_FOR_SECRET_FILE=/vault/secrets/hono-api.env
+        deploy:
+            resources:
+                limits:
+                    memory: 512M
+                    cpus: '0.5'
+                reservations:
+                    memory: 256M
+                    cpus: '0.25'
 
     workers:
         restart: always
+        environment:
+            - NODE_ENV=production
+            - WAIT_FOR_SECRET_FILE=/vault/secrets/workers.env
+        deploy:
+            resources:
+                limits:
+                    memory: 512M
+                    cpus: '0.5'
+                reservations:
+                    memory: 256M
+                    cpus: '0.25'
 
     postgres:
         restart: always
+        environment:
+            - WAIT_FOR_SECRET_FILE=/vault/secrets/postgres.env
+            - POSTGRES_INITDB_ARGS=--auth=scram-sha-256 --auth-host=scram-sha-256 --auth-local=scram-sha-256
+        deploy:
+            resources:
+                limits:
+                    memory: 1G
+                    cpus: '1.0'
+                reservations:
+                    memory: 512M
+                    cpus: '0.5'
 
     redis:
         restart: always
+        command: redis-server --maxmemory 256mb --maxmemory-policy allkeys-lru
+        deploy:
+            resources:
+                limits:
+                    memory: 256M
+                    cpus: '0.25'
+                reservations:
+                    memory: 128M
+                    cpus: '0.125'
 
     vault-agent:
         restart: always
+        environment:
+            - VAULT_ENV=prod
+
+    web-prod:
+        restart: always
+        volumes:
+            # SSL certificates should be mounted here in production
+            - /etc/letsencrypt/live/phyt.fun:/etc/ssl/certs:ro
+            - /etc/letsencrypt/live/phyt.fun:/etc/ssl/private:ro
+        deploy:
+            resources:
+                limits:
+                    memory: 128M
+                    cpus: '0.25'
+                reservations:
+                    memory: 64M
+                    cpus: '0.125'
