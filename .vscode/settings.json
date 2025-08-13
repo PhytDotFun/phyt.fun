@@ -66,6 +66,7 @@
     //     "redis": "../../../../icons/folder-redis",
     //     "trpc": "../../../../icons/folder-trpc",
     //     "trpc-adapters": "../../../../icons/folder-trpc",
+    //     "dokploy": *../../../../icons/dokploy
     // },
     // "material-icon-theme.files.associations": {
     //     "*.mergify.yml": "../../icons/mergify"
