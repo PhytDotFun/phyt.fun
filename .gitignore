@@ -13,6 +13,8 @@ node_modules
 .env.development.local
 .env.test.local
 .env.production.local
+*.env
+env.*
 
 # Testing
 coverage
@@ -58,6 +60,13 @@ logs/
 credentials/
 secrets/
 
+# Ansible
+infra/ansible/inventory/temp-hosts.yml
+infra/ansible/inventory/*-hosts.yml
+!infra/ansible/inventory/hosts.yml
+.ansible/
+*.retry
+
 # Temporary files
 tmp/
 temp/
@@ -81,3 +90,7 @@ override.tf.json
 # Jetbrains .idea
 /shelf
 workspace.xml
+
+# AI
+.cursor
+.claude
