@@ -1,3 +1,3 @@
 # `@phyt/vault`
 
-A package that does something.
+Hashicorp Vault policies + management scripts.
