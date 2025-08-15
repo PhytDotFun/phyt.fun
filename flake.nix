@@ -14,10 +14,12 @@
             nodejs_22
             pnpm
             docker-compose
+            go
             go-task
             git
             jq
             yq
+            python3
             vault
             cloudflared
           ];
