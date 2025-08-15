@@ -1,18 +1,14 @@
 version: '3'
 
 includes:
-    infra: ./infra/Taskfile.yml
     cloudflare: ./tooling/cloudflare/Taskfile.yml
-    dev: ./tooling/dev/Taskfile.yml
-    deploy: ./tooling/deploy/Taskfile.yml
-    web: ./apps/web/Taskfile.yml
-    api: ./apps/hono-api/Taskfile.yml
-    workers: ./apps/workers/Taskfile.yml
-    core: ./packages/core/Taskfile.yml
 
 vars:
     COMPOSE: docker compose
     ENV: dev
+    TERRAFORM_DIR: ./infra/terraform
+    OPS_DIR: ./tooling/ops
+    AWS_REGION: us-east-1
 
 tasks:
     # Root-level tasks
@@ -29,110 +25,150 @@ tasks:
     build:web:
         desc: Build web application
         cmds:
-            - task: web:build
+            - pnpm --filter @phyt/web build
 
     build:staging:
         desc: Build staging deployment files
         deps: [build:all]
         cmds:
-            - echo "🏗️ Building staging deployment..."
+            - echo "Building staging deployment..."
             - echo "Built apps ready for staging.phyt.fun deployment"
 
-    # Legacy tasks (redirects to new environment-specific tasks)
-    up:
-        desc: Start environment (defaults to dev)
-        cmds:
-            - task: dev:up:dev
-
-    # Quick access aliases
+    # Development Environment
     dev:
-        desc: Start development environment
+        desc: Start development infrastructure (postgres, redis, vault)
+        deps: [install]
         cmds:
-            - task: dev:dev
+            - echo "Starting development infrastructure..."
+            - docker compose --profile dev up -d
+            - echo ""
+            - echo "Infrastructure ready!"
+            - echo "Database - localhost:5432"
+            - echo "Redis - localhost:6379"
+            - echo "Vault - secrets mounted in containers"
+            - echo ""
+            - echo "To run applications locally:"
+            - echo "  API - pnpm --filter @phyt/hono-api dev"
+            - echo "  Web - pnpm --filter @phyt/web dev"
+            - echo "  Workers - pnpm --filter @phyt/workers dev"
 
     dev:full:
-        desc: Start full dev environment with tunnel
+        desc: Start development infrastructure with tunnel
+        deps: [dev]
         cmds:
-            - task: dev:dev:full
+            - echo "Starting Cloudflare tunnel for webhooks..."
+            - task: tunnel:start
+
+    up:
+        desc: Start development environment (alias for dev)
+        cmds:
+            - task: dev
 
     down:
         desc: Stop all services and remove volumes
         cmds:
-            - task: dev:down
+            - docker compose --profile dev down -v --remove-orphans
+            - task: tunnel:stop
 
     down:keep-data:
         desc: Stop all services but keep volumes
         cmds:
-            - task: dev:down:keep-data
+            - docker compose --profile dev down --remove-orphans
+            - task: tunnel:stop
 
-    # Logging shortcuts
+    # Logging
     logs:
         desc: Show logs for all services
         cmds:
-            - task: dev:logs
-
-    logs:api:
-        desc: Show API logs
-        cmds:
-            - task: dev:logs:api
+            - docker compose --profile dev logs -f --tail=200
 
     logs:workers:
         desc: Show worker logs
         cmds:
-            - task: dev:logs:workers
+            - docker compose --profile dev logs -f --tail=200 workers
 
     logs:db:
         desc: Show database logs
         cmds:
-            - task: dev:logs:db
+            - docker compose --profile dev logs -f --tail=200 postgres
 
-    # Database shortcuts
+    # Database Management
     db:migrate:
         desc: Run database migrations
         cmds:
-            - task: dev:db:migrate
+            - pnpm db:migrate
 
     db:seed:
         desc: Seed database with test data
         cmds:
-            - task: dev:db:seed
+            - pnpm db:seed
 
     db:studio:
         desc: Open database studio
         cmds:
-            - task: dev:db:studio
+            - pnpm db:studio
 
-    # Health check shortcuts
+    # Health Checks
     health:
         desc: Check service health
         cmds:
-            - task: dev:health
+            - docker compose --profile dev ps
+            - echo ""
+            - echo "For comprehensive health checks use:"
+            - echo "  task health:dev      - Check development services"
+            - echo "  task health:staging  - Check staging environment"
+            - echo "  task health:all      - Check all environments"
 
-    # Infrastructure shortcuts
-    infra:init:
-        desc: Initialize Terraform infrastructure
+    health:dev:
+        desc: Check development environment health
         cmds:
-            - task: infra:terraform:init
+            - ./tooling/ops/health-check.sh dev
 
-    infra:plan:
-        desc: Plan infrastructure changes
+    health:staging:
+        desc: Check staging environment health
         cmds:
-            - task: infra:terraform:plan
+            - ./tooling/ops/health-check.sh staging
 
-    infra:apply:
-        desc: Apply infrastructure changes
+    # Infrastructure Management
+    terraform:init:
+        desc: Initialize Terraform with S3 backend
         cmds:
-            - task: infra:terraform:apply
+            - ./infra/scripts/terraform-init.sh
 
-    infra:destroy:
-        desc: Destroy infrastructure (DANGEROUS)
+    terraform:plan:staging:
+        desc: Plan staging infrastructure changes
+        dir: '{{.TERRAFORM_DIR}}'
+        deps: [terraform:workspace:staging]
         cmds:
-            - task: infra:terraform:destroy
+            - terraform plan -var="environment=staging" -out=staging.tfplan
 
-    infra:validate:
-        desc: Validate Terraform configuration
+    terraform:apply:staging:
+        desc: Apply staging infrastructure changes
+        dir: '{{.TERRAFORM_DIR}}'
+        deps: [terraform:plan:staging]
         cmds:
-            - task: infra:terraform:validate
+            - terraform apply staging.tfplan
+
+    terraform:destroy:staging:
+        desc: Destroy staging infrastructure (cost optimization)
+        dir: '{{.TERRAFORM_DIR}}'
+        deps: [terraform:workspace:staging]
+        cmds:
+            - terraform plan -destroy -var="environment=staging" -out=destroy.tfplan
+            - terraform apply destroy.tfplan
+
+    terraform:workspace:staging:
+        desc: Select staging Terraform workspace
+        dir: '{{.TERRAFORM_DIR}}'
+        cmds:
+            - terraform workspace select staging || terraform workspace new staging
+
+    terraform:output:staging:
+        desc: Show staging infrastructure outputs
+        dir: '{{.TERRAFORM_DIR}}'
+        deps: [terraform:workspace:staging]
+        cmds:
+            - terraform output
 
     # Cloudflare shortcuts
     tunnel:start:
@@ -150,91 +186,40 @@ tasks:
         cmds:
             - task: cloudflare:tunnel:status
 
-    # Deployment shortcuts
-    staging:deploy:
-        desc: Deploy to staging.phyt.fun
-        cmds:
-            - task: deploy:staging:deploy
-
+    # Deployment Operations
     staging:verify:
         desc: Verify staging deployment health
         cmds:
-            - task: deploy:staging:verify
+            - task: health:staging
+            - echo "Staging URL - https://staging.phyt.fun"
+
+    staging:logs:
+        desc: View staging server logs (requires SSH access)
+        vars:
+            STAGING_IP:
+                sh: cd {{.TERRAFORM_DIR}} && terraform output -raw staging_public_ip 2>/dev/null || echo ""
+        cmds:
+            - |
+                if [ -z "{{.STAGING_IP}}" ]; then
+                  echo "❌ No staging instance found. Run 'task terraform:apply:staging' first."
+                  exit 1
+                fi
+                echo "Connecting to staging instance: {{.STAGING_IP}}"
+                ssh -o StrictHostKeyChecking=no ubuntu@{{.STAGING_IP}} 'cd /opt/phyt && docker compose logs --tail=100 -f'
 
     prod:verify:
         desc: Verify production deployment health
         cmds:
-            - task: deploy:prod:verify
+            - ./tooling/ops/health-check.sh prod
 
-    dev:verify:
-        desc: Verify development environment health
+    prod:status:
+        desc: Check production status
         cmds:
-            - task: deploy:dev:verify
+            - echo "Production Status Check"
+            - echo "========================"
+            - curl -s https://phyt.fun/health | jq . || echo "Production health check failed"
 
     health:all:
-        desc: Verify health of all environments
+        desc: Check health of all environments
         cmds:
-            - task: deploy:health:all
-
-    # SSL shortcuts
-    ssl:setup:staging:
-        desc: Setup SSL certificates for staging
-        cmds:
-            - task: cloudflare:ssl:setup:staging
-
-    ssl:setup:prod:
-        desc: Setup SSL certificates for production
-        cmds:
-            - task: cloudflare:ssl:setup:prod
-
-    ssl:renew:
-        desc: Renew SSL certificates
-        cmds:
-            - task: cloudflare:ssl:renew
-
-    ssl:check:
-        desc: Check SSL certificate status
-        cmds:
-            - task: cloudflare:ssl:check
-
-    ssl:test:
-        desc: Test SSL configuration for staging
-        cmds:
-            - task: cloudflare:ssl:test
-
-    # Dokploy shortcuts
-    dokploy:test:
-        desc: Test Dokploy connection
-        cmds:
-            - task: deploy:dokploy:test
-
-    dokploy:projects:
-        desc: List Dokploy projects
-        cmds:
-            - task: deploy:dokploy:projects
-
-    dokploy:deploy:
-        desc: Deploy via Dokploy
-        cmds:
-            - task: deploy:dokploy:deploy
-
-    dokploy:monitor:
-        desc: Monitor Dokploy deployment
-        cmds:
-            - task: deploy:dokploy:monitor
-
-    dokploy:logs:
-        desc: Get Dokploy deployment logs
-        cmds:
-            - task: deploy:dokploy:logs
-
-    # Load balancing shortcuts
-    docker:scale:
-        desc: Scale services for load testing
-        cmds:
-            - task: dev:docker:scale
-
-    docker:test-lb:
-        desc: Test load balancer configuration
-        cmds:
-            - task: dev:docker:test-lb
+            - ./tooling/ops/health-check.sh all
