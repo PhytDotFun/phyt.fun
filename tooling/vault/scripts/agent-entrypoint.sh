@@ -1,24 +1,28 @@
-#!/usr/bin/env sh
-set -euo pipefail
+#!/bin/sh
+set -e
 
-# Ensure directories
-mkdir -p /vault/secrets /vault/credentials
-chmod 0775 /vault/secrets /vault/credentials
-chown root:root /vault/secrets /vault/credentials || true
-
-# If a wrapped SecretID is provided, unwrap and write to /vault/credentials/secret-id
-if [ "${VAULT_WRAPPED_SECRET_ID:-}" != "" ]; then
-  echo "Unwrapping VAULT_WRAPPED_SECRET_ID into /vault/credentials/secret-id"
-  vault unwrap -field=secret_id "$VAULT_WRAPPED_SECRET_ID" > /vault/credentials/secret-id
-  chmod 0600 /vault/credentials/secret-id
+# Get vault address from env (set by Docker or systemd)
+if [ -z "$VAULT_ADDR" ]; then
+    echo "ERROR: VAULT_ADDR env var not set!"
+    exit 1
 fi
 
-# If role-id file missing and VAULT_ROLE_ID is provided, write it
-if [ ! -s /vault/credentials/role-id ] && [ "${VAULT_ROLE_ID:-}" != "" ]; then
-  echo "Writing VAULT_ROLE_ID into /vault/credentials/role-id"
-  printf "%s" "$VAULT_ROLE_ID" > /vault/credentials/role-id
-  chmod 0600 /vault/credentials/role-id
+# Replace placeholders
+sed -i "s|VAULT_ADDR_PLACEHOLDER|${VAULT_ADDR}|g" /vault/config/agent.hcl
+sed -i "s|DEPLOYMENT_ID|${DEPLOYMENT_ID:-staging}|g" /vault/templates/*.tpl
+
+# Verify tmpfs mount
+if ! mount | grep -q "/vault/secrets type tmpfs"; then
+    echo "ERROR: /vault/secrets is not mounted as tmpfs!"
+    echo "Secrets will be written to disk - this is a security risk!"
+    exit 1
 fi
 
-echo "Starting Vault Agent..."
+# Wait for vault
+until vault status 2>/dev/null; do
+    echo "Waiting for Vault at ${VAULT_ADDR}..."
+    sleep 2
+done
+
+# Start agent - creds will be consumed and tokens will expire
 exec vault agent -config=/vault/config/agent.hcl

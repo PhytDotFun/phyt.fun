@@ -3,6 +3,9 @@ disable_mlock = true
 
 vault {
     address = "https://vault.tailea8363.ts.net"
+    retry {
+        num_retries = 5
+    }
 }
 
 listener "tcp" {
@@ -16,41 +19,84 @@ auto_auth {
         config = {
             role_id_file_path = "/vault/credentials/role-id"
             secret_id_file_path = "/vault/credentials/secret-id"
-            remove_secret_id_file_after_reading = false
+            remove_secret_id_file_after_reading = true
         }
     }
 
     sink "file" {
         config = {
             path = "/vault/secrets/token"
+            mode = 0640
+            delete_after_reading = true
         }
     }
 }
 
+# Minimal cache
 cache {
     use_auto_auth_token = true
+    enforce_consistency = "always"
+    cache_static_secrets = false
 }
 
+# Write templates to tmpfs (RAM) and refresh frequently
 template {
-    source = "/vault/templates/postgres.tmpl.env"
-    destination = "/vault/secrets/postgres.env"
-    perms = "0644"
-}
-
-template {
-    source = "/vault/templates/hono-api.tmpl.env"
+    source = "/vault/templates/hono-api.tpl"
     destination = "/vault/secrets/hono-api.env"
     perms = "0644"
+
+    # Refresh every 60 seconds
+    wait {
+        min = "60s"
+        max = "120s"
+    }
+
+    exec {
+        command = ["sh", "-c", "touch /vault/secrets/.hono-api-ready"]
+    }
 }
 
 template {
-    source = "/vault/templates/workers.tmpl.env"
+    source = "/vault/templates/postgres.tpl"
+    destination = "/vault/secrets/postgres.env"
+    perms = "0644"
+
+    wait {
+        min = "60s"
+        max = "120s"
+    }
+
+    exec {
+        command = ["sh", "-c", "touch /vault/secrets/.postgres-ready"]
+    }
+}
+
+template {
+    source = "/vault/templates/pgbouncer.tpl"
+    destination = "/vault/secrets/pgbouncer.env"
+    perms = "0644"
+
+    wait {
+        min = "60s"
+        max = "120s"
+    }
+    
+    exec {
+        command = ["sh", "-c", "touch /vault/secrets/.pgbouncer-ready"]
+    }
+}
+
+template {
+    source = "/vault/templates/workers.tpl"
     destination = "/vault/secrets/workers.env"
     perms = "0644"
-}
 
-template {
-    source = "/vault/templates/web.tmpl.env"
-    destination = "/vault/secrets/web.env"
-    perms = "0644"
+    wait {
+        min = "60s"
+        max = "120s"
+    }
+
+    exec {
+        command = ["sh", "-c", "touch /vault/secrets/.workers-ready"]
+    }
 }
