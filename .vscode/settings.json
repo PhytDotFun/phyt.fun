@@ -101,5 +101,9 @@
 
     "solidity.formatter": "forge",
     "solidity.packageDefaultDependenciesContractsDirectory": "src",
-    "solidity.packageDefaultDependenciesDirectory": "dependencies"
+    "solidity.packageDefaultDependenciesDirectory": "dependencies",
+
+    "[shellscript]": {
+        "editor.defaultFormatter": "mads-hartmann.bash-ide-vscode"
+    }
 }
