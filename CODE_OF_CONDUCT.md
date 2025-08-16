@@ -10,9 +10,9 @@ We are committed to creating a welcoming and secure environment for all.
 
 Examples of behavior that upholds these beliefs include:
 
-- Prioitzing value and meaning over money
+- Prioritizing value and meaning over money
 - Giving and gracefully accepting constructive feedback
-- Accepting responsibility and comitting to being better
+- Accepting responsibility and committing to being better
 - Focusing on what is best not just for us as individuals, but for the overall community
 
 Examples of unacceptable behavior include:
