@@ -1,0 +1,5 @@
+{{ with secret "secret/data/staging/DEPLOYMENT_ID/workers" }}
+{{ range $k, $v := .Data.data }}
+{{ $k }}={{ $v }}
+{{ end }}
+{{ end }}
