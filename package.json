@@ -32,7 +32,7 @@
         "start:prod": "docker compose -f docker-compose.prod.yml up -d",
         "stop": "docker compose down",
         "stop:prod": "docker compose -f docker-compose.prod.yml down",
-        "up": "pnpm run up:db && docker compose up -d redis hono-api workers",
+        "up": "task up:dev",
         "up:db": "pnpm run up:vault && docker compose up -d postgres",
         "up:vault": "pnpm run bootstrap && docker compose up -d vault-agent"
     },
