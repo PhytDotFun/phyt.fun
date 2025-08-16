@@ -7,13 +7,13 @@ path "secret/data/staging/*" {
 }
 
 path "secret/metadata/staging/*" {
-    capabiities = ["read", "list"]
+    capabilities = ["read", "list"]
 }
 
 # No ability to create or modify secrets
 
 # Allow token self-renewal (limited by max TTL)
-path "auth/token/renew-sel" {
+path "auth/token/renew-self" {
     capabilities = ["update"]
 }
 
