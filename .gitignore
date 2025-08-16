@@ -59,6 +59,12 @@ logs/
 *.key
 credentials/
 secrets/
+*.crt
+*.p12
+*_rsa
+*_dsa
+*_ed25519
+*.ppk
 
 # Ansible
 infra/ansible/inventory/temp-hosts.yml
