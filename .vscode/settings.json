@@ -47,7 +47,7 @@
         "workers": "robot",
         "ops": "command",
         "infra": "pipe",
-        "staging-aws": "aws"
+        "aws-staging": "aws"
     },
 
     "material-icon-theme.files.associations": {
