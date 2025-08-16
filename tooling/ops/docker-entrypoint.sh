@@ -21,7 +21,7 @@ if [ ! -z "$WAIT_FOR_SECRET_FILE" ]; then
 
     # Source env file
     set -a
-    . "$WAIT_FOR_SECRET_FIL"
+    . "$WAIT_FOR_SECRET_FILE"
     set +a
 fi
 
