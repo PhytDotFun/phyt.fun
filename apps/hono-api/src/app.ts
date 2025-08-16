@@ -22,7 +22,48 @@ app.use(
     })
 );
 
+// Health check endpoints
+// Simple health check (used by load balancers)
+app.get('/health', (c) => c.json({ status: 'ok' }));
 app.get('/api/health', (c) => c.json({ status: 'ok' }));
+
+// Comprehensive health check with dependencies
+app.get('/api/health/detailed', async (c) => {
+    const checks = {
+        api: 'ok',
+        timestamp: new Date().toISOString(),
+        uptime: process.uptime(),
+        environment: env.NODE_ENV,
+        memory: {
+            used: Math.round(process.memoryUsage().heapUsed / 1024 / 1024),
+            total: Math.round(process.memoryUsage().heapTotal / 1024 / 1024)
+        },
+        database: 'unknown',
+        redis: 'unknown'
+    };
+
+    // Check database health
+    try {
+        const { appDeps } = await import('./di');
+        await appDeps.db.execute('SELECT 1');
+        checks.database = 'ok';
+    } catch (error) {
+        checks.database = 'error';
+        console.error('Database health check failed:', error);
+    }
+
+    // Check Redis health
+    try {
+        const { appDeps } = await import('./di');
+        await appDeps.redis.ping();
+        checks.redis = 'ok';
+    } catch (error) {
+        checks.redis = 'error';
+        console.error('Redis health check failed:', error);
+    }
+
+    return c.json(checks);
+});
 
 app.route(env.PRIVY_WEBHOOK_ENDPOINT, privyWebhook);
 

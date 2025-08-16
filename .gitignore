@@ -1,4 +1,5 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+# Internal docs
+docs/
 
 # Dependencies
 node_modules
@@ -12,6 +13,8 @@ node_modules
 .env.development.local
 .env.test.local
 .env.production.local
+*.env
+env.*
 
 # Testing
 coverage
@@ -50,12 +53,50 @@ dependencies/
 # Logging
 logs/
 
-# Vault tokens (security)
+# Security
 .vault-tokens/
 *.pem
 *.key
 credentials/
+secrets/
+*.crt
+*.p12
+*_rsa
+*_dsa
+*_ed25519
+*.ppk
+
+# Ansible
+infra/ansible/inventory/temp-hosts.yml
+infra/ansible/inventory/*-hosts.yml
+!infra/ansible/inventory/hosts.yml
+.ansible/
+*.retry
 
 # Temporary files
 tmp/
 temp/
+
+# Direnv
+.direnv/
+
+# Terraform
+*.tfstate
+*.tfstate.*
+*.tfvars
+!*.tfvars.example
+.terraform/
+.terraform.lock.hcl
+crash.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Jetbrains .idea
+/shelf
+workspace.xml
+
+# AI
+.cursor
+.claude

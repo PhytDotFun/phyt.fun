@@ -1,0 +1,225 @@
+version: '3'
+
+includes:
+    cloudflare: ./tooling/cloudflare/Taskfile.yml
+
+vars:
+    COMPOSE: docker compose
+    ENV: dev
+    TERRAFORM_DIR: ./infra/terraform
+    OPS_DIR: ./tooling/ops
+    AWS_REGION: us-east-1
+
+tasks:
+    # Root-level tasks
+    install:
+        desc: Install all dependencies
+        cmds:
+            - pnpm -w install
+
+    build:all:
+        desc: Build all applications and packages
+        cmds:
+            - pnpm build
+
+    build:web:
+        desc: Build web application
+        cmds:
+            - pnpm --filter @phyt/web build
+
+    build:staging:
+        desc: Build staging deployment files
+        deps: [build:all]
+        cmds:
+            - echo "Building staging deployment..."
+            - echo "Built apps ready for staging.phyt.fun deployment"
+
+    # Development Environment
+    dev:
+        desc: Start development infrastructure (postgres, redis, vault)
+        deps: [install]
+        cmds:
+            - echo "Starting development infrastructure..."
+            - docker compose --profile dev up -d
+            - echo ""
+            - echo "Infrastructure ready!"
+            - echo "Database - localhost:5432"
+            - echo "Redis - localhost:6379"
+            - echo "Vault - secrets mounted in containers"
+            - echo ""
+            - echo "To run applications locally:"
+            - echo "  API - pnpm --filter @phyt/hono-api dev"
+            - echo "  Web - pnpm --filter @phyt/web dev"
+            - echo "  Workers - pnpm --filter @phyt/workers dev"
+
+    dev:full:
+        desc: Start development infrastructure with tunnel
+        deps: [dev]
+        cmds:
+            - echo "Starting Cloudflare tunnel for webhooks..."
+            - task: tunnel:start
+
+    up:
+        desc: Start development environment (alias for dev)
+        cmds:
+            - task: dev
+
+    down:
+        desc: Stop all services and remove volumes
+        cmds:
+            - docker compose --profile dev down -v --remove-orphans
+            - task: tunnel:stop
+
+    down:keep-data:
+        desc: Stop all services but keep volumes
+        cmds:
+            - docker compose --profile dev down --remove-orphans
+            - task: tunnel:stop
+
+    # Logging
+    logs:
+        desc: Show logs for all services
+        cmds:
+            - docker compose --profile dev logs -f --tail=200
+
+    logs:workers:
+        desc: Show worker logs
+        cmds:
+            - docker compose --profile dev logs -f --tail=200 workers
+
+    logs:db:
+        desc: Show database logs
+        cmds:
+            - docker compose --profile dev logs -f --tail=200 postgres
+
+    # Database Management
+    db:migrate:
+        desc: Run database migrations
+        cmds:
+            - pnpm db:migrate
+
+    db:seed:
+        desc: Seed database with test data
+        cmds:
+            - pnpm db:seed
+
+    db:studio:
+        desc: Open database studio
+        cmds:
+            - pnpm db:studio
+
+    # Health Checks
+    health:
+        desc: Check service health
+        cmds:
+            - docker compose --profile dev ps
+            - echo ""
+            - echo "For comprehensive health checks use:"
+            - echo "  task health:dev      - Check development services"
+            - echo "  task health:staging  - Check staging environment"
+            - echo "  task health:all      - Check all environments"
+
+    health:dev:
+        desc: Check development environment health
+        cmds:
+            - ./tooling/ops/health-check.sh dev
+
+    health:staging:
+        desc: Check staging environment health
+        cmds:
+            - ./tooling/ops/health-check.sh staging
+
+    # Infrastructure Management
+    terraform:init:
+        desc: Initialize Terraform with S3 backend
+        cmds:
+            - ./infra/scripts/terraform-init.sh
+
+    terraform:plan:staging:
+        desc: Plan staging infrastructure changes
+        dir: '{{.TERRAFORM_DIR}}'
+        deps: [terraform:workspace:staging]
+        cmds:
+            - terraform plan -var="environment=staging" -out=staging.tfplan
+
+    terraform:apply:staging:
+        desc: Apply staging infrastructure changes
+        dir: '{{.TERRAFORM_DIR}}'
+        deps: [terraform:plan:staging]
+        cmds:
+            - terraform apply staging.tfplan
+
+    terraform:destroy:staging:
+        desc: Destroy staging infrastructure (cost optimization)
+        dir: '{{.TERRAFORM_DIR}}'
+        deps: [terraform:workspace:staging]
+        cmds:
+            - terraform plan -destroy -var="environment=staging" -out=destroy.tfplan
+            - terraform apply destroy.tfplan
+
+    terraform:workspace:staging:
+        desc: Select staging Terraform workspace
+        dir: '{{.TERRAFORM_DIR}}'
+        cmds:
+            - terraform workspace select staging || terraform workspace new staging
+
+    terraform:output:staging:
+        desc: Show staging infrastructure outputs
+        dir: '{{.TERRAFORM_DIR}}'
+        deps: [terraform:workspace:staging]
+        cmds:
+            - terraform output
+
+    # Cloudflare shortcuts
+    tunnel:start:
+        desc: Start cloudflare tunnel for webhooks
+        cmds:
+            - task: cloudflare:tunnel:start
+
+    tunnel:stop:
+        desc: Stop cloudflare tunnel
+        cmds:
+            - task: cloudflare:tunnel:stop
+
+    tunnel:status:
+        desc: Check if tunnel is running
+        cmds:
+            - task: cloudflare:tunnel:status
+
+    # Deployment Operations
+    staging:verify:
+        desc: Verify staging deployment health
+        cmds:
+            - task: health:staging
+            - echo "Staging URL - https://staging.phyt.fun"
+
+    staging:logs:
+        desc: View staging server logs (requires SSH access)
+        vars:
+            STAGING_IP:
+                sh: cd {{.TERRAFORM_DIR}} && terraform output -raw staging_public_ip 2>/dev/null || echo ""
+        cmds:
+            - |
+                if [ -z "{{.STAGING_IP}}" ]; then
+                  echo "❌ No staging instance found. Run 'task terraform:apply:staging' first."
+                  exit 1
+                fi
+                echo "Connecting to staging instance: {{.STAGING_IP}}"
+                ssh -o StrictHostKeyChecking=no ubuntu@{{.STAGING_IP}} 'cd /opt/phyt && docker compose logs --tail=100 -f'
+
+    prod:verify:
+        desc: Verify production deployment health
+        cmds:
+            - ./tooling/ops/health-check.sh prod
+
+    prod:status:
+        desc: Check production status
+        cmds:
+            - echo "Production Status Check"
+            - echo "========================"
+            - curl -s https://phyt.fun/health | jq . || echo "Production health check failed"
+
+    health:all:
+        desc: Check health of all environments
+        cmds:
+            - ./tooling/ops/health-check.sh all

@@ -4,9 +4,7 @@ import 'dotenv/config';
 
 export const env = createEnv({
     server: {
-        NODE_ENV: z
-            .enum(['development', 'production', 'test'])
-            .default('development'),
+        NODE_ENV: z.enum(['dev', 'prod', 'test', 'staging']).default('dev'),
         CORS_ORIGIN: z.string(),
         PORT: z.coerce.number(),
         PRIVY_APP_ID: z.string(),

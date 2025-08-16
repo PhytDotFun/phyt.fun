@@ -4,9 +4,7 @@ import 'dotenv/config';
 
 export const env = createEnv({
     server: {
-        NODE_ENV: z
-            .enum(['development', 'production', 'test'])
-            .default('development'),
+        NODE_ENV: z.enum(['dev', 'prod', 'test', 'staging']).default('dev'),
         LOG_LEVEL: z
             .enum(['trace', 'debug', 'info', 'warn', 'error'])
             .default('info'),

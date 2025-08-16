@@ -47,7 +47,7 @@
         "@t3-oss/env-core": "catalog:",
         "@tailwindcss/vite": "catalog:",
         "@tanstack/react-query": "catalog:",
-        "@tanstack/react-router": "^1.121.40",
+        "@tanstack/react-router": "^1.131.7",
         "@tanstack/react-router-devtools": "catalog:",
         "@tanstack/router-plugin": "catalog:",
         "@trpc/client": "catalog:",
@@ -99,6 +99,6 @@
         "web-vitals": "catalog:"
     },
     "overrides": {
-        "@tanstack/react-router": "^1.121.40"
+        "@tanstack/react-router": "^1.131.7"
     }
 }
