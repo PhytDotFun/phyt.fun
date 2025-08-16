@@ -46,7 +46,8 @@
         "webhooks": "connection",
         "workers": "robot",
         "ops": "command",
-        "infra": "pipe"
+        "infra": "pipe",
+        "staging-aws": "aws"
     },
 
     "material-icon-theme.files.associations": {
@@ -66,10 +67,18 @@
     //     "redis": "../../../../icons/folder-redis",
     //     "trpc": "../../../../icons/folder-trpc",
     //     "trpc-adapters": "../../../../icons/folder-trpc",
-    //     "dokploy": *../../../../icons/dokploy
+    //     "dokploy": "*../../../../icons/folder-dokploy",
+    //     "ec2": "*../../../../icons/folder-ec2",
+    //     "hetzner": "*../../../../icons/folder-hetzner",
+    //     "hetzner-prod": "*../../../../icons/folder-hetzner",
+    //     "packer": "*../../../../icons/folder-packer",
+    //     "postgres": "*../../../../icons/folder-postgres",
+    //     "pgbouncer": "*../../../../icons/folder-postgres",
     // },
     // "material-icon-theme.files.associations": {
     //     "*.mergify.yml": "../../icons/mergify"
+    //     "*.pkr.hcl": "../../icons/packer",
+    //     "*.pkr": "../../icons/packer"
     // }
 
     "[solidity]": {
