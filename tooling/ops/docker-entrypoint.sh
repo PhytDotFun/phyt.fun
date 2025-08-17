@@ -1,29 +1,26 @@
 #!/bin/sh
 set -e
 
-# Wait for secret file
-if [ ! -z "$WAIT_FOR_SECRET_FILE" ]; then
-    echo "Waiting for secrets at $WAIT_FOR_SECRET_FILE..."
-    timeout=60
-    elapsed=0
+FILE="${WAIT_FOR_SECRET_FILE:-}"
+TIMEOUT="${WAIT_FOR_SECRET_TIMEOUT:-60}"
 
-    while [ ! -f "$WAIT_FOR_SECRET_FILE" ]; do
-        if [ $elapsed -ge $timeout ]; then
-            echo "ERROR: Timeout waiting for secrets!"
+# Wait for secret file
+if [ -n "$FILE" ]; then
+    echo "Waiting for secrets at $FILE..."
+    i=0
+    while [ ! -f "$FILE" ]; do
+        if [ "$i" -ge "$TIMEOUT" ]; then
+            echo "ERROR: Timeout waiting for secrets at $FILE" >&2
             exit 1
         fi
-        
         sleep 1
-        elapsed=$((elapsed + 1))
+        i=$((i + 1))
     done
-
-    echo "Secrets found, loading environment..."
-
-    # Source env file
+    echo "Secrets found; exporting ..."
     set -a
-    . "$WAIT_FOR_SECRET_FILE"
+    # shellcheck source=/dev/null
+    . "$FILE"
     set +a
 fi
 
-# Execute
 exec "$@"

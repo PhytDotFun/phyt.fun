@@ -80,7 +80,7 @@ template {
         min = "60s"
         max = "120s"
     }
-    
+
     exec {
         command = ["sh", "-c", "touch /vault/secrets/.pgbouncer-ready"]
     }
