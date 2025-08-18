@@ -1,4 +1,4 @@
-{{ with secret "secret/data/staging/DEPLOYMENT_ID/workers" }}
+{{ with secret (printf "secret/data/%s/%s/workers" (env "VAULT_NAMESPACE") (env "DEPLOYMENT_ID")) }}
 {{ range $k, $v := .Data.data }}
 {{ $k }}={{ $v }}
 {{ end }}
