@@ -1,5 +1,6 @@
 pid_file = "/vault/pidfile"
 disable_mlock = true
+log_level = "info"
 
 vault {
     address = "https://vault.tailea8363.ts.net"
@@ -17,8 +18,9 @@ auto_auth {
     method "approle" {
         mount_path = "auth/approle"
         config = {
-            role_id_file_path = "/vault/credentials/role-id"
-            secret_id_file_path = "/vault/credentials/secret-id"
+            role_id_file_path = "/vault/credentials/role_id"
+            secret_id_file_path = "/vault/credentials/secret_id"
+            # Secret ID is single us
             remove_secret_id_file_after_reading = true
         }
     }
@@ -41,7 +43,7 @@ cache {
 
 # Write templates to tmpfs (RAM) and refresh frequently
 template {
-    source = "/vault/templates/hono-api.tpl"
+    source = "/vault/templates/hono-api.ctmpl"
     destination = "/vault/secrets/hono-api.env"
     perms = "0644"
 
@@ -57,7 +59,7 @@ template {
 }
 
 template {
-    source = "/vault/templates/postgres.tpl"
+    source = "/vault/templates/postgres.ctmpl"
     destination = "/vault/secrets/postgres.env"
     perms = "0644"
 
@@ -72,7 +74,7 @@ template {
 }
 
 template {
-    source = "/vault/templates/pgbouncer.tpl"
+    source = "/vault/templates/pgbouncer.ctmpl"
     destination = "/vault/secrets/pgbouncer.env"
     perms = "0644"
 
@@ -87,7 +89,7 @@ template {
 }
 
 template {
-    source = "/vault/templates/workers.tpl"
+    source = "/vault/templates/workers.ctmpl"
     destination = "/vault/secrets/workers.env"
     perms = "0644"
 
