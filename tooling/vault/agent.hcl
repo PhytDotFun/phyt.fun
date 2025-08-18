@@ -46,59 +46,27 @@ template {
     source = "/vault/templates/hono-api.ctmpl"
     destination = "/vault/secrets/hono-api.env"
     perms = "0644"
-
     # Refresh every 60 seconds
-    wait {
-        min = "60s"
-        max = "120s"
-    }
-
-    exec {
-        command = ["sh", "-c", "touch /vault/secrets/.hono-api-ready"]
-    }
+    wait { min = "60s"; max = "120s" }
 }
 
 template {
     source = "/vault/templates/postgres.ctmpl"
     destination = "/vault/secrets/postgres.env"
     perms = "0644"
-
-    wait {
-        min = "60s"
-        max = "120s"
-    }
-
-    exec {
-        command = ["sh", "-c", "touch /vault/secrets/.postgres-ready"]
-    }
-}
-
-template {
-    source = "/vault/templates/pgbouncer.ctmpl"
-    destination = "/vault/secrets/pgbouncer.env"
-    perms = "0644"
-
-    wait {
-        min = "60s"
-        max = "120s"
-    }
-
-    exec {
-        command = ["sh", "-c", "touch /vault/secrets/.pgbouncer-ready"]
-    }
+    wait { min = "60s"; max = "120s" }
 }
 
 template {
     source = "/vault/templates/workers.ctmpl"
     destination = "/vault/secrets/workers.env"
     perms = "0644"
+    wait { min = "60s"; max = "120s" }
+}
 
-    wait {
-        min = "60s"
-        max = "120s"
-    }
-
-    exec {
-        command = ["sh", "-c", "touch /vault/secrets/.workers-ready"]
-    }
+template {
+    source      = "/vault/templates/pgbouncer.ctmpl"
+    destination = "/vault/secrets/pgbouncer.ini"
+    perms       = "0600"
+    wait { min = "60s"; max = "120s" }
 }
