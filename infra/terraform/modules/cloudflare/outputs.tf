@@ -4,7 +4,7 @@ output "tunnel_id" {
 }
 
 output "tunnel_token" {
-    value = random_id.tunnel_scret.b64_std
+    value = random_id.tunnel_secret.b64_std
     sensitive = true
     description = "Cloudflare tunnel token"
 }
