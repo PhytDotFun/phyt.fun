@@ -85,6 +85,7 @@
     //     "packer": "*../../../../icons/folder-packer",
     //     "postgres": "*../../../../icons/folder-postgres",
     //     "pgbouncer": "*../../../../icons/folder-postgres",
+    //     "tailscale": "*../../../../icons/folder-tailscale",
     // },
     "material-icon-theme.files.associations": {
         "*.nginx.conf": "nginx"
@@ -92,6 +93,7 @@
         //     "*.pkr.hcl": "../../icons/packer",
         //     "*.pkr": "../../icons/packer",
         //     "*.ctmpl": "../../icons/consul",
+        //     "*.tailscale.json: "../../icons/tailscale"
     },
 
     "[solidity]": {
