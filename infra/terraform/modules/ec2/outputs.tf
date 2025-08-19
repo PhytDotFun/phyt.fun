@@ -4,7 +4,7 @@ output "instance_id" {
 }
 
 output "spot_request_id" {
-    value = aws_spot_instance.request.staging.id
+    value = aws_spot_instance_request.staging.id
     description = "Spot instance request ID"
 }
 
