@@ -32,7 +32,7 @@ source "amazon-ebs" "staging" {
     }
 }
 
- build {
+build {
     sources = ["source.amazon-ebs.staging"]
 
     provisioner "shell" {
