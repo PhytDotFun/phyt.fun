@@ -1,6 +1,15 @@
 #!/bin/bash
 set -e
 
+# Set fallback values if not provided by Terraform
+: "${deployment_id?Error: deployment_id is not set.}"
+: "${tailscale_auth_key?Error: tailscale_auth_key is not set.}"
+: "${cloudflare_account_id?Error: cloudflare_account_id is not set.}"
+: "${cloudflare_tunnel_id?Error: cloudflare_tunnel_id is not set.}"
+: "${cloudflare_tunnel_token?Error: cloudflare_tunnel_token is not set.}"
+: "${vault_role_id?Error: vault_role_id is not set.}"
+: "${vault_secret_id?Error: vault_secret_id is not set.}"
+
 # Log all output
 exec > >(tee -a /var/log/user-data.log)
 exec 2>&1
