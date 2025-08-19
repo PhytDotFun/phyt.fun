@@ -85,7 +85,7 @@ resource "aws_vpc" "staging" {
 }
 
 resource "aws_internet_gateway" "staging" {
-    vpc_id = aws_vpc.staging_id
+    vpc_id = aws_vpc.staging.id
 
     tags = {
         Name = "staging-igw-${var.deployment_id}"
