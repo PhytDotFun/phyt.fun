@@ -135,7 +135,7 @@ resource "aws_security_group" "staging" {
         protocol = "-1"
         cidr_blocks = ["0.0.0.0/0"]
     }
-    
+
     tags = {
         Name = "staging-sg-${var.deployment_id}"
     }
@@ -216,7 +216,7 @@ module "staging_instance" {
     security_group_id     = aws_security_group.staging.id
     iam_instance_profile  = aws_iam_instance_profile.staging.name
 
-    # Vault credentials are ephemeral 
+    # Vault credentials are ephemeral
     vault_role_id   = vault_approle_auth_backend_role.staging.role_id
     vault_secret_id = vault_approle_auth_backend_role_secret_id.staging.secret_id
 
@@ -234,7 +234,7 @@ module "staging_instance" {
 # Cloudflare config
 module "cloudflare" {
     source = "../../terraform/modules/cloudflare"
-    
+
     zone_id = data.vault_generic_secret.cloudflare.data["zone_id"]
     account_id    = data.vault_generic_secret.cloudflare.data["account_id"]
     deployment_id = var.deployment_id

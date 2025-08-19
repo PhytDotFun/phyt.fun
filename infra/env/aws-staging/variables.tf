@@ -22,7 +22,7 @@ variable "instance_type" {
 variable "spot_price" {
     description = "Maximum spot price"
     type = string
-    
+
     default = "0.0336"
 }
 
