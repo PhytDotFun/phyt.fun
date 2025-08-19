@@ -1,5 +1,2 @@
-#!/usr/bin/env sh
-# shellcheck disable=SC1091 # husky path is resolved at runtime
-. "$(dirname -- "$0")/_/husky.sh"
-
+# shellcheck disable=SC2148 # husky requires no shebang
 pnpm dlx commitlint --edit "$1"
