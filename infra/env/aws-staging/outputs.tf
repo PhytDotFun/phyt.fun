@@ -24,6 +24,6 @@ output "deployment_url" {
 }
 
 output "ssh_command" {
-    value = "tailscale ssh ubuntu@${var.deployment_id}.tailea8363.ts.net"
-    description = "SSH command to access the instance"
+  value       = "tailscale ssh ubuntu@${var.deployment_id}"
+  description = "SSH command to access the instance (Tailscale SSH)"
 }
