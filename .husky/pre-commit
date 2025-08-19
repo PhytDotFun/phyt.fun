@@ -1,6 +1,4 @@
-#!/usr/bin/env sh
-# shellcheck disable=SC1091 # husky path is resolved at runtime
-. "$(dirname -- "$0")/_/husky.sh"
+# shellcheck disable=SC2148 # husky requires disabled
 
 # JS/TS tasks
 echo "🔧 Running pre-commit checks (JS/TS linting & formatting)..."
