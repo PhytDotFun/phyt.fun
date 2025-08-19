@@ -1,4 +1,4 @@
-# shellcheck disable=SC2148 # husky requires disabled
+# shellcheck disable=SC2148 # husky requires no shebang
 
 # JS/TS tasks
 echo "🔧 Running pre-commit checks (JS/TS linting & formatting)..."
