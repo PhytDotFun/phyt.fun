@@ -40,7 +40,7 @@ data "vault_generic_secret" "cloudflare" {
 }
 
 provider "cloudflare" {
-    api_token = data.vault_generic_secret.cloudflare
+    api_token = data.vault_generic_secret.cloudflare.data["api_token"]
 }
 
 # Fetch AWS deployment keys from Vault at runtime
