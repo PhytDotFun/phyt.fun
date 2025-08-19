@@ -24,7 +24,8 @@ if [ -d "packages/data-access/src/db/drizzle" ]; then
 
     if find packages/data-access/src/db/drizzle/meta -name "*.json" -type f | grep -q .; then
         find packages/data-access/src/db/drizzle/meta -name "*.json" -type f -exec cp {} "$BACKUP_DIR/meta/" \;
-        echo "Backed up $(find "$BACKUP_DIR/meta/" -type f | wc -l) meta files"
+        meta_count=$(find "$BACKUP_DIR/meta/" -type f | wc -l)
+        echo "Backed up $meta_count meta files"
     fi
 fi
 
