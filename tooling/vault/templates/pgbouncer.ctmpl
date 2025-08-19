@@ -1,0 +1,4 @@
+{{- with secret (printf "secret/data/%s/%s/postgres" (env "VAULT_NAMESPACE") (env "DEPLOYMENT_ID")) -}}
+[databases]
+appdb = host=postgres port=5432 dbname={{ .Data.data.POSTGRES_DB }} user={{ .Data.data.POSTGRES_USER }} password={{ .Data.data.POSTGRES_PASSWORD }}
+{{- end -}}

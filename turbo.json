@@ -20,7 +20,6 @@
                 "PRIVY_SECRET_KEY",
                 "PRIVY_VERIFICATION_KEY",
                 "PRIVY_WEBHOOK_SECRET",
-                "REDIS_URL",
                 "PRIVY_WEBHOOK_ENDPOINT",
                 "USERS_SALT",
                 "POSTS_SALT",

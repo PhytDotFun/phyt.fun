@@ -1,1 +1,12 @@
-pnpm syncpack fix && pnpm syncpack format && pnpm exec lint-staged
+#!/usr/bin/env sh
+# shellcheck disable=SC1091 # husky path is resolved at runtime
+. "$(dirname -- "$0")/_/husky.sh"
+
+# JS/TS tasks
+echo "🔧 Running pre-commit checks (JS/TS linting & formatting)..."
+if pnpm syncpack fix && pnpm syncpack format && pnpm exec lint-staged; then
+    echo "✅ All pre-commit checks passed!"
+else
+    echo "❌ Some pre-commit checks failed."
+    exit 1
+fi

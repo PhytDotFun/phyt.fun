@@ -1,0 +1,5 @@
+{{ with secret (printf "secret/data/%s/%s/postgres" (env "VAULT_NAMESPACE") (env "DEPLOYMENT_ID")) }}
+{{ range $k, $v := .Data.data }}
+{{ $k }}={{ $v }}
+{{ end }}
+{{ end }}

@@ -1,0 +1,53 @@
+# Configure all hooks to run on pre-push stage to avoid conflicts with Husky's pre-commit JS linting
+default_stages: [pre-push]
+
+repos:
+    - repo: https://github.com/pre-commit/pre-commit-hooks
+      rev: v4.6.0
+      hooks:
+          - id: trailing-whitespace
+          - id: end-of-file-fixer
+          - id: check-yaml
+          - id: check-added-large-files
+
+    # Shell script hooks
+    - repo: https://github.com/shellcheck-py/shellcheck-py
+      rev: v0.11.0.1
+      hooks:
+          - id: shellcheck
+            args: [-e, SC1091] # Exclude "not following" errors for sourced files
+            types: [shell]
+            exclude: ^(node_modules/|\.git/)
+
+    - repo: https://github.com/scop/pre-commit-shfmt
+      rev: v3.12.0-2
+      hooks:
+          - id: shfmt
+            args: [-w, -s, -i, '4'] # Write changes, simplify, 4-space indent
+            types: [shell]
+            exclude: ^(node_modules/|\.git/)
+
+    # Python app hooks
+    - repo: https://github.com/psf/black
+      rev: 24.8.0
+      hooks:
+          - id: black
+
+    # Terraform Package Hooks
+    - repo: https://github.com/antonbabenko/pre-commit-terraform
+      rev: v1.100.0
+      hooks:
+          - id: terraform_fmt
+          - id: terraform_tflint
+          - id: terraform_validate
+
+    # Optional: TypeScript build check (commented out by default - can be slow)
+    # Uncomment if you want to ensure builds pass before pushing
+    # - repo: local
+    #   hooks:
+    #       - id: typescript-check
+    #         name: TypeScript Build Check
+    #         entry: pnpm run build
+    #         language: system
+    #         pass_filenames: false
+    #         stages: [pre-push]

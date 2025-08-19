@@ -19,12 +19,13 @@ mkdir -p "$BACKUP_DIR/meta"
 if [ -d "packages/data-access/src/db/drizzle" ]; then
     if find packages/data-access/src/db/drizzle -name "*.sql" -type f | grep -q .; then
         find packages/data-access/src/db/drizzle -name "*.sql" -type f -exec cp {} "$BACKUP_DIR/migrations/" \;
-        echo "Backed up $(ls -1 "$BACKUP_DIR/migrations/" | wc -l) migration files"
+        echo "Backed up $(find "$BACKUP_DIR/migrations/" -type f | wc -l) migration files"
     fi
-    
+
     if find packages/data-access/src/db/drizzle/meta -name "*.json" -type f | grep -q .; then
         find packages/data-access/src/db/drizzle/meta -name "*.json" -type f -exec cp {} "$BACKUP_DIR/meta/" \;
-        echo "Backed up $(ls -1 "$BACKUP_DIR/meta/" | wc -l) meta files"
+        meta_count=$(find "$BACKUP_DIR/meta/" -type f | wc -l)
+        echo "Backed up $meta_count meta files"
     fi
 fi
 
@@ -82,17 +83,17 @@ done
 echo "Restoring Drizzle migration files..."
 if [ -d "$BACKUP_DIR" ]; then
     mkdir -p packages/data-access/src/db/drizzle/meta
-    
+
     if [ "$(ls -A "$BACKUP_DIR/migrations/" 2>/dev/null)" ]; then
         cp "$BACKUP_DIR/migrations/"*.sql packages/data-access/src/db/drizzle/ 2>/dev/null || true
-        echo "Restored $(ls -1 "$BACKUP_DIR/migrations/" 2>/dev/null | wc -l) migration files"
+        echo "Restored $(find "$BACKUP_DIR/migrations/" -type f 2>/dev/null | wc -l) migration files"
     fi
-    
+
     if [ "$(ls -A "$BACKUP_DIR/meta/" 2>/dev/null)" ]; then
         cp "$BACKUP_DIR/meta/"*.json packages/data-access/src/db/drizzle/meta/ 2>/dev/null || true
-        echo "Restored $(ls -1 "$BACKUP_DIR/meta/" 2>/dev/null | wc -l) meta files"
+        echo "Restored $(find "$BACKUP_DIR/meta/" -type f 2>/dev/null | wc -l) meta files"
     fi
-    
+
     rm -rf "$BACKUP_DIR"
     echo "Cleaned up temporary backup files"
 fi
@@ -114,4 +115,4 @@ if [ ${#TRULY_REMOVED_PACKAGES[@]} -gt 0 ]; then
     done
 else
     echo "No packages were permanently removed"
-fi 
+fi

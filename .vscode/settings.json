@@ -23,42 +23,75 @@
         "**/routeTree.gen.ts": true
     },
 
+    "editor.tabSize": 4,
+
     "editor.defaultFormatter": "esbenp.prettier-vscode",
 
     "[typescript]": {
-        "editor.defaultFormatter": "esbenp.prettier-vscode"
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.formatOnSave": true
     },
 
     "[typescriptreact]": {
-        "editor.defaultFormatter": "esbenp.prettier-vscode"
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.formatOnSave": true
     },
 
     "[javascript]": {
-        "editor.defaultFormatter": "esbenp.prettier-vscode"
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.formatOnSave": true
+    },
+
+    "[nginx]": {
+        "editor.defaultFormatter": "ahmadalli.vscode-nginx-conf",
+        "editor.formatOnSave": true
     },
 
     "material-icon-theme.folders.associations": {
         "web": "react-components",
-        "hono-api": "server",
+        "hono-api": "api",
         "data-access": "log",
-        "eslint": "tasks",
         "m-queue": "queue",
-        "redis": "class",
-        "trpc-adapters": "examples",
         "tsconfig": "typescript",
         "webhooks": "connection",
         "workers": "robot",
-        "ops": "command"
-        // Icons have to be placed inside of ~/.vscode/extensions/icons
-        // Drop this line into user settings
-        // "material-icon-theme.folders.associations": {
-        //     "vault": "../../../../icons/folder-vault",
-        //     "golang": "../../../../icons/folder-golang",
-        //     "go": "../../../../icons/folder-golang"
-        // },
-        // "material-icon-theme.files.associations": {
+        "ops": "command",
+        "infra": "pipe",
+        "aws-staging": "aws"
+    },
+
+    // OPTIONAL - CUSTOM MATERIAL ICONS
+
+    // Icons have to be placed inside of ~/.vscode (or ~/.cursor)/extensions/icons (this is your IDE's installation path)
+    // Copies of the custom icons are saved in /.vscode/icons (this is inside the monorepo) for you to paste into ~/.vscode/extensions/icons
+    // After placing icon.svgs, drop these lines into user settings
+
+    // Feel free to make a pr with these icons to the material icon theme repo - I'm just too lazy
+
+    // "material-icon-theme.folders.associations": {
+    //     "vault": "../../../../icons/folder-vault",
+    //     "golang": "../../../../icons/folder-golang",
+    //     "go": "../../../../icons/folder-golang",
+    //     "eslint": "../../../../icons/folder-eslint",
+    //     "eslint-config": "../../../../icons/folder-eslint",
+    //     "nginx": "../../../../icons/folder-nginx",
+    //     "redis": "../../../../icons/folder-redis",
+    //     "trpc": "../../../../icons/folder-trpc",
+    //     "trpc-adapters": "../../../../icons/folder-trpc",
+    //     "dokploy": "*../../../../icons/folder-dokploy",
+    //     "ec2": "*../../../../icons/folder-ec2",
+    //     "hetzner": "*../../../../icons/folder-hetzner",
+    //     "hetzner-prod": "*../../../../icons/folder-hetzner",
+    //     "packer": "*../../../../icons/folder-packer",
+    //     "postgres": "*../../../../icons/folder-postgres",
+    //     "pgbouncer": "*../../../../icons/folder-postgres",
+    // },
+    "material-icon-theme.files.associations": {
+        "*.nginx.conf": "nginx"
         //     "*.mergify.yml": "../../icons/mergify"
-        // }
+        //     "*.pkr.hcl": "../../icons/packer",
+        //     "*.pkr": "../../icons/packer",
+        //     "*.ctmpl": "../../icons/consul",
     },
 
     "[solidity]": {
@@ -68,5 +101,9 @@
 
     "solidity.formatter": "forge",
     "solidity.packageDefaultDependenciesContractsDirectory": "src",
-    "solidity.packageDefaultDependenciesDirectory": "dependencies"
+    "solidity.packageDefaultDependenciesDirectory": "dependencies",
+
+    "[shellscript]": {
+        "editor.defaultFormatter": "mads-hartmann.bash-ide-vscode"
+    }
 }

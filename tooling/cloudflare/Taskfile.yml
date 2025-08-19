@@ -1,0 +1,18 @@
+version: '3'
+
+tasks:
+    # Tunnel management
+    tunnel:start:
+        desc: Start cloudflare tunnel for webhooks
+        cmds:
+            - cloudflared tunnel run local-dev-tunnel
+
+    tunnel:stop:
+        desc: Stop cloudflare tunnel
+        cmds:
+            - pkill -f "cloudflared tunnel run" || true
+
+    tunnel:status:
+        desc: Check if tunnel is running
+        cmds:
+            - ps aux | grep -v grep | grep "cloudflared tunnel run" || echo "Tunnel not running"
