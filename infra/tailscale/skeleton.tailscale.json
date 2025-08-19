@@ -1,0 +1,36 @@
+{
+    "groups": {
+        "group:eng": ["alice@example.com", "bob@example.com"]
+    },
+    "tagOwners": {
+        "tag:staging": ["group:eng", "autogroup:admins"],
+        "tag:ci": ["autogroup:admins"],
+        "tag:dokploy": ["autogroup:admins"]
+    },
+    "ssh": [
+        {
+            "action": "accept",
+            "src": ["tag:ci"],
+            "dst": ["tag:staging"],
+            "users": ["ubuntu"]
+        },
+        {
+            "action": "accept",
+            "src": ["tag:dokploy"],
+            "dst": ["tag:staging"],
+            "users": ["ubuntu"]
+        }
+    ],
+    "acls": [
+        {
+            "COMMENT": "service-to-service access on the tailnet, if any needed",
+            "action": "accept",
+            "src": ["tag:staging"],
+            "dst": ["tag:monitoring:9090"]
+        }
+    ],
+    "tests": [
+        { "src": "tag:ci", "dst": "tag:staging", "users": ["ubuntu"] },
+        { "src": "tag:dokploy", "dst": "tag:staging", "users": ["ubuntu"] }
+    ]
+}

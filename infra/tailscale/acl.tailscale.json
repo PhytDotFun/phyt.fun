@@ -1,0 +1,21 @@
+{
+    "ssh": [
+        {
+            "action": "accept",
+            "src": ["tag:ci"],
+            "dst": ["tag:staging"],
+            "users": ["ubuntu"]
+        },
+        {
+            "action": "accept",
+            "src": ["tag:dokploy"],
+            "dst": ["tag:staging"],
+            "users": ["ubuntu"]
+        }
+    ],
+    "tagOwners": {
+        "tag:staging": ["autogroup:admins"],
+        "tag:ci": ["autogroup:admins"],
+        "tag:dokploy": ["autogroup:admins"]
+    }
+}
