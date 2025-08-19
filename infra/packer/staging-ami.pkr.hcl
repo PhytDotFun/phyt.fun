@@ -57,4 +57,4 @@ build {
             "sudo truncate -s 0 /var/log/*.log"
         ]
     }
- }
+}
