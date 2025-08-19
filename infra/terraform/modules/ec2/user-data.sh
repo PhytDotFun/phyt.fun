@@ -61,7 +61,13 @@ systemctl enable docker
 # Install Tailscale with ephemeral auth key
 curl -fsSL https://tailscale.com/install.sh | sh
 # Auth key is single-use and expires after use
-tailscale up --auth-key="${tailscale_auth_key}" --hostname="${deployment_id}" --accept-routes --accept-dns=false
+tailscale up \
+    --auth-key="${tailscale_auth_key}" \
+    --hostname="${deployment_id}" \
+    --accept-routes \
+    --accept-dns=false \
+    --ssh \
+    --advertise-tags=tag:staging
 # Clear the auth key from memory
 unset tailscale_auth_key
 
