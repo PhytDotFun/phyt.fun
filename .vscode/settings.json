@@ -93,7 +93,7 @@
         //     "*.pkr.hcl": "../../icons/packer",
         //     "*.pkr": "../../icons/packer",
         //     "*.ctmpl": "../../icons/consul",
-        //     "*.tailscale.json: "../../icons/tailscale"
+        //     "*.tailscale.json": "../../icons/tailscale"
     },
 
     "[solidity]": {
