@@ -37,6 +37,7 @@
         "up:vault": "pnpm run bootstrap && docker compose up -d vault-agent"
     },
     "devDependencies": {
+        "@changesets/cli": "catalog:",
         "@commitlint/cli": "catalog:",
         "@commitlint/config-conventional": "catalog:",
         "@turbo/gen": "catalog:",
