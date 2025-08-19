@@ -20,7 +20,7 @@ auto_auth {
         config = {
             role_id_file_path = "/vault/credentials/role_id"
             secret_id_file_path = "/vault/credentials/secret_id"
-            # Secret ID is single us
+            # Secret ID is single use
             remove_secret_id_file_after_reading = true
         }
     }
