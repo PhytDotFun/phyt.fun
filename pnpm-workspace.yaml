@@ -74,7 +74,7 @@ catalog:
   drizzle-orm: ^0.44.4
   drizzle-zod: ^0.8.3
   embla-carousel-react: ^8.6.0
-  esbuild: ^0.24.2
+  esbuild: ^0.25.0
   eslint: ^9.33.0
   eslint-config-prettier: ^10.1.8
   eslint-import-resolver-typescript: ^4.4.4
