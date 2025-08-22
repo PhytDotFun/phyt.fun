@@ -8,7 +8,7 @@ terraform {
         }
         cloudflare = {
             source = "cloudflare/cloudflare"
-            version = "~> 4.0"
+            version = "~> 5.0"
         }
         vault = {
             source = "hashicorp/vault"
