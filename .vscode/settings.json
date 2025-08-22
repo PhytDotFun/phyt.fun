@@ -47,6 +47,24 @@
         "editor.formatOnSave": true
     },
 
+    "[solidity]": {
+        "editor.defaultFormatter": "JuanBlanco.solidity",
+        "editor.formatOnSave": true
+    },
+
+    "solidity.formatter": "forge",
+    "solidity.packageDefaultDependenciesContractsDirectory": "src",
+    "solidity.packageDefaultDependenciesDirectory": "dependencies",
+
+    "[shellscript]": {
+        "editor.defaultFormatter": "mads-hartmann.bash-ide-vscode"
+    },
+
+    "[terraform]": {
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "hashicorp.terraform"
+    },
+
     "material-icon-theme.folders.associations": {
         "web": "react-components",
         "hono-api": "api",
@@ -94,18 +112,5 @@
         //     "*.pkr": "../../icons/packer",
         //     "*.ctmpl": "../../icons/consul",
         //     "*.tailscale.json": "../../icons/tailscale"
-    },
-
-    "[solidity]": {
-        "editor.defaultFormatter": "JuanBlanco.solidity",
-        "editor.formatOnSave": true
-    },
-
-    "solidity.formatter": "forge",
-    "solidity.packageDefaultDependenciesContractsDirectory": "src",
-    "solidity.packageDefaultDependenciesDirectory": "dependencies",
-
-    "[shellscript]": {
-        "editor.defaultFormatter": "mads-hartmann.bash-ide-vscode"
     }
 }
