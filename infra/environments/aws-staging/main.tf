@@ -186,7 +186,7 @@ resource "aws_iam_instance_profile" "staging" {
 resource "vault_approle_auth_backend_role" "staging" {
     backend = "approle"
     role_name = "staging-${var.deployment_id}"
-    token_policies = ["staging-policy"]
+    token_policies = ["staging-approle"]
 
     # Very short TTL
     token_ttl = 300

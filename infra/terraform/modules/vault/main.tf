@@ -74,7 +74,7 @@ resource "vault_generic_secret" "workers" {
 resource "vault_approle_auth_backend_role" "staging" {
     backend = "approle"
     role_name = "staging-${var.deployment_id}"
-    token_policies = ["staging-policy"]
+    token_policies = ["staging-approle"]
 
     token_ttl = 3600
     token_max_ttl = 86400
