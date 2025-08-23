@@ -60,7 +60,7 @@ catalog:
   '@types/react-dom': ^19.1.7
   '@vitejs/plugin-react': ^5.0.0
   babel-plugin-react-compiler: 19.1.0-rc.2
-  bullmq: 5.56.9
+  bullmq: 5.58.1
   chalk: 5.6.0
   class-variance-authority: ^0.7.1
   clsx: ^2.1.1
