@@ -172,8 +172,8 @@ catalogs:
       specifier: 19.1.0-rc.2
       version: 19.1.0-rc.2
     bullmq:
-      specifier: 5.56.9
-      version: 5.56.9
+      specifier: 5.58.1
+      version: 5.58.1
     chalk:
       specifier: 5.6.0
       version: 5.6.0
@@ -421,7 +421,7 @@ importers:
         version: 11.4.4(typescript@5.9.2)
       bullmq:
         specifier: 'catalog:'
-        version: 5.56.9
+        version: 5.58.1
       dotenv:
         specifier: 'catalog:'
         version: 17.2.1
@@ -729,7 +729,7 @@ importers:
         version: 0.13.8(typescript@5.9.2)(zod@4.0.17)
       bullmq:
         specifier: 'catalog:'
-        version: 5.56.9
+        version: 5.58.1
       dotenv:
         specifier: 'catalog:'
         version: 17.2.1
@@ -814,7 +814,7 @@ importers:
         version: 8.15.5
       bullmq:
         specifier: 'catalog:'
-        version: 5.56.9
+        version: 5.58.1
       drizzle-kit:
         specifier: 'catalog:'
         version: 0.31.4
@@ -908,7 +908,7 @@ importers:
         version: link:../data-access
       bullmq:
         specifier: 'catalog:'
-        version: 5.56.9
+        version: 5.58.1
       zod:
         specifier: 'catalog:'
         version: 4.0.17
@@ -4106,8 +4106,8 @@ packages:
     resolution: {integrity: sha512-WDtdLmJvAuNNPzByAYpRo2rF1Mmradw6gvWsQKf63476DDXmomT9zUiGypLcG4ibIM67vhAj8jJRdbmEws2Aqw==}
     engines: {node: '>=6.14.2'}
 
-  bullmq@5.56.9:
-    resolution: {integrity: sha512-SL7OZG0x9sh/PC6ZVKqibSmPsbjViBaiFAyr3ujJRxb6nlZefb1hU0biJuvfI8/hQa4HtEG9sCHRMiz905B2eg==}
+  bullmq@5.58.1:
+    resolution: {integrity: sha512-ySnO1Yn+J7oVkXn4cvPQQK7RFEP3hlqwnIJRxumODyLk+1o4/3H5qwB7s7e9h5W6tZdktvysNZsE/e5/VdKvuA==}
 
   bundle-require@5.1.0:
     resolution: {integrity: sha512-3WrrOuZiyaaZPWiEt4G3+IffISVC9HYlWueJEBWED4ZH4aIAC2PnkdnuRrR94M+w6yGWn4AglWtJtBI8YqvgoA==}
@@ -12460,7 +12460,7 @@ snapshots:
       node-gyp-build: 4.8.4
     optional: true
 
-  bullmq@5.56.9:
+  bullmq@5.58.1:
     dependencies:
       cron-parser: 4.9.0
       ioredis: 5.7.0
