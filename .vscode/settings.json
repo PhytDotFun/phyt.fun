@@ -66,8 +66,17 @@
         "editor.tabSize": 2
     },
 
+    "[hcl]": {
+        "editor.defaultFormatter": "hashicorp.hcl",
+        "editor.formatOnSave": true,
+        "editor.tabSize": 2
+    },
+
+    "files.insertFinalNewline": true,
+    "files.trimFinalNewlines": true,
+
     "material-icon-theme.folders.associations": {
-        "web": "react-components",
+        "web": "desktop",
         "hono-api": "api",
         "data-access": "log",
         "m-queue": "queue",
@@ -105,6 +114,8 @@
     //     "postgres": "*../../../../icons/folder-postgres",
     //     "pgbouncer": "*../../../../icons/folder-postgres",
     //     "tailscale": "*../../../../icons/folder-tailscale",
+    //     "vite": "*../../../../icons/folder-vite",
+    //     "web": "*../../../../icons/folder-vite"
     // },
     "material-icon-theme.files.associations": {
         "*.nginx.conf": "nginx"
@@ -112,6 +123,7 @@
         //     "*.pkr.hcl": "../../icons/packer",
         //     "*.pkr": "../../icons/packer",
         //     "*.ctmpl": "../../icons/consul",
-        //     "*.tailscale.json": "../../icons/tailscale"
+        //     "*.tailscale.json": "../../icons/tailscale",
+        //     "pull_request_template.md": "../../icons/pull-request"
     }
 }
