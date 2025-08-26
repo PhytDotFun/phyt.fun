@@ -14,4 +14,4 @@ path "secret/data/web/staging" { capabilities = ["read"] }
 
 # Tiny self-introspection
 path "auth/token/lookup-self" { capabilities = ["read"] }
-path "sys/capabilities-self"  { capabilities = ["update"] }
+path "sys/capabilities-self" { capabilities = ["update"] }
