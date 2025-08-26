@@ -125,5 +125,6 @@
         //     "*.ctmpl": "../../icons/consul",
         //     "*.tailscale.json": "../../icons/tailscale",
         //     "pull_request_template.md": "../../icons/pull-request"
-    }
+    },
+    "nixEnvSelector.nixFile": "${workspaceFolder}/flake.nix"
 }
