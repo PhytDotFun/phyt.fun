@@ -1,7 +1,3 @@
-# CRITICAL: ALL secrets are fetched from Vault at runtime
-# NEVER pass secrets as variables
-# Only non-sensitive configuration values are variables
-
 variable "aws_region" {
   description = "AWS region for resources"
   type        = string
