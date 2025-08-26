@@ -1,4 +1,62 @@
-{{- with secret (printf "secret/data/%s/%s/postgres" (env "VAULT_NAMESPACE") (env "DEPLOYMENT_ID")) -}}
+{{- /* tooling/vault/templates/pgbouncer.ctmpl
+      Rendered by Vault Agent directly to /etc/pgbouncer/pgbouncer.ini
+      ENV behavior:
+        - ENV=staging  -> auth_type=trust (simple smoke)
+        - otherwise    -> scram + auth_query (prod posture)
+*/ -}}
+{{- $ns  := env "VAULT_NAMESPACE" | default "staging" -}}
+{{- $dep := env "DEPLOYMENT_ID"   | default "local"   -}}
+{{- $env := env "ENV"             | default "staging" -}}
+
+{{- with secret (printf "secret/data/%s/%s/postgres" $ns $dep) -}}
+{{-   $pg := .Data.data -}}
+{{-   with secret (printf "secret/data/%s/%s/pgbouncer" $ns $dep) -}}
+{{-     $pb := .Data.data -}}
+
 [databases]
-appdb = host=postgres port=5432 dbname={{ .Data.data.POSTGRES_DB }} user={{ .Data.data.POSTGRES_USER }} password={{ .Data.data.POSTGRES_PASSWORD }}
+; In prod we avoid embedding user/password here—app supplies its own creds.
+; In staging (trust), user/password also not needed.
+appdb = host={{ or $pb.DATABASES_HOST "postgres" }} \
+        port={{ or $pb.DATABASES_PORT "5432" }} \
+        dbname={{ or $pb.DATABASES_NAME (or $pg.POSTGRES_DB "app") }}{{ if $pb.DATABASES_SSLMODE }} sslmode={{ $pb.DATABASES_SSLMODE }}{{ end }}
+
+[pgbouncer]
+listen_addr = 0.0.0.0
+listen_port = 6432
+unix_socket_dir = /var/run/postgresql
+
+pool_mode = transaction
+server_reset_query = DISCARD ALL
+max_client_conn = 1000
+default_pool_size = 50
+min_pool_size = 5
+reserve_pool_size = 10
+reserve_pool_timeout = 5
+max_db_connections = 0
+max_user_connections = 0
+ignore_startup_parameters = extra_float_digits
+
+{{- if eq $env "staging" }}
+; ── STAGING: simplest posture (no userlist) ─────────────────────────────────────
+auth_type = trust
+server_tls_sslmode = disable
+{{- else }}
+; ── PROD: DB-side auth (no app creds in .ini) ───────────────────────────────────
+auth_type = scram-sha-256
+auth_user = {{ or $pb.AUTH_USER "pgbouncer_auth" }}
+auth_query = {{ or $pb.AUTH_QUERY "SELECT username, password FROM pgbouncer.get_auth($1)" }}
+; Optional client TLS to PgBouncer (enable if you terminate TLS at PgBouncer)
+; client_tls_sslmode = {{ or $pb.CLIENT_TLS_SSLMODE "disable" }}
+{{- end }}
+
+server_fast_close = 1
+query_timeout = 60
+tcp_keepalive = 1
+tcp_keepidle = 30
+tcp_keepintvl = 10
+tcp_keepcnt = 3
+
+; No [users] section required (trust in staging; auth_query in prod)
+
+{{-   end -}}
 {{- end -}}
