@@ -67,7 +67,7 @@
     },
 
     "[hcl]": {
-        "editor.defaultFormatter": "hashicorp.hcl",
+        "editor.defaultFormatter": "fredwangwang.vscode-hcl-format",
         "editor.formatOnSave": true,
         "editor.tabSize": 2
     },
