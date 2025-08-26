@@ -12,6 +12,7 @@
         "juanblanco.solidity",
         "ahmadalli.vscode-nginx-conf",
         "golang.go",
-        "mads-hartmann.bash-ide-vscode"
+        "mads-hartmann.bash-ide-vscode",
+        "hashicorp.hcl"
     ]
 }
