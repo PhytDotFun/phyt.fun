@@ -29,6 +29,8 @@ services:
             interval: 30s
             timeout: 5s
             retries: 3
+        networks:
+            - phyt
         profiles: ['dev', 'staging', 'prod']
         restart: ${RESTART_POLICY:-unless-stopped}
 
@@ -58,6 +60,8 @@ services:
             interval: 10s
             timeout: 5s
             retries: 10
+        networks:
+            - phyt
         profiles: ['dev', 'staging', 'prod']
         restart: ${RESTART_POLICY:-unless-stopped}
 
@@ -68,14 +72,15 @@ services:
             postgres: { condition: service_healthy }
             vault-agent: { condition: service_started }
         volumes:
-            - ./tooling/pgbouncer/pgbouncer.ini:/etc/pgbouncer/pgbouncer.ini:ro
             - vault-secrets:/vault/secrets:ro
             - ./tooling/ops/wait-for-secrets.sh:/usr/local/bin/wait-for-secrets.sh:ro
             - ./tooling/ops/pgbouncer-entrypoint.sh:/usr/local/bin/pgbouncer-entrypoint.sh:ro
         entrypoint: ['/usr/local/bin/pgbouncer-entrypoint.sh']
         environment:
             WAIT_FOR_SECRET_FILE: /vault/secrets/pgbouncer.ini
-        profiles: ['staging', 'prod']
+        networks:
+            - phyt
+        profiles: ['dev', 'staging', 'prod']
         restart: ${RESTART_POLICY:-unless-stopped}
 
     redis:
@@ -87,6 +92,8 @@ services:
             interval: 5s
             timeout: 3s
             retries: 5
+        networks:
+            - phyt
         profiles: ['dev', 'staging', 'prod']
         restart: ${RESTART_POLICY:-unless-stopped}
 
@@ -119,6 +126,8 @@ services:
             interval: 15s
             timeout: 5s
             retries: 10
+        networks:
+            - phyt
         profiles: ['staging', 'prod']
         restart: ${RESTART_POLICY:-always}
 
@@ -141,6 +150,8 @@ services:
             ['/usr/local/bin/wait-for-secrets.sh', 'node', '/app/dist/index.js']
         environment:
             WAIT_FOR_SECRET_FILE: /vault/secrets/workers.env
+        networks:
+            - phyt
         profiles: ['dev', 'staging', 'prod']
         restart: ${RESTART_POLICY:-unless-stopped}
 
@@ -155,8 +166,17 @@ services:
             - ./tooling/ops/nginx-entrypoint.sh:/docker-entrypoint.d/99-nginx-mode.sh:ro
         environment:
             NGINX_MODE: ${NGINX_MODE:-staging}
+        networks:
+            - phyt
         profiles: ['staging', 'prod']
         restart: ${RESTART_POLICY:-unless-stopped}
+
+networks:
+    phyt:
+        driver: bridge
+        ipam:
+            config:
+                - subnet: 172.20.0.0/16
 
 volumes:
     postgres-data:
