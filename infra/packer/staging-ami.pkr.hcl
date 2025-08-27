@@ -40,8 +40,6 @@ build {
     environment_vars = [
       "deployment_id=packer-build",
       "vault_addr=placeholder",
-      "vault_role_id=placeholder",
-      "vault_secret_id=placeholder",
       "cloudflare_tunnel_token=placeholder",
       "cloudflare_account_id=placeholder",
       "tailscale_auth_key=placeholder"
