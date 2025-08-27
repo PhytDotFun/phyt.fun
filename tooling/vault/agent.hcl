@@ -65,11 +65,8 @@ template {
 }
 
 template {
-  source               = "/templates/pgbouncer.ctmpl"
-  destination          = "/etc/pgbouncer/pgbouncer.ini"
+  source               = "/vault/templates/pgbouncer.ctmpl"
+  destination          = "/vault/secrets/pgbouncer.ini"
   perms                = "0640"
-  user                 = "pgbouncer"
-  group                = "pgbouncer"
-  command              = "pkill -HUP pgbouncer" # hot-reload on rotation
   error_on_missing_key = true
 }
