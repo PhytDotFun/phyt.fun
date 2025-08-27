@@ -22,8 +22,6 @@ resource "aws_spot_instance_request" "staging" {
 
   user_data = templatefile("${path.module}/user-data.sh", {
     deployment_id           = var.deployment_id
-    vault_role_id           = var.vault_role_id
-    vault_secret_id         = var.vault_secret_id
     cloudflare_tunnel_token = var.cloudflare_tunnel_token
     cloudflare_account_id   = var.cloudflare_account_id
     cloudflare_tunnel_id    = var.cloudflare_tunnel_id

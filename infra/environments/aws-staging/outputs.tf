@@ -27,16 +27,3 @@ output "ssh_command" {
   value       = "tailscale ssh ubuntu@${var.deployment_id}"
   description = "SSH command to access the instance (Tailscale SSH)"
 }
-
-# Ephemeral and short-lived; mark sensitive
-output "approle_role_id" {
-  value       = vault_approle_auth_backend_role.staging.role_id
-  sensitive   = true
-  description = "Vault AppRole role_id (staging, short TTL)"
-}
-
-output "approle_secret_id" {
-  value       = vault_approle_auth_backend_role_secret_id.staging.secret_id
-  sensitive   = true
-  description = "Vault AppRole secret_id (staging, TTL-limited)"
-}

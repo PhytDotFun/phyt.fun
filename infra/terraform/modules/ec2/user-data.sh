@@ -7,8 +7,6 @@ set -e
 : "${cloudflare_account_id?Error: cloudflare_account_id is not set.}"
 : "${cloudflare_tunnel_id?Error: cloudflare_tunnel_id is not set.}"
 : "${cloudflare_tunnel_token?Error: cloudflare_tunnel_token is not set.}"
-: "${vault_role_id?Error: vault_role_id is not set.}"
-: "${vault_secret_id?Error: vault_secret_id is not set.}"
 
 # Log all output
 exec > >(tee -a /var/log/user-data.log)
@@ -101,10 +99,6 @@ mkdir -p /etc/vault
 # Write Vault address (not sensitive)
 echo "export VAULT_ADDR=https://vault.tailea8363.ts.net" >>/etc/environment
 
-# Clear from memory
-unset vault_role_id
-unset vault_secret_id
-
 # Create docker network
 docker network create phyt || true
 
@@ -151,7 +145,7 @@ systemctl start spot-handler
 
 # Clear all sensitive variables from environment
 # Remove dokploy_agent_token from the cleanup list
-unset vault_role_id vault_secret_id cloudflare_tunnel_token tailscale_auth_key
+unset cloudflare_tunnel_token tailscale_auth_key
 
 # Signal completion
 touch /var/lib/cloud/instance/boot-finished

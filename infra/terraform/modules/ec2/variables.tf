@@ -33,18 +33,6 @@ variable "iam_instance_profile" {
   type        = string
 }
 
-variable "vault_role_id" {
-  description = "Vault AppRole role ID (ephemeral)"
-  type        = string
-  sensitive   = true
-}
-
-variable "vault_secret_id" {
-  description = "Vault AppRole secret ID (single-use)"
-  type        = string
-  sensitive   = true
-}
-
 variable "cloudflare_tunnel_token" {
   description = "Cloudflare tunnel token (ephemeral)"
   type        = string

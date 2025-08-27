@@ -191,17 +191,6 @@ resource "vault_approle_auth_backend_role" "staging" {
   token_max_ttl = 600
 }
 
-resource "vault_approle_auth_backend_role_secret_id" "staging" {
-  backend   = vault_approle_auth_backend_role.staging.backend
-  role_name = vault_approle_auth_backend_role.staging.role_name
-
-  # Secret ID also has TTL
-  cidr_list = ["100.64.0.0/10"] # Allow AppRole login from the tailnet (100.64.0.0/10), not the VPC CIDR
-  metadata = jsonencode({
-    deployment_id = var.deployment_id
-  })
-}
-
 # Spot instance with dynamic credentials
 module "staging_instance" {
   source = "../../terraform/modules/ec2"
@@ -213,10 +202,6 @@ module "staging_instance" {
   subnet_id            = aws_subnet.public.id
   security_group_id    = aws_security_group.staging.id
   iam_instance_profile = aws_iam_instance_profile.staging.name
-
-  # Vault credentials are ephemeral
-  vault_role_id   = vault_approle_auth_backend_role.staging.role_id
-  vault_secret_id = vault_approle_auth_backend_role_secret_id.staging.secret_id
 
   # Pass tunnel ID so user-data can write correct cloudflared credentials
   cloudflare_tunnel_id = module.cloudflare.tunnel_id
