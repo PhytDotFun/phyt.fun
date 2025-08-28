@@ -1,0 +1,28 @@
+name: Require Changeset on PRs to staging
+on:
+    pull_request:
+        branches: [staging]
+
+permissions:
+    contents: read
+
+jobs:
+    changeset-check:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+
+            - name: Detect code changes (excluding docs/assets)
+              id: diff
+              run: |
+                  git fetch origin ${{ github.base_ref }} --depth=1
+                  CHANGED=$(git diff --name-only origin/${{ github.base_ref }}...HEAD | grep -Ev '(^README|\\.md$|\\.lock$|\\.png$|\\.jpg$|\\.svg$|^docs/)' || true)
+                  echo "changed=$CHANGED" >> $GITHUB_OUTPUT
+
+            - name: Fail if no changeset provided
+              if: steps.diff.outputs.changed != ''
+              run: |
+                  if [ -z "$(ls -1 .changeset/*.md 2>/dev/null || true)" ]; then
+                    echo "::error::No .changeset found. Run \`pnpm changeset\`."
+                    exit 1
+                  fi
