@@ -1,0 +1,149 @@
+name: Staging CI
+
+on:
+    push:
+        branches: [staging]
+    workflow_dispatch: {}
+
+concurrency:
+    group: staging-ci
+    cancel-in-progress: true
+
+env:
+    REGISTRY: ghcr.io
+    AWS_REGION: us-east-1
+
+permissions:
+    contents: read
+    packages: write
+    id-token: write
+
+jobs:
+    build-images:
+        runs-on: ubuntu-latest
+        strategy:
+            matrix:
+                service:
+                    - name: hono-api
+                      dockerfile: Dockerfile
+                      context: .
+                      buildargs: |
+                          PROJECT=hono-api
+                    - name: workers
+                      dockerfile: Dockerfile
+                      context: .
+                      buildargs: |
+                          PROJECT=workers
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Set SHORT_SHA
+              run: echo "SHORT_SHA=${GITHUB_SHA::7}" >> $GITHUB_ENV
+
+            - name: Set up Buildx
+              uses: docker/setup-buildx-action@v3
+
+            - name: Log in to GHCR
+              uses: docker/login-action@v3
+              with:
+                  registry: ${{ env.REGISTRY }}
+                  username: ${{ github.actor }}
+                  password: ${{ secrets.GITHUB_TOKEN }}
+
+            - name: Build & push ${{ matrix.service.name }}
+              uses: docker/build-push-action@v6
+              with:
+                  context: ${{ matrix.service.context }}
+                  file: ${{ matrix.service.dockerfile }}
+                  push: true
+                  build-args: ${{ matrix.service.buildargs }}
+                  tags: |
+                      ${{ env.REGISTRY }}/${{ github.repository }}/${{ matrix.service.name }}:staging-${{ env.SHORT_SHA }}
+                      ${{ env.REGISTRY }}/${{ github.repository }}/${{ matrix.service.name }}:staging
+                  cache-from: type=gha
+                  cache-to: type=gha,mode=max
+
+    deploy:
+        runs-on: ubuntu-latest
+        needs: build-images
+        permissions:
+            id-token: write
+            contents: read
+            packages: read
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Set SHORT_SHA
+              run: echo "SHORT_SHA=${GITHUB_SHA::7}" >> $GITHUB_ENV
+
+            - name: Configure AWS credentials
+              uses: aws-actions/configure-aws-credentials@v4
+              with:
+                  role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+                  aws-region: ${{ env.AWS_REGION }}
+
+            - name: Connect to Tailscale
+              uses: tailscale/github-action@v2
+              with:
+                  oauth-client-id: ${{ secrets.TAILSCALE_OAUTH_CLIENT_ID }}
+                  oauth-secret: ${{ secrets.TAILSCALE_OAUTH_SECRET }}
+                  tags: ci
+
+            - name: Terraform init/plan/apply (staging infra)
+              working-directory: infra/environments/aws-staging
+              env:
+                  TF_VAR_github_repo: ${{ github.repository }}
+              run: |
+                  set -euo pipefail
+                  export TF_VAR_deployment_id="${SHORT_SHA}"
+                  terraform init -input=false
+                  terraform plan -out=plan.tfplan -input=false
+                  terraform apply -input=false -auto-approve plan.tfplan
+
+            - name: Mint AppRole credentials (single-use)
+              id: approle
+              env:
+                  VAULT_ADDR: ${{ secrets.VAULT_ADDR }}
+                  VAULT_NAMESPACE: ${{ secrets.VAULT_NAMESPACE }}
+                  VAULT_TOKEN: ${{ secrets.VAULT_CI_TOKEN }}
+              run: |
+                  set -euo pipefail
+                  ROLE="staging-${SHORT_SHA}"
+
+                  ROLE_ID=$(curl -sS \
+                    -H "X-Vault-Token: ${VAULT_TOKEN}" \
+                    -H "X-Vault-Namespace: ${VAULT_NAMESPACE:-}" \
+                    "${VAULT_ADDR}/v1/auth/approle/role/${ROLE}/role-id" | jq -r '.data.role_id')
+
+                  SECRET_ID=$(curl -sS -X POST \
+                    -H "X-Vault-Token: ${VAULT_TOKEN}" \
+                    -H "X-Vault-Namespace: ${VAULT_NAMESPACE:-}" \
+                    "${VAULT_ADDR}/v1/auth/approle/role/${ROLE}/secret-id" | jq -r '.data.secret_id')
+
+                  # Mask values in logs
+                  echo "::add-mask::${ROLE_ID}"
+                  echo "::add-mask::${SECRET_ID}"
+
+                  {
+                    echo "ROLE_ID=${ROLE_ID}"
+                    echo "SECRET_ID=${SECRET_ID}"
+                    echo "DEPLOYMENT_ID=${SHORT_SHA}"
+                    echo "IMAGE_TAG=staging-${SHORT_SHA}"
+                  } >> "$GITHUB_ENV"
+
+            - name: Remote deploy over Tailscale SSH (no env files on disk)
+              env:
+                  TS_SSH_DEST: ${{ secrets.TS_SSH_DEST }} # e.g. ubuntu@staging-phyt (Tailscale SSH name)
+              run: |
+                  set -euo pipefail
+                  # Pass env via STDIN; remote shell sources from stdin, then deploys.
+                  tailscale ssh -T "${TS_SSH_DEST}" 'bash -lc "set -a; . /dev/stdin; set +a; cd /opt/phyt && docker compose pull && docker compose up -d --remove-orphans"' <<EOF
+                  VAULT_ROLE_ID=${ROLE_ID}
+                  VAULT_SECRET_ID=${SECRET_ID}
+                  IMAGE_TAG=${IMAGE_TAG}
+                  DEPLOYMENT_ID=${DEPLOYMENT_ID}
+                  EOF
