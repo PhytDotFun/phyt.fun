@@ -8,7 +8,7 @@ data "vault_kv_secret_v2" "workers_static" {
   name  = "workers/staging"
 }
 
-data "vault_kv_secret_v2" "web_static" {
-  mount = "secret"
-  name  = "web/staging"
-}
+# data "vault_kv_secret_v2" "web_static" {
+#   mount = "secret"
+#   name  = "web/staging"
+# }
