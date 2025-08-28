@@ -69,13 +69,17 @@ services:
         image: edoburu/pgbouncer:latest
         container_name: ${COMPOSE_PROJECT_NAME:-phyt}-pgbouncer
         depends_on:
+            vault-agent: { condition: service_healthy }
             postgres: { condition: service_healthy }
-            vault-agent: { condition: service_started }
         volumes:
             - vault-secrets:/vault/secrets:ro
             - ./tooling/ops/wait-for-secrets.sh:/usr/local/bin/wait-for-secrets.sh:ro
             - ./tooling/ops/pgbouncer-entrypoint.sh:/usr/local/bin/pgbouncer-entrypoint.sh:ro
-        entrypoint: ['/usr/local/bin/pgbouncer-entrypoint.sh']
+        entrypoint:
+            [
+                '/usr/local/bin/pgbouncer-entrypoint.sh',
+                '/vault/secrets/pgbouncer.ini'
+            ]
         environment:
             WAIT_FOR_SECRET_FILE: /vault/secrets/pgbouncer.ini
         networks:
