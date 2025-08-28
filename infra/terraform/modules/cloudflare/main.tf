@@ -17,21 +17,21 @@ resource "random_id" "tunnel_secret" {
   byte_length = 32
 }
 
-resource "cloudflare_tunnel" "staging" {
+resource "cloudflare_zero_trust_tunnel_cloudflared" "staging" {
   account_id = var.account_id
   name       = "staging-${var.deployment_id}"
 }
 
-resource "cloudflare_tunnel_config" "staging" {
+resource "cloudflare_zero_trust_tunnel_cloudflared_config" "staging" {
   account_id = var.account_id
-  tunnel_id  = cloudflare_tunnel.staging.id
+  tunnel_id  = cloudflare_zero_trust_tunnel_cloudflared.staging.id
 
-  config {
-    ingress_rule {
+  config = {
+    ingress_rule = {
       hostname = "staging.phyt.fun"
       service  = "http://localhost:8080"
 
-      origin_request {
+      origin_request = {
         no_tls_verify          = true
         connect_timeout        = "30s"
         tcp_keep_alive         = "30s"
@@ -40,20 +40,19 @@ resource "cloudflare_tunnel_config" "staging" {
         origin_server_name     = "staging.phyt.fun"
       }
     }
-    ingress_rule {
+    ingress_rule = {
       service = "http_status:404"
     }
   }
 }
 
-resource "cloudflare_record" "staging" {
+resource "cloudflare_dns_record" "staging" {
   zone_id = var.zone_id
   name    = "staging"
-  value   = "${cloudflare_tunnel.staging.id}.cfargotunnel.com"
+  content = "${cloudflare_zero_trust_tunnel_cloudflared.staging.id}.cfargotunnel.com"
   type    = "CNAME"
   proxied = true
   ttl     = 1
-
   comment = "Staging environment - ${var.deployment_id}"
 }
 
@@ -66,7 +65,7 @@ resource "cloudflare_page_rule" "staging_cache" {
   actions = {
     cache_level      = "bypass"
     security_level   = "medium"
-    ssl              = "full"
+    ssl              = "strict"
     always_use_https = true
   }
 }
@@ -80,7 +79,7 @@ resource "cloudflare_page_rule" "staging_static" {
     cache_level       = "simplified"
     edge_cache_ttl    = 300
     browser_cache_ttl = 300
-    ssl               = "full"
+    ssl               = "strict"
     always_use_https  = true
   }
 }
