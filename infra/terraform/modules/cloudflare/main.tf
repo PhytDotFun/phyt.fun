@@ -83,8 +83,3 @@ resource "cloudflare_page_rule" "staging_static" {
     always_use_https  = true
   }
 }
-
-resource "cloudflare_tunnel_token" "staging" {
-  account_id = var.account_id
-  tunnel_id  = cloudflare_zero_trust_tunnel_cloudflared.staging.id
-}
