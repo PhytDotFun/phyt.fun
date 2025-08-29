@@ -3,9 +3,9 @@
 # Run pre-commit hooks for non-JS linting (shell, Python, Terraform, etc.)
 # Only on files that are being pushed
 echo "🔍 Running pre-push checks (shell, Python, Terraform, etc.)..."
-if pre-commit run --hook-stage pre-push --show-diff-on-failure; then
-    echo "✅ All pre-push checks passed!"
+if pre-commit run --all-files --show-diff-on-failure --hook-stage pre-push; then
+  echo "✅ All pre-push checks passed!"
 else
-    echo "❌ Some pre-push checks failed. Fix the issues above before pushing."
-    exit 1
+  echo "❌ Some pre-push checks failed. Fix the issues above before pushing."
+  exit 1
 fi

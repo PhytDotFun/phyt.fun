@@ -1,9 +1,14 @@
 variable "deployment_id" {
-    description = "Deployment identifier"
-    type = string
+  description = "Deployment identifier"
+  type        = string
 }
 
-variable "instance_ip" {
-    description = "Instance IP address"
-    type = string
+variable "db_user" {
+  description = "Database user"
+  type        = string
+}
+
+variable "db_name" {
+  description = "Database name"
+  type        = string
 }

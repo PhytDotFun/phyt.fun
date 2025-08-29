@@ -9,6 +9,8 @@ services:
             VAULT_NAMESPACE: ${VAULT_NAMESPACE:-staging}
             VAULT_PATH_PREFIX: ${VAULT_PATH_PREFIX:-phyt}
             DEPLOYMENT_ID: ${DEPLOYMENT_ID:-staging}
+            VAULT_ROLE_ID: ${VAULT_ROLE_ID}
+            VAULT_SECRET_ID: ${VAULT_SECRET_ID}
         security_opt: ['no-new-privileges:true']
         volumes:
             - ./tooling/vault:/vault/config:ro
@@ -27,6 +29,8 @@ services:
             interval: 30s
             timeout: 5s
             retries: 3
+        networks:
+            - phyt
         profiles: ['dev', 'staging', 'prod']
         restart: ${RESTART_POLICY:-unless-stopped}
 
@@ -56,6 +60,8 @@ services:
             interval: 10s
             timeout: 5s
             retries: 10
+        networks:
+            - phyt
         profiles: ['dev', 'staging', 'prod']
         restart: ${RESTART_POLICY:-unless-stopped}
 
@@ -63,17 +69,22 @@ services:
         image: edoburu/pgbouncer:latest
         container_name: ${COMPOSE_PROJECT_NAME:-phyt}-pgbouncer
         depends_on:
+            vault-agent: { condition: service_healthy }
             postgres: { condition: service_healthy }
-            vault-agent: { condition: service_started }
         volumes:
-            - ./tooling/pgbouncer/pgbouncer.ini:/etc/pgbouncer/pgbouncer.ini:ro
             - vault-secrets:/vault/secrets:ro
             - ./tooling/ops/wait-for-secrets.sh:/usr/local/bin/wait-for-secrets.sh:ro
             - ./tooling/ops/pgbouncer-entrypoint.sh:/usr/local/bin/pgbouncer-entrypoint.sh:ro
-        entrypoint: ['/usr/local/bin/pgbouncer-entrypoint.sh']
+        entrypoint:
+            [
+                '/usr/local/bin/pgbouncer-entrypoint.sh',
+                '/vault/secrets/pgbouncer.ini'
+            ]
         environment:
             WAIT_FOR_SECRET_FILE: /vault/secrets/pgbouncer.ini
-        profiles: ['staging', 'prod']
+        networks:
+            - phyt
+        profiles: ['dev', 'staging', 'prod']
         restart: ${RESTART_POLICY:-unless-stopped}
 
     redis:
@@ -85,6 +96,8 @@ services:
             interval: 5s
             timeout: 3s
             retries: 5
+        networks:
+            - phyt
         profiles: ['dev', 'staging', 'prod']
         restart: ${RESTART_POLICY:-unless-stopped}
 
@@ -117,6 +130,8 @@ services:
             interval: 15s
             timeout: 5s
             retries: 10
+        networks:
+            - phyt
         profiles: ['staging', 'prod']
         restart: ${RESTART_POLICY:-always}
 
@@ -139,6 +154,8 @@ services:
             ['/usr/local/bin/wait-for-secrets.sh', 'node', '/app/dist/index.js']
         environment:
             WAIT_FOR_SECRET_FILE: /vault/secrets/workers.env
+        networks:
+            - phyt
         profiles: ['dev', 'staging', 'prod']
         restart: ${RESTART_POLICY:-unless-stopped}
 
@@ -153,8 +170,17 @@ services:
             - ./tooling/ops/nginx-entrypoint.sh:/docker-entrypoint.d/99-nginx-mode.sh:ro
         environment:
             NGINX_MODE: ${NGINX_MODE:-staging}
+        networks:
+            - phyt
         profiles: ['staging', 'prod']
         restart: ${RESTART_POLICY:-unless-stopped}
+
+networks:
+    phyt:
+        driver: bridge
+        ipam:
+            config:
+                - subnet: 172.20.0.0/16
 
 volumes:
     postgres-data:

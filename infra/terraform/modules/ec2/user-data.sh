@@ -7,8 +7,6 @@ set -e
 : "${cloudflare_account_id?Error: cloudflare_account_id is not set.}"
 : "${cloudflare_tunnel_id?Error: cloudflare_tunnel_id is not set.}"
 : "${cloudflare_tunnel_token?Error: cloudflare_tunnel_token is not set.}"
-: "${vault_role_id?Error: vault_role_id is not set.}"
-: "${vault_secret_id?Error: vault_secret_id is not set.}"
 
 # Log all output
 exec > >(tee -a /var/log/user-data.log)
@@ -81,34 +79,27 @@ tailscale up \
 unset tailscale_auth_key
 
 # Install Cloudflare Tunnel
-wget -q https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb
-dpkg -i cloudflared-linux-amd64.deb
-rm cloudflared-linux-amd64.deb
+# Detect architecture and download appropriate cloudflared binary
+arch="$(uname -m)"
+case "$arch" in
+aarch64 | arm64)
+    cfd_arch="arm64"
+    ;;
+x86_64 | amd64)
+    cfd_arch="amd64"
+    ;;
+*)
+    echo "Unsupported architecture: $arch"
+    exit 1
+    ;;
+esac
+wget -q "https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-${cfd_arch}.deb"
+dpkg -i "cloudflared-linux-${cfd_arch}.deb"
+rm "cloudflared-linux-${cfd_arch}.deb"
 
-# Use the real tunnel ID (from Terraform) and keep local config minimal; ingress is managed in Terraform (cloudflare_tunnel_config)
-mkdir -p /etc/cloudflared
-cat >/etc/cloudflared/config.yml <<'EOF'
-tunnel: ${cloudflare_tunnel_id}
-credentials-file: /etc/cloudflared/creds.json
-EOF
-
-# Write tunnel credentials temporarily
-cat >/etc/cloudflared/creds.json <<EOF
-{
-  "AccountTag": "${cloudflare_account_id}",
-  "TunnelID": "${cloudflare_tunnel_id}",
-  "TunnelSecret": "${cloudflare_tunnel_token}"
-}
-EOF
-
-chmod 600 /etc/cloudflared/creds.json
-
-# Start Cloudflare Tunnel
-cloudflared service install
-systemctl start cloudflared
-systemctl enable cloudflared
-
-# Clear tunnel token from memory
+# Cloudflared: use token install and DO NOT write creds.json
+cloudflared service install --token "${cloudflare_tunnel_token}"
+systemctl enable --now cloudflared
 unset cloudflare_tunnel_token
 
 # Install Vault
@@ -122,17 +113,8 @@ mkdir -p /etc/vault
 # Write Vault address (not sensitive)
 echo "export VAULT_ADDR=https://vault.tailea8363.ts.net" >>/etc/environment
 
-# Write ephemeral AppRole credentials (will be deleted after first use)
-echo "${vault_role_id}" >/etc/vault/role_id
-echo "${vault_secret_id}" >/etc/vault/secret_id
-chmod 600 /etc/vault/role_id /etc/vault/secret_id
-
-# Clear from memory
-unset vault_role_id
-unset vault_secret_id
-
 # Create docker network
-docker network create phyt-network || true
+docker network create phyt || true
 
 # Spot instance termination handler (graceful shutdown only)
 cat >/usr/local/bin/spot-handler.sh <<'HANDLER_SCRIPT'
@@ -177,7 +159,7 @@ systemctl start spot-handler
 
 # Clear all sensitive variables from environment
 # Remove dokploy_agent_token from the cleanup list
-unset vault_role_id vault_secret_id cloudflare_tunnel_token tailscale_auth_key
+unset cloudflare_tunnel_token tailscale_auth_key
 
 # Signal completion
 touch /var/lib/cloud/instance/boot-finished

@@ -1,18 +1,27 @@
-resource "aws_spot_instance_request" "staging" {
-    ami = var.ami_id
-    instance_type = var.instance_type
-    spot_price = var.spot_price
-    wait_for_fulfillment = true
-    spot_type = "one-time"
-    instance_interruption_behavior = "terminate"
-    subnet_id = var.subnet_id
-    vpc_security_group_ids = [var.security_group_id]
-    iam_instance_profile = var.iam_instance_profile
+terraform {
+  required_version = ">= 1.0"
 
-    user_data = templatefile("${path.module}/user-data.sh", {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 6.0"
+    }
+  }
+}
+
+resource "aws_spot_instance_request" "staging" {
+  ami                            = var.ami_id
+  instance_type                  = var.instance_type
+  spot_price                     = var.spot_price
+  wait_for_fulfillment           = true
+  spot_type                      = "one-time"
+  instance_interruption_behavior = "terminate"
+  subnet_id                      = var.subnet_id
+  vpc_security_group_ids         = [var.security_group_id]
+  iam_instance_profile           = var.iam_instance_profile
+
+  user_data = templatefile("${path.module}/user-data.sh", {
     deployment_id           = var.deployment_id
-    vault_role_id           = var.vault_role_id
-    vault_secret_id         = var.vault_secret_id
     cloudflare_tunnel_token = var.cloudflare_tunnel_token
     cloudflare_account_id   = var.cloudflare_account_id
     cloudflare_tunnel_id    = var.cloudflare_tunnel_id
@@ -52,16 +61,16 @@ resource "aws_ec2_tag" "staging_instance" {
 }
 
 resource "aws_eip" "staging" {
-    domain = "vpc"
+  domain = "vpc"
 
-    tags = {
-        Name = "staging-eip-${var.deployment_id}"
-    }
+  tags = {
+    Name = "staging-eip-${var.deployment_id}"
+  }
 }
 
 resource "aws_eip_association" "staging" {
-    instance_id = aws_spot_instance_request.staging.spot_instance_id
-    allocation_id = aws_eip.staging.id
+  instance_id   = aws_spot_instance_request.staging.spot_instance_id
+  allocation_id = aws_eip.staging.id
 }
 
 # CloudWatch alarm for spot instance termination

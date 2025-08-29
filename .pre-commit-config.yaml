@@ -1,6 +1,9 @@
 # Configure all hooks to run on pre-push stage to avoid conflicts with Husky's pre-commit JS linting
 default_stages: [pre-push]
 
+exclude: >
+    ^(node_modules/|\.git/|dist/|build/|\.next/|out/|coverage/)
+
 repos:
     - repo: https://github.com/pre-commit/pre-commit-hooks
       rev: v4.6.0
@@ -16,7 +19,10 @@ repos:
       hooks:
           - id: shellcheck
             args: [-e, SC1091] # Exclude "not following" errors for sourced files
-            types: [shell]
+            # Ensure Husky hooks (no shebang) are linted:
+            files: >
+                ^(\.husky/.*|.*\.sh|tooling/.+\.sh|scripts/.+\.sh)$
+            types_or: [shell, file]
             exclude: ^(node_modules/|\.git/)
 
     - repo: https://github.com/scop/pre-commit-shfmt
@@ -24,22 +30,47 @@ repos:
       hooks:
           - id: shfmt
             args: [-w, -s, -i, '4'] # Write changes, simplify, 4-space indent
-            types: [shell]
+            files: >
+                ^(\.husky/.*|.*\.sh|tooling/.+\.sh|scripts/.+\.sh)$
+            types_or: [shell, file]
             exclude: ^(node_modules/|\.git/)
 
-    # Python app hooks
+    # Python hooks
     - repo: https://github.com/psf/black
       rev: 24.8.0
       hooks:
           - id: black
 
-    # Terraform Package Hooks
+    # Terraform package hooks
     - repo: https://github.com/antonbabenko/pre-commit-terraform
       rev: v1.100.0
       hooks:
           - id: terraform_fmt
           - id: terraform_tflint
-          - id: terraform_validate
+            exclude: '^infra/terraform/modules/'
+          # Move to CI
+          # - id: terraform_validate
+          #   exclude: '^infra/terraform/modules/'
+          #   args:
+          #       - --hook-config=--retry-once-with-cleanup=true
+          #       - --tf-init-args=-upgrade
+
+    # Packer package hooks
+    - repo: https://github.com/cisagov/pre-commit-packer
+      rev: v0.3.1
+      hooks:
+          - id: packer_fmt
+          - id: packer_validate
+
+    # HCL hooks
+    - repo: local
+      hooks:
+          - id: hclfmt
+            name: Format HCL files
+            entry: hclfmt
+            args: [-w]
+            language: system
+            files: \.hcl$
 
     # Optional: TypeScript build check (commented out by default - can be slow)
     # Uncomment if you want to ensure builds pass before pushing

@@ -27,7 +27,9 @@
             shellcheck
             shfmt
             tflint
+            hclfmt
             terraform
+            packer
           ];
         };
       });

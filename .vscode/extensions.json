@@ -1,0 +1,18 @@
+{
+    "recommendations": [
+        "fredwangwang.vscode-hcl-format",
+        "hashicorp.terraform",
+        "mkhl.direnv",
+        "dbaeumer.vscode-eslint",
+        "jnoortheen.nix-ide",
+        "arrterian.nix-env-selector",
+        "esbenp.prettier-vscode",
+        "foxundermoon.shell-format",
+        "timonwong.shellcheck",
+        "juanblanco.solidity",
+        "ahmadalli.vscode-nginx-conf",
+        "golang.go",
+        "mads-hartmann.bash-ide-vscode",
+        "hashicorp.hcl"
+    ]
+}

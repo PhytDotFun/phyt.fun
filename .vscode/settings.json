@@ -47,8 +47,36 @@
         "editor.formatOnSave": true
     },
 
+    "[solidity]": {
+        "editor.defaultFormatter": "JuanBlanco.solidity",
+        "editor.formatOnSave": true
+    },
+
+    "solidity.formatter": "forge",
+    "solidity.packageDefaultDependenciesContractsDirectory": "src",
+    "solidity.packageDefaultDependenciesDirectory": "dependencies",
+
+    "[shellscript]": {
+        "editor.defaultFormatter": "mads-hartmann.bash-ide-vscode"
+    },
+
+    "[terraform]": {
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "hashicorp.terraform",
+        "editor.tabSize": 2
+    },
+
+    "[hcl]": {
+        "editor.defaultFormatter": "fredwangwang.vscode-hcl-format",
+        "editor.formatOnSave": true,
+        "editor.tabSize": 2
+    },
+
+    "files.insertFinalNewline": true,
+    "files.trimFinalNewlines": true,
+
     "material-icon-theme.folders.associations": {
-        "web": "react-components",
+        "web": "desktop",
         "hono-api": "api",
         "data-access": "log",
         "m-queue": "queue",
@@ -86,6 +114,8 @@
     //     "postgres": "*../../../../icons/folder-postgres",
     //     "pgbouncer": "*../../../../icons/folder-postgres",
     //     "tailscale": "*../../../../icons/folder-tailscale",
+    //     "vite": "*../../../../icons/folder-vite",
+    //     "web": "*../../../../icons/folder-vite"
     // },
     "material-icon-theme.files.associations": {
         "*.nginx.conf": "nginx"
@@ -93,19 +123,8 @@
         //     "*.pkr.hcl": "../../icons/packer",
         //     "*.pkr": "../../icons/packer",
         //     "*.ctmpl": "../../icons/consul",
-        //     "*.tailscale.json": "../../icons/tailscale"
+        //     "*.tailscale.json": "../../icons/tailscale",
+        //     "pull_request_template.md": "../../icons/pull-request"
     },
-
-    "[solidity]": {
-        "editor.defaultFormatter": "JuanBlanco.solidity",
-        "editor.formatOnSave": true
-    },
-
-    "solidity.formatter": "forge",
-    "solidity.packageDefaultDependenciesContractsDirectory": "src",
-    "solidity.packageDefaultDependenciesDirectory": "dependencies",
-
-    "[shellscript]": {
-        "editor.defaultFormatter": "mads-hartmann.bash-ide-vscode"
-    }
+    "nixEnvSelector.nixFile": "${workspaceFolder}/flake.nix"
 }
