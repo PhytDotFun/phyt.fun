@@ -86,5 +86,5 @@ resource "cloudflare_page_rule" "staging_static" {
 
 resource "cloudflare_tunnel_token" "staging" {
   account_id = var.account_id
-  tunnel_id  = cloudflare_tunnel.staging.id
+  tunnel_id  = cloudflare_zero_trust_tunnel_cloudflared.staging.id
 }
