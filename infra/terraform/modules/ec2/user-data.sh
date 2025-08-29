@@ -79,9 +79,23 @@ tailscale up \
 unset tailscale_auth_key
 
 # Install Cloudflare Tunnel
-wget -q https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-arm64.deb
-dpkg -i cloudflared-linux-arm64.deb
-rm cloudflared-linux-arm64.deb
+# Detect architecture and download appropriate cloudflared binary
+arch="$(uname -m)"
+case "$arch" in
+aarch64 | arm64)
+    cfd_arch="arm64"
+    ;;
+x86_64 | amd64)
+    cfd_arch="amd64"
+    ;;
+*)
+    echo "Unsupported architecture: $arch"
+    exit 1
+    ;;
+esac
+wget -q "https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-${cfd_arch}.deb"
+dpkg -i "cloudflared-linux-${cfd_arch}.deb"
+rm "cloudflared-linux-${cfd_arch}.deb"
 
 # Cloudflared: use token install and DO NOT write creds.json
 cloudflared service install --token "${cloudflare_tunnel_token}"
