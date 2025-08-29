@@ -42,6 +42,9 @@ jobs:
             - name: Set SHORT_SHA
               run: echo "SHORT_SHA=${GITHUB_SHA::7}" >> $GITHUB_ENV
 
+            - name: Set lowercase repository name
+              run: echo "IMAGE_NAME=$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+
             - name: Set up Buildx
               uses: docker/setup-buildx-action@v3
 
@@ -60,8 +63,8 @@ jobs:
                   push: true
                   build-args: ${{ matrix.service.buildargs }}
                   tags: |
-                      ${{ env.REGISTRY }}/${{ github.repository }}/${{ matrix.service.name }}:staging-${{ env.SHORT_SHA }}
-                      ${{ env.REGISTRY }}/${{ github.repository }}/${{ matrix.service.name }}:staging
+                      ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/${{ matrix.service.name }}:staging-${{ env.SHORT_SHA }}
+                      ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}//${{ matrix.service.name }}:staging
                   cache-from: type=gha
                   cache-to: type=gha,mode=max
 
