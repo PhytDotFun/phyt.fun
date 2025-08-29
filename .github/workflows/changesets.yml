@@ -1,4 +1,4 @@
-name: Require Changeset on PRs to staging
+name: Require Changeset
 on:
     pull_request:
         branches: [staging]
