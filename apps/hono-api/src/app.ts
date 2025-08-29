@@ -70,7 +70,7 @@ app.route(env.PRIVY_WEBHOOK_ENDPOINT, privyWebhook);
 app.use('*', authMiddleware);
 
 app.use(
-    '/trpc/*',
+    '/api/*',
     trpcServer({
         router: apiRouter,
         createContext: createContext,
