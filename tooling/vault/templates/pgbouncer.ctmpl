@@ -16,7 +16,11 @@
 [databases]
 ; In prod we avoid embedding user/password here—app supplies its own creds.
 ; In staging (trust), user/password also not needed.
-appdb = host={{ or $pb.DATABASES_HOST "postgres" }} port={{ or $pb.DATABASES_PORT "5432" }} dbname={{ or $pb.DATABASES_NAME (or $pg.POSTGRES_DB "app") }}{{ if $pb.DATABASES_SSLMODE }} sslmode={{ $pb.DATABASES_SSLMODE }}{{ end }}
+{{- $appdb_host := or $pb.DATABASES_HOST "postgres" -}}
+{{- $appdb_port := or $pb.DATABASES_PORT "5432" -}}
+{{- $appdb_dbname := or $pb.DATABASES_NAME (or $pg.POSTGRES_DB "app") -}}
+{{- $appdb_sslmode := $pb.DATABASES_SSLMODE -}}
+appdb = host={{ $appdb_host }} port={{ $appdb_port }} dbname={{ $appdb_dbname }}{{ if $appdb_sslmode }} sslmode={{ $appdb_sslmode }}{{ end }}
 
 [pgbouncer]
 listen_addr = 0.0.0.0
