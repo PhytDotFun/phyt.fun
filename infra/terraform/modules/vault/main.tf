@@ -35,7 +35,7 @@ locals {
       PORT         = "8000"
       REDIS_URL    = "redis://redis:6379"
     },
-    try(data.vault_kv_secret_v2.hono_api_static.data, {})
+    length(data.vault_kv_secret_v2.hono_api_static) > 0 ? data.vault_kv_secret_v2.hono_api_static[0].data : {}
   )
 }
 
@@ -81,7 +81,7 @@ locals {
       WORKER_CONCURRENCY = "2"
       NODE_ENV           = "production"
     },
-    try(data.vault_kv_secret_v2.workers_static.data, {})
+    length(data.vault_kv_secret_v2.workers_static) > 0 ? data.vault_kv_secret_v2.workers_static[0].data : {}
   )
 }
 
