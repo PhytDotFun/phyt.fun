@@ -4,11 +4,11 @@
 '@phyt/pgbouncer': patch
 '@phyt/tailscale': patch
 '@phyt/terraform': patch
+'@phyt/hono-api': patch
 '@phyt/nginx': patch
 '@phyt/vault': patch
 '@phyt/packer': patch
 '@phyt/ops': patch
-'@phyt/hono-api': patch
 '@phyt/web': patch
 '@phyt/workers': patch
 '@phyt/contracts': patch
