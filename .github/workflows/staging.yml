@@ -114,15 +114,19 @@ jobs:
                   set -euo pipefail
                   ROLE="staging-${SHORT_SHA}"
 
-                  ROLE_ID=$(curl -sS \
+                  # Fetch ROLE_ID with error checking
+                  ROLE_ID_RESPONSE=$(curl -sSf \
                     -H "X-Vault-Token: ${VAULT_TOKEN}" \
                     -H "X-Vault-Namespace: ${VAULT_NAMESPACE:-}" \
-                    "${VAULT_ADDR}/v1/auth/approle/role/${ROLE}/role-id" | jq -r '.data.role_id')
+                    "${VAULT_ADDR}/v1/auth/approle/role/${ROLE}/role-id") || { echo "Failed to fetch role_id from Vault"; exit 1; }
+                  ROLE_ID=$(echo "$ROLE_ID_RESPONSE" | jq -er '.data.role_id') || { echo "role_id not found in Vault response"; echo "$ROLE_ID_RESPONSE"; exit 1; }
 
-                  SECRET_ID=$(curl -sS -X POST \
+                  # Fetch SECRET_ID with error checking
+                  SECRET_ID_RESPONSE=$(curl -sSf -X POST \
                     -H "X-Vault-Token: ${VAULT_TOKEN}" \
                     -H "X-Vault-Namespace: ${VAULT_NAMESPACE:-}" \
-                    "${VAULT_ADDR}/v1/auth/approle/role/${ROLE}/secret-id" | jq -r '.data.secret_id')
+                    "${VAULT_ADDR}/v1/auth/approle/role/${ROLE}/secret-id") || { echo "Failed to fetch secret_id from Vault"; exit 1; }
+                  SECRET_ID=$(echo "$SECRET_ID_RESPONSE" | jq -er '.data.secret_id') || { echo "secret_id not found in Vault response"; echo "$SECRET_ID_RESPONSE"; exit 1; }
 
                   # Mask values in logs
                   echo "::add-mask::${ROLE_ID}"
