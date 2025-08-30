@@ -39,11 +39,13 @@ jobs:
             - name: Checkout
               uses: actions/checkout@v4
 
-            - name: Set SHORT_SHA
-              run: echo "SHORT_SHA=${GITHUB_SHA::7}" >> $GITHUB_ENV
+            - name: Set SHORT_SHA and IMAGE_TAG
+              run: |
+                  echo "SHORT_SHA=${GITHUB_SHA::7}" >> "$GITHUB_ENV"
+                  echo "IMAGE_TAG=staging-${GITHUB_SHA::7}" >> "$GITHUB_ENV"     # FIX: single source of truth tag
 
             - name: Set lowercase repository name
-              run: echo "IMAGE_NAME=$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+              run: echo "REPO_LC=$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> "$GITHUB_ENV" # FIX
 
             - name: Set up Buildx
               uses: docker/setup-buildx-action@v3
@@ -63,14 +65,15 @@ jobs:
                   push: true
                   build-args: ${{ matrix.service.buildargs }}
                   tags: |
-                      ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/${{ matrix.service.name }}:staging-${{ env.SHORT_SHA }}
-                      ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}//${{ matrix.service.name }}:staging
+                      ${{ env.REGISTRY }}/${{ env.REPO_LC }}/${{ matrix.service.name }}:${{ env.IMAGE_TAG }}
+                      ${{ env.REGISTRY }}/${{ env.REPO_LC }}/${{ matrix.service.name }}:staging
                   cache-from: type=gha
                   cache-to: type=gha,mode=max
 
     deploy:
         runs-on: ubuntu-latest
         needs: build-images
+        environment: staging
         permissions:
             id-token: write
             contents: read
@@ -80,8 +83,11 @@ jobs:
             - name: Checkout
               uses: actions/checkout@v4
 
-            - name: Set SHORT_SHA
-              run: echo "SHORT_SHA=${GITHUB_SHA::7}" >> $GITHUB_ENV
+            - name: Set SHORT_SHA / IMAGE_TAG / REPO_LC
+              run: |
+                  echo "SHORT_SHA=${GITHUB_SHA::7}" >> "$GITHUB_ENV"
+                  echo "IMAGE_TAG=staging-${GITHUB_SHA::7}" >> "$GITHUB_ENV"
+                  echo "REPO_LC=$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> "$GITHUB_ENV"
 
             - name: Configure AWS credentials
               uses: aws-actions/configure-aws-credentials@v4
@@ -96,13 +102,21 @@ jobs:
                   oauth-secret: ${{ secrets.TAILSCALE_OAUTH_SECRET }}
                   tags: ci
 
+            - name: Setup Terraform
+              uses: hashicorp/setup-terraform@v3
+              with:
+                  terraform_version: 1.6.0
+
             - name: Terraform init/plan/apply (staging infra)
               working-directory: infra/environments/aws-staging
               env:
                   TF_VAR_github_repo: ${{ github.repository }}
+                  TF_VAR_deployment_id: ${{ env.SHORT_SHA }} # matches doc’s ephemeral ID
+                  VAULT_ADDR: ${{ secrets.VAULT_ADDR }}
+                  VAULT_NAMESPACE: ${{ secrets.VAULT_NAMESPACE }}
+                  VAULT_TOKEN: ${{ secrets.VAULT_CI_TOKEN }}
               run: |
                   set -euo pipefail
-                  export TF_VAR_deployment_id="${SHORT_SHA}"
                   terraform init -input=false
                   terraform plan -out=plan.tfplan -input=false
                   terraform apply -input=false -auto-approve plan.tfplan
@@ -116,41 +130,36 @@ jobs:
               run: |
                   set -euo pipefail
                   ROLE="staging-${SHORT_SHA}"
+                  HDRS=(-H "X-Vault-Token: ${VAULT_TOKEN}")                             # FIX: conditional namespace header
+                  if [ -n "${VAULT_NAMESPACE:-}" ]; then HDRS+=(-H "X-Vault-Namespace: ${VAULT_NAMESPACE}"); fi
 
-                  # Fetch ROLE_ID with error checking
-                  ROLE_ID_RESPONSE=$(curl -sSf \
-                    -H "X-Vault-Token: ${VAULT_TOKEN}" \
-                    -H "X-Vault-Namespace: ${VAULT_NAMESPACE:-}" \
-                    "${VAULT_ADDR}/v1/auth/approle/role/${ROLE}/role-id") || { echo "Failed to fetch role_id from Vault"; exit 1; }
-                  ROLE_ID=$(echo "$ROLE_ID_RESPONSE" | jq -er '.data.role_id') || { echo "role_id not found in Vault response"; echo "$ROLE_ID_RESPONSE"; exit 1; }
+                  ROLE_ID=$(curl -sS "${HDRS[@]}" "${VAULT_ADDR}/v1/auth/approle/role/${ROLE}/role-id" | jq -er '.data.role_id')
+                  SECRET_ID=$(curl -sS -X POST "${HDRS[@]}" "${VAULT_ADDR}/v1/auth/approle/role/${ROLE}/secret-id" | jq -er '.data.secret_id')
 
-                  # Fetch SECRET_ID with error checking
-                  SECRET_ID_RESPONSE=$(curl -sSf -X POST \
-                    -H "X-Vault-Token: ${VAULT_TOKEN}" \
-                    -H "X-Vault-Namespace: ${VAULT_NAMESPACE:-}" \
-                    "${VAULT_ADDR}/v1/auth/approle/role/${ROLE}/secret-id") || { echo "Failed to fetch secret_id from Vault"; exit 1; }
-                  SECRET_ID=$(echo "$SECRET_ID_RESPONSE" | jq -er '.data.secret_id') || { echo "secret_id not found in Vault response"; echo "$SECRET_ID_RESPONSE"; exit 1; }
-
-                  # Mask values in logs
                   echo "::add-mask::${ROLE_ID}"
                   echo "::add-mask::${SECRET_ID}"
 
                   {
                     echo "ROLE_ID=${ROLE_ID}"
                     echo "SECRET_ID=${SECRET_ID}"
-                    echo "DEPLOYMENT_ID=${SHORT_SHA}"
-                    echo "IMAGE_TAG=staging-${SHORT_SHA}"
                   } >> "$GITHUB_ENV"
 
             - name: Remote deploy over Tailscale SSH (no env files on disk)
               env:
-                  TS_SSH_DEST: ${{ secrets.TS_SSH_DEST }} # e.g. ubuntu@staging-phyt (Tailscale SSH name)
+                  TS_SSH_DEST: ${{ secrets.TS_SSH_DEST }}
+                  GHCR_RO_TOKEN: ${{ secrets.GHCR_RO_TOKEN }} # optional if repo is private
               run: |
                   set -euo pipefail
-                  # Pass env via STDIN; remote shell sources from stdin, then deploys.
-                  tailscale ssh -T "${TS_SSH_DEST}" 'bash -lc "set -a; . /dev/stdin; set +a; cd /opt/phyt && docker compose pull && docker compose up -d --remove-orphans"' <<EOF
-                  VAULT_ROLE_ID=${ROLE_ID}
-                  VAULT_SECRET_ID=${SECRET_ID}
-                  IMAGE_TAG=${IMAGE_TAG}
-                  DEPLOYMENT_ID=${DEPLOYMENT_ID}
-                  EOF
+                  tailscale ssh -T "${TS_SSH_DEST}" 'bash -lc "set -a; . /dev/stdin; set +a; \
+                    docker login ghcr.io -u ${GITHUB_ACTOR} -p ${GHCR_RO_TOKEN:-} >/dev/null 2>&1 || true; \
+                    cd /opt/phyt && docker compose pull && docker compose up -d --remove-orphans; \
+                    docker logout ghcr.io >/dev/null 2>&1 || true"' <<EOF
+                    IMAGE_REGISTRY=${{ env.REGISTRY }}
+                    GITHUB_REPOSITORY=${{ env.REPO_LC }}                                      
+                    IMAGE_TAG=${{ env.IMAGE_TAG }}
+                    COMPOSE_PROFILES=staging
+                    VAULT_ADDR=${{ secrets.VAULT_ADDR }}
+                    VAULT_NAMESPACE=${{ secrets.VAULT_NAMESPACE }}
+                    VAULT_ROLE_ID=${{ env.ROLE_ID }}
+                    VAULT_SECRET_ID=${{ env.SECRET_ID }}
+                    EOF
