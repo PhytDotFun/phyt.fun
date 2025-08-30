@@ -156,7 +156,7 @@ tooling/
 # Package files we don't need in container
 package-lock.json
 yarn.lock
-pnpm-lock.yaml
+# pnpm-lock.yaml
 
 # Temporary files
 tmp/
