@@ -30,6 +30,8 @@ RUN --mount=type=cache,id=pnpm,target=~/.pnpm-store pnpm install --frozen-lockfi
 
 COPY --from=pruner /app/out/full/ .
 
+COPY --from=pruner /app/tooling/tsconfig ./tooling/tsconfig
+
 RUN turbo build --filter=@phyt/${PROJECT}
 RUN --mount=type=cache,id=pnpm,target=~/.pnpm-store pnpm prune --prod --no-optional
 RUN rm -rf ./**/*/src
