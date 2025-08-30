@@ -4,7 +4,7 @@ output "tunnel_id" {
 }
 
 output "tunnel_token" {
-  value       = cloudflare_zero_trust_tunnel_cloudflared.staging.tunnel_token
+  value       = data.cloudflare_zero_trust_tunnel_cloudflared_token.staging_token.token
   sensitive   = true
   description = "Cloudflare tunnel token"
 }

@@ -22,6 +22,11 @@ resource "cloudflare_zero_trust_tunnel_cloudflared" "staging" {
   name       = "staging-${var.deployment_id}"
 }
 
+data "cloudflare_zero_trust_tunnel_cloudflared_token" "staging_token" {
+  account_id = var.account_id
+  tunnel_id  = cloudflare_zero_trust_tunnel_cloudflared.staging.id
+}
+
 resource "cloudflare_zero_trust_tunnel_cloudflared_config" "staging" {
   account_id = var.account_id
   tunnel_id  = cloudflare_zero_trust_tunnel_cloudflared.staging.id
