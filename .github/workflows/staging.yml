@@ -155,7 +155,7 @@ jobs:
                     cd /opt/phyt && docker compose pull && docker compose up -d --remove-orphans; \
                     docker logout ghcr.io >/dev/null 2>&1 || true"' <<EOF
                     IMAGE_REGISTRY=${{ env.REGISTRY }}
-                    GITHUB_REPOSITORY=${{ env.REPO_LC }}                                      
+                    GITHUB_REPOSITORY=${{ env.REPO_LC }}
                     IMAGE_TAG=${{ env.IMAGE_TAG }}
                     COMPOSE_PROFILES=staging
                     VAULT_ADDR=${{ secrets.VAULT_ADDR }}
