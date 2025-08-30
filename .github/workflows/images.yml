@@ -3,48 +3,63 @@ on:
     push:
         tags:
             - 'v*'
+
+concurrency:
+    group: release-images
+    cancel-in-progress: true
+
+env:
+    REGISTRY: ghcr.io
+
+permissions:
+    contents: read
+    packages: write
+
 jobs:
-    build_and_push_release_images:
+    build-and-push:
         runs-on: ubuntu-latest
-        env:
-            REGISTRY: ghcr.io
-            IMAGE_PREFIX: ${{ github.repository }}
-            VERSION: ${{ github.ref_name }}
+        strategy:
+            matrix:
+                service:
+                    - name: hono-api
+                      dockerfile: Dockerfile
+                      context: .
+                      buildargs: |
+                          PROJECT=hono-api
+                    - name: workers
+                      dockerfile: Dockerfile
+                      context: .
+                      buildargs: |
+                          PROJECT=workers
+
         steps:
-            - uses: actions/checkout@v4
-            - uses: docker/setup-buildx-action@v3
-            - uses: docker/login-action@v3
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Normalize repo path to lowercase # CHANGED: required for GHCR
+              run: |
+                  echo "REPO_LC=$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> "$GITHUB_ENV"
+                  echo "TAG_NAME=${GITHUB_REF_NAME}" >> "$GITHUB_ENV"   # e.g. v1.2.3
+
+            - name: Setup Buildx
+              uses: docker/setup-buildx-action@v3
+
+            - name: Login to GHCR
+              uses: docker/login-action@v3
               with:
                   registry: ${{ env.REGISTRY }}
                   username: ${{ github.actor }}
                   password: ${{ secrets.GITHUB_TOKEN }}
-            - uses: docker/metadata-action@v5
-              id: meta-hono-api
+
+            - name: Build & push ${{ matrix.service.name }}
+              uses: docker/build-push-action@v6
               with:
-                  images: ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}/hono-api
-                  tags: |
-                      type=raw,value=${{ env.VERSION }}
-                      type=raw,value=latest
-            - uses: docker/build-push-action@v5
-              with:
-                  context: .
-                  file: Dockerfile
+                  context: ${{ matrix.service.context }}
+                  file: ${{ matrix.service.dockerfile }}
                   push: true
-                  tags: ${{ steps.meta-hono-api.outputs.tags }}
-                  labels: ${{ steps.meta-hono-api.outputs.labels }}
-                  build-args: PROJECT=hono-api
-            - uses: docker/metadata-action@v5
-              id: meta-workers
-              with:
-                  images: ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}/workers
-                  tags: |
-                      type=raw,value=${{ env.VERSION }}
-                      type=raw,value=latest
-            - uses: docker/build-push-action@v5
-              with:
-                  context: .
-                  file: Dockerfile
-                  push: true
-                  tags: ${{ steps.meta-workers.outputs.tags }}
-                  labels: ${{ steps.meta-workers.outputs.labels }}
-                  build-args: PROJECT=workers
+                  build-args: ${{ matrix.service.buildargs }}
+                  tags: | # CHANGED: lowercase repo path + release tag + latest
+                      ${{ env.REGISTRY }}/${{ env.REPO_LC }}/${{ matrix.service.name }}:${{ env.TAG_NAME }}
+                      ${{ env.REGISTRY }}/${{ env.REPO_LC }}/${{ matrix.service.name }}:latest
+                  cache-from: type=gha
+                  cache-to: type=gha,mode=max
