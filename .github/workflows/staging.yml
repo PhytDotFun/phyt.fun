@@ -100,7 +100,7 @@ jobs:
               with:
                   oauth-client-id: ${{ secrets.TAILSCALE_OAUTH_CLIENT_ID }}
                   oauth-secret: ${{ secrets.TAILSCALE_OAUTH_SECRET }}
-                  tags: ci
+                  tags: tag:ci
 
             - name: Setup Terraform
               uses: hashicorp/setup-terraform@v3
