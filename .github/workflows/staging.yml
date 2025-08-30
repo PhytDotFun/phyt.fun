@@ -2,7 +2,7 @@ name: Staging CI
 
 on:
     push:
-        branches: [staging]
+        branches: [staging, 'ci/**']
     workflow_dispatch: {}
 
 concurrency:
