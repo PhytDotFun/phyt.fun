@@ -146,13 +146,6 @@ docker-compose*.yml
 Dockerfile*
 .dockerignore
 
-# Scripts and tooling
-scripts/
-tooling/
-!tooling/ops/docker-entrypoint.sh
-!tooling/ops/health-check.sh
-!tooling/nginx/*.conf
-
 # Package files we don't need in container
 package-lock.json
 yarn.lock
