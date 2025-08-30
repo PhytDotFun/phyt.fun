@@ -14,8 +14,8 @@
         }
     ],
     "tagOwners": {
-        "tag:staging": ["autogroup:admins"],
-        "tag:ci": ["autogroup:admins"],
-        "tag:dokploy": ["autogroup:admins"]
+        "tag:staging": ["autogroup:admin"],
+        "tag:ci": ["autogroup:admin"],
+        "tag:dokploy": ["autogroup:admin"]
     }
 }
