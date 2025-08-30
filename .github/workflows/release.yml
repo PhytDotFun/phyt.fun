@@ -1,57 +1,42 @@
-name: Release PR and Publish
+name: Release Pull Request
 
 on:
     push:
         branches: [main]
+    workflow_dispatch: {}
+
+concurrency:
+    group: release-pr
+    cancel-in-progress: true
 
 permissions:
-    contents: write # create PR, push version commits, create tags
-    pull-requests: write
-    packages: write
-    id-token: write
-
-env:
-    REGISTRY: ghcr.io
-    IMAGE_PREFIX: ${{ github.repository }}
-    VERSION_SOURCE: packages/hono-api/package.json # authoritative version file
+    contents: write # required to push release commit/PR
+    pull-requests: write # required to open/update PR
 
 jobs:
-    release_pr_or_publish:
+    release-pr:
         runs-on: ubuntu-latest
-        outputs:
-            published: ${{ steps.changesets.outputs.published }}
-            version: ${{ steps.readver.outputs.version }}
         steps:
-            - uses: actions/checkout@v4
+            - name: Checkout
+              uses: actions/checkout@v4
 
             - uses: pnpm/action-setup@v4
-              with: { version: 9 }
+              with: { version: 10 }
 
             - uses: actions/setup-node@v4
               with:
-                  node-version: '20'
+                  node-version: lts/*
                   cache: 'pnpm'
 
             - run: pnpm -w install --frozen-lockfile
 
-            # 1) When there ARE changesets on main, this opens/updates a Release PR.
-            # 2) AFTER the Release PR is merged, the next push to main will have NO changesets,
-            #    so this runs the `publish` command instead.
-            - name: Changesets (open PR or publish)
-              id: changesets
+            - name: Create or update Release PR via Changesets
               uses: changesets/action@v1
               with:
-                  version: pnpm changeset version
-                  publish: pnpm changeset publish
+                  # CHANGED: avoid assuming yarn/pnpm; use npx for portability
+                  version: pnpm changeset version # We do not publish here; images are built on tags in a separate workflow.
+                  publish: echo "skip publish"
+                  title: 'Release: version packages'
                   commit: 'chore: version packages'
-                  title: 'Release: Version Packages 🚀'
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-            # Read version only if we just published (so we can tag images/release)
-            - name: Read version for Docker/GH Release
-              id: readver
-              if: steps.changesets.outputs.published == 'true'
-              run: |
-                  VERSION=$(jq -r .version "${{ env.VERSION_SOURCE }}")
-                  echo "version=$VERSION" >> $GITHUB_OUTPUT
