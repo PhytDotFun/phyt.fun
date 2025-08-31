@@ -2,8 +2,7 @@
 set -e
 
 # Log all output
-exec > >(tee -a /var/log/user-data.log)
-exec 2>&1
+exec >/var/log/user-data.log 2>&1
 
 echo "======================================"
 echo "Starting user-data script"
@@ -81,6 +80,7 @@ aarch64 | arm64)
     cfd_arch="arm64"
     ;;
 x86_64 | amd64)
+    # shellcheck disable=SC2034 # TF will validate and template this
     cfd_arch="amd64"
     ;;
 *)
@@ -90,7 +90,7 @@ x86_64 | amd64)
 esac
 wget -q "https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-$${cfd_arch}.deb"
 dpkg -i "cloudflared-linux-$${cfd_arch}.deb"
-rm "cloudflared-linux-${cfd_arch}.deb"
+rm "cloudflared-linux-$${cfd_arch}.deb"
 
 # Cloudflared: use token install and DO NOT write creds.json
 # shellcheck disable=SC2154 # TF will validate and template this
