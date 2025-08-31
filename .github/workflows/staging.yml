@@ -12,6 +12,7 @@ concurrency:
 env:
     REGISTRY: ghcr.io
     AWS_REGION: us-east-1
+    VAULT_ADDR: ${{ vars.VAULT_ADDR }}
 
 permissions:
     contents: read
@@ -130,8 +131,8 @@ jobs:
               env:
                   TF_VAR_github_repo: ${{ github.repository }}
                   TF_VAR_deployment_id: ${{ env.SHORT_SHA }} # matches doc’s ephemeral ID
-                  VAULT_ADDR: ${{ secrets.VAULT_ADDR }}
-                  VAULT_NAMESPACE: ${{ secrets.VAULT_NAMESPACE }}
+                  TF_VAR_vault_addr: ${{ env.VAULT_ADDR }}
+                  VAULT_ADDR: ${{ env.VAULT_ADDR }}
                   VAULT_TOKEN: ${{ secrets.VAULT_GITHUB_TOKEN }}
               run: |
                   set -euo pipefail
@@ -142,15 +143,12 @@ jobs:
             - name: Mint AppRole credentials (single-use)
               id: approle
               env:
-                  VAULT_ADDR: ${{ secrets.VAULT_ADDR }}
-                  VAULT_NAMESPACE: ${{ secrets.VAULT_NAMESPACE }}
+                  VAULT_ADDR: ${{ env.VAULT_ADDR }}
                   VAULT_TOKEN: ${{ secrets.VAULT_GITHUB_TOKEN }}
               run: |
                   set -euo pipefail
                   ROLE="staging-${SHORT_SHA}"
-                  HDRS=(-H "X-Vault-Token: ${VAULT_TOKEN}")                             # FIX: conditional namespace header
-                  if [ -n "${VAULT_NAMESPACE:-}" ]; then HDRS+=(-H "X-Vault-Namespace: ${VAULT_NAMESPACE}"); fi
-
+                  HDRS=(-H "X-Vault-Token: ${VAULT_TOKEN}")
                   ROLE_ID=$(curl -sS "${HDRS[@]}" "${VAULT_ADDR}/v1/auth/approle/role/${ROLE}/role-id" | jq -er '.data.role_id')
                   SECRET_ID=$(curl -sS -X POST "${HDRS[@]}" "${VAULT_ADDR}/v1/auth/approle/role/${ROLE}/secret-id" | jq -er '.data.secret_id')
 
@@ -176,8 +174,7 @@ jobs:
                     GITHUB_REPOSITORY=${{ env.REPO_LC }}
                     IMAGE_TAG=${{ env.IMAGE_TAG }}
                     COMPOSE_PROFILES=staging
-                    VAULT_ADDR=${{ secrets.VAULT_ADDR }}
-                    VAULT_NAMESPACE=${{ secrets.VAULT_NAMESPACE }}
+                    VAULT_ADDR=${{ env.VAULT_ADDR }}
                     VAULT_ROLE_ID=${{ env.ROLE_ID }}
                     VAULT_SECRET_ID=${{ env.SECRET_ID }}
                     EOF

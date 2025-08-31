@@ -6,7 +6,7 @@ exec >/var/log/user-data.log 2>&1
 
 echo "======================================"
 echo "Starting user-data script"
-# shellcheck disable=SC2154 # TF will validate and template this
+# shellcheck disable=SC2154 # TF will validate and render this
 echo "Deployment ID: ${deployment_id}"
 echo "Date: $$(date)"
 echo "======================================"
@@ -62,7 +62,7 @@ systemctl enable docker
 # Install Tailscale with ephemeral auth key
 curl -fsSL https://tailscale.com/install.sh | sh
 # Auth key is single-use and expires after use
-# shellcheck disable=SC2154 # TF will validate and template this
+# shellcheck disable=SC2154 # TF will validate and render this
 tailscale up --auth-key="${tailscale_auth_key}" \
     --hostname="${deployment_id}" \
     --accept-routes \
@@ -80,7 +80,7 @@ aarch64 | arm64)
     cfd_arch="arm64"
     ;;
 x86_64 | amd64)
-    # shellcheck disable=SC2034 # TF will validate and template this
+    # shellcheck disable=SC2034 # TF will validate and render this
     cfd_arch="amd64"
     ;;
 *)
@@ -93,7 +93,7 @@ dpkg -i "cloudflared-linux-$${cfd_arch}.deb"
 rm "cloudflared-linux-$${cfd_arch}.deb"
 
 # Cloudflared: use token install and DO NOT write creds.json
-# shellcheck disable=SC2154 # TF will validate and template this
+# shellcheck disable=SC2154 # TF will validate and render this
 cloudflared service install --token "${cloudflare_tunnel_token}"
 systemctl enable --now cloudflared
 unset cloudflare_tunnel_token
@@ -107,7 +107,8 @@ apt update && apt install vault -y
 mkdir -p /etc/vault
 
 # Write Vault address (not sensitive)
-echo "export VAULT_ADDR=https://vault.tailea8363.ts.net" >>/etc/environment
+# shellcheck disable=SC2154 # TF will validate and render this
+echo "export VAULT_ADDR=${vault_addr}" >>/etc/environment
 
 # Create docker network
 docker network create phyt || true

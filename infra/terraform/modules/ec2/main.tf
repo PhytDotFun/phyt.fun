@@ -26,6 +26,7 @@ resource "aws_spot_instance_request" "staging" {
     cloudflare_account_id   = var.cloudflare_account_id
     cloudflare_tunnel_id    = var.cloudflare_tunnel_id
     tailscale_auth_key      = var.tailscale_auth_key
+    vault_addr              = var.vault_addr
   })
 
   root_block_device {
