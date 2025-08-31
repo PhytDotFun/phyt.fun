@@ -35,9 +35,23 @@ jobs:
                       buildargs: |
                           PROJECT=workers
 
+        outputs:
+            skipped: ${{ steps.check_skip.outputs.skipped }}
+
         steps:
             - name: Checkout
               uses: actions/checkout@v4
+
+            - name: Check for [skip build]
+              id: check_skip
+              run: |
+                  if [[ "${{ github.event.head_commit.message }}" == *"[skip build]"* ]]; then
+                    echo "Commit message contains [skip build], skipping image build."
+                    echo "skipped=true" >> "$GITHUB_OUTPUT"
+                  else
+                    echo "Commit message does not contain [skip build], proceeding with image build."
+                    echo "skipped=false" >> "$GITHUB_OUTPUT"
+                  fi
 
             - name: Set SHORT_SHA and IMAGE_TAG
               run: |
