@@ -132,7 +132,7 @@ jobs:
                   TF_VAR_deployment_id: ${{ env.SHORT_SHA }} # matches doc’s ephemeral ID
                   VAULT_ADDR: ${{ secrets.VAULT_ADDR }}
                   VAULT_NAMESPACE: ${{ secrets.VAULT_NAMESPACE }}
-                  VAULT_TOKEN: ${{ secrets.VAULT_CI_TOKEN }}
+                  VAULT_TOKEN: ${{ secrets.VAULT_GITHUB_TOKEN }}
               run: |
                   set -euo pipefail
                   terraform init -input=false
@@ -144,7 +144,7 @@ jobs:
               env:
                   VAULT_ADDR: ${{ secrets.VAULT_ADDR }}
                   VAULT_NAMESPACE: ${{ secrets.VAULT_NAMESPACE }}
-                  VAULT_TOKEN: ${{ secrets.VAULT_CI_TOKEN }}
+                  VAULT_TOKEN: ${{ secrets.VAULT_GITHUB_TOKEN }}
               run: |
                   set -euo pipefail
                   ROLE="staging-${SHORT_SHA}"
