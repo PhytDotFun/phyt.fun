@@ -2,11 +2,11 @@
 set -e
 
 # Set fallback values if not provided by Terraform
-: "${deployment_id?Error: deployment_id is not set.}"
-: "${tailscale_auth_key?Error: tailscale_auth_key is not set.}"
-: "${cloudflare_account_id?Error: cloudflare_account_id is not set.}"
-: "${cloudflare_tunnel_id?Error: cloudflare_tunnel_id is not set.}"
-: "${cloudflare_tunnel_token?Error: cloudflare_tunnel_token is not set.}"
+# : "${deployment_id?Error: deployment_id is not set.}"
+# : "${tailscale_auth_key?Error: tailscale_auth_key is not set.}"
+# : "${cloudflare_account_id?Error: cloudflare_account_id is not set.}"
+# : "${cloudflare_tunnel_id?Error: cloudflare_tunnel_id is not set.}"
+# : "${cloudflare_tunnel_token?Error: cloudflare_tunnel_token is not set.}"
 
 # Log all output
 exec > >(tee -a /var/log/user-data.log)
@@ -14,8 +14,9 @@ exec 2>&1
 
 echo "======================================"
 echo "Starting user-data script"
+# shellcheck disable=SC2154 # TF will validate and template this
 echo "Deployment ID: ${deployment_id}"
-echo "Date: $(date)"
+echo "Date: $$(date)"
 echo "======================================"
 
 # Update system
@@ -44,8 +45,9 @@ usermod -aG docker ubuntu
 rm get-docker.sh
 
 # Install Docker Compose
-COMPOSE_VERSION=$(curl -s https://api.github.com/repos/docker/compose/releases/latest | jq -r .tag_name)
-curl -L "https://github.com/docker/compose/releases/download/${COMPOSE_VERSION}/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+# shellcheck disable=SC2034 # Shellcheck can't see but TF needs it escaped
+COMPOSE_VERSION="$$(curl -s https://api.github.com/repos/docker/compose/releases/latest | jq -r .tag_name)"
+curl -L "https://github.com/docker/compose/releases/download/$${COMPOSE_VERSION}/docker-compose-$$(uname -s)-$$(uname -m)" -o /usr/local/bin/docker-compose
 chmod +x /usr/local/bin/docker-compose
 
 # Configure Docker daemon
@@ -68,8 +70,8 @@ systemctl enable docker
 # Install Tailscale with ephemeral auth key
 curl -fsSL https://tailscale.com/install.sh | sh
 # Auth key is single-use and expires after use
-tailscale up \
-    --auth-key="${tailscale_auth_key}" \
+# shellcheck disable=SC2154 # TF will validate and template this
+tailscale up --auth-key="${tailscale_auth_key}" \
     --hostname="${deployment_id}" \
     --accept-routes \
     --accept-dns=false \
@@ -80,7 +82,7 @@ unset tailscale_auth_key
 
 # Install Cloudflare Tunnel
 # Detect architecture and download appropriate cloudflared binary
-arch="$(uname -m)"
+arch="$$(uname -m)"
 case "$arch" in
 aarch64 | arm64)
     cfd_arch="arm64"
@@ -93,11 +95,12 @@ x86_64 | amd64)
     exit 1
     ;;
 esac
-wget -q "https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-${cfd_arch}.deb"
-dpkg -i "cloudflared-linux-${cfd_arch}.deb"
+wget -q "https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-$${cfd_arch}.deb"
+dpkg -i "cloudflared-linux-$${cfd_arch}.deb"
 rm "cloudflared-linux-${cfd_arch}.deb"
 
 # Cloudflared: use token install and DO NOT write creds.json
+# shellcheck disable=SC2154 # TF will validate and template this
 cloudflared service install --token "${cloudflare_tunnel_token}"
 systemctl enable --now cloudflared
 unset cloudflare_tunnel_token
@@ -123,9 +126,9 @@ while true; do
   if curl -s -f http://169.254.169.254/latest/meta-data/spot/termination-time > /dev/null 2>&1; then
     echo "$(date): Spot termination notice received!" >> /var/log/spot-handler.log
 
-    # EDIT: Removed backup call; Dokploy manages backups
+    # TODO: Add staging backups
     # docker-compose will stop workloads cleanly
-    docker-compose --profile ${COMPOSE_PROFILES:-staging} down || true
+    docker-compose --profile $${COMPOSE_PROFILES:-staging} down || true
 
     break
   fi
@@ -167,5 +170,5 @@ echo "======================================"
 echo "User-data script completed successfully"
 echo "All ephemeral credentials have been used and cleared"
 echo "Deployment ID: ${deployment_id}"
-echo "Date: $(date)"
+echo "Date: $$(date)"
 echo "======================================"
