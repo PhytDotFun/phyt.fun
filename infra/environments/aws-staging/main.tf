@@ -217,6 +217,7 @@ module "staging_instance" {
   subnet_id            = aws_subnet.public.id
   security_group_id    = aws_security_group.staging.id
   iam_instance_profile = aws_iam_instance_profile.staging.name
+  vault_addr           = var.vault_addr
 
   # Pass tunnel ID so user-data can write correct cloudflared credentials
   cloudflare_tunnel_id = module.cloudflare.tunnel_id
@@ -240,6 +241,7 @@ module "cloudflare" {
 
 # Vault config with dynamic secrets
 module "vault" {
+  address = var.vault_addr
   source  = "../../terraform/modules/vault"
   db_name = "primary_staging"
   db_user = "phyt"

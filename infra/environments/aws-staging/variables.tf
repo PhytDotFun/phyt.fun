@@ -27,3 +27,8 @@ variable "volume_size" {
   type        = number
   default     = 30
 }
+
+variable "vault_addr" {
+  description = "Vault server address"
+  type        = string
+}

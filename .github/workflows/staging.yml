@@ -61,7 +61,7 @@ jobs:
 
             - name: Set lowercase repository name
               if: steps.check_skip.outputs.skipped == 'false'
-              run: echo "REPO_LC=$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> "$GITHUB_ENV" # FIX
+              run: echo "REPO_LC=$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> "$GITHUB_ENV"
 
             - name: Set up Buildx
               if: steps.check_skip.outputs.skipped == 'false'

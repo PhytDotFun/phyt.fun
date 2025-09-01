@@ -12,3 +12,8 @@ variable "db_name" {
   description = "Database name"
   type        = string
 }
+
+variable "address" {
+  description = "Vault server address"
+  type        = string
+}
