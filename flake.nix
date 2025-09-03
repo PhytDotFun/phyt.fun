@@ -21,6 +21,8 @@
             git
             jq
             yq
+            ripgrep
+            fd
             python3
             vault
             cloudflared
