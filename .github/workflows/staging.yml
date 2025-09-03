@@ -1,180 +1,217 @@
 name: Staging CI
 
 on:
-    push:
-        branches: [staging, 'ci/**']
-    workflow_dispatch: {}
+  push:
+    branches: [staging, "ci/**"]
+  workflow_dispatch: {}
 
 concurrency:
-    group: staging-ci
-    cancel-in-progress: true
+  group: staging-ci
+  cancel-in-progress: true
 
 env:
-    REGISTRY: ghcr.io
-    AWS_REGION: us-east-1
-    VAULT_ADDR: ${{ vars.VAULT_ADDR }}
+  REGISTRY: ghcr.io
+  AWS_REGION: us-east-1
+  VAULT_ADDR: ${{ vars.VAULT_ADDR }}
 
 permissions:
-    contents: read
-    packages: write
-    id-token: write
+  contents: read
+  packages: write
+  id-token: write
 
 jobs:
-    build-images:
-        runs-on: ubuntu-latest
-        strategy:
-            matrix:
-                service:
-                    - name: hono-api
-                      dockerfile: Dockerfile
-                      context: .
-                      buildargs: |
-                          PROJECT=hono-api
-                    - name: workers
-                      dockerfile: Dockerfile
-                      context: .
-                      buildargs: |
-                          PROJECT=workers
+  build-images:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service:
+          - name: hono-api
+            dockerfile: Dockerfile
+            context: .
+            buildargs: |
+              PROJECT=hono-api
+          - name: workers
+            dockerfile: Dockerfile
+            context: .
+            buildargs: |
+              PROJECT=workers
 
-        outputs:
-            skipped: ${{ steps.check_skip.outputs.skipped }}
+    outputs:
+      skipped: ${{ steps.check_skip.outputs.skipped }}
 
-        steps:
-            - name: Checkout
-              uses: actions/checkout@v4
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
-            - name: Check for [skip build]
-              id: check_skip
-              run: |
-                  if [[ "${{ github.event.head_commit.message }}" == *"[skip build]"* ]]; then
-                    echo "Commit message contains [skip build], skipping image build."
-                    echo "skipped=true" >> "$GITHUB_OUTPUT"
-                  else
-                    echo "Commit message does not contain [skip build], proceeding with image build."
-                    echo "skipped=false" >> "$GITHUB_OUTPUT"
-                  fi
+      - name: Check for [skip build]
+        id: check_skip
+        run: |
+          if [[ "${{ github.event.head_commit.message }}" == *"[skip build]"* ]]; then
+            echo "Commit message contains [skip build], skipping image build."
+            echo "skipped=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "Commit message does not contain [skip build], proceeding with image build."
+            echo "skipped=false" >> "$GITHUB_OUTPUT"
+          fi
 
-            - name: Set SHORT_SHA and IMAGE_TAG
-              run: |
-                  echo "SHORT_SHA=${GITHUB_SHA::7}" >> "$GITHUB_ENV"
-                  echo "IMAGE_TAG=staging-${GITHUB_SHA::7}" >> "$GITHUB_ENV"     # FIX: single source of truth tag
+      - name: Set SHORT_SHA and IMAGE_TAG
+        run: |
+          echo "SHORT_SHA=${GITHUB_SHA::7}" >> "$GITHUB_ENV"
+          echo "IMAGE_TAG=staging-${GITHUB_SHA::7}" >> "$GITHUB_ENV" # Single source of truth tag
 
-            - name: Set lowercase repository name
-              if: steps.check_skip.outputs.skipped == 'false'
-              run: echo "REPO_LC=$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> "$GITHUB_ENV"
+      - name: Set lowercase repository name
+        if: steps.check_skip.outputs.skipped == 'false'
+        run: echo "REPO_LC=$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> "$GITHUB_ENV"
 
-            - name: Set up Buildx
-              if: steps.check_skip.outputs.skipped == 'false'
-              uses: docker/setup-buildx-action@v3
+      - name: Set up Buildx
+        if: steps.check_skip.outputs.skipped == 'false'
+        uses: docker/setup-buildx-action@v3
 
-            - name: Log in to GHCR
-              if: steps.check_skip.outputs.skipped == 'false'
-              uses: docker/login-action@v3
-              with:
-                  registry: ${{ env.REGISTRY }}
-                  username: ${{ github.actor }}
-                  password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Log in to GHCR
+        if: steps.check_skip.outputs.skipped == 'false'
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-            - name: Build & push ${{ matrix.service.name }}
-              if: steps.check_skip.outputs.skipped == 'false'
-              uses: docker/build-push-action@v6
-              with:
-                  context: ${{ matrix.service.context }}
-                  file: ${{ matrix.service.dockerfile }}
-                  push: true
-                  build-args: ${{ matrix.service.buildargs }}
-                  tags: |
-                      ${{ env.REGISTRY }}/${{ env.REPO_LC }}/${{ matrix.service.name }}:${{ env.IMAGE_TAG }}
-                      ${{ env.REGISTRY }}/${{ env.REPO_LC }}/${{ matrix.service.name }}:staging
-                  cache-from: type=gha
-                  cache-to: type=gha,mode=max
+      - name: Build & push ${{ matrix.service.name }}
+        if: steps.check_skip.outputs.skipped == 'false'
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ matrix.service.context }}
+          file: ${{ matrix.service.dockerfile }}
+          push: true
+          build-args: ${{ matrix.service.buildargs }}
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.REPO_LC }}/${{ matrix.service.name }}:${{ env.IMAGE_TAG }}
+            ${{ env.REGISTRY }}/${{ env.REPO_LC }}/${{ matrix.service.name }}:staging
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
-    deploy:
-        runs-on: ubuntu-latest
-        needs: build-images
-        environment: staging
-        permissions:
-            id-token: write
-            contents: read
-            packages: read
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build-images
+    environment: staging
+    permissions:
+      id-token: write
+      contents: read
+      packages: read
 
-        steps:
-            - name: Checkout
-              uses: actions/checkout@v4
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
-            - name: Set SHORT_SHA / IMAGE_TAG / REPO_LC
-              run: |
-                  echo "SHORT_SHA=${GITHUB_SHA::7}" >> "$GITHUB_ENV"
-                  echo "IMAGE_TAG=staging-${GITHUB_SHA::7}" >> "$GITHUB_ENV"
-                  echo "REPO_LC=$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> "$GITHUB_ENV"
+      - name: Set SHORT_SHA / IMAGE_TAG / REPO_LC
+        run: |
+          echo "SHORT_SHA=${GITHUB_SHA::7}" >> "$GITHUB_ENV"
+          echo "IMAGE_TAG=staging-${GITHUB_SHA::7}" >> "$GITHUB_ENV"
+          echo "REPO_LC=$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> "$GITHUB_ENV"
 
-            - name: Configure AWS credentials
-              uses: aws-actions/configure-aws-credentials@v4
-              with:
-                  role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
-                  aws-region: ${{ env.AWS_REGION }}
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
 
-            - name: Connect to Tailscale
-              uses: tailscale/github-action@v2
-              with:
-                  oauth-client-id: ${{ secrets.TAILSCALE_OAUTH_CLIENT_ID }}
-                  oauth-secret: ${{ secrets.TAILSCALE_OAUTH_SECRET }}
-                  tags: tag:ci
+      - name: Connect to Tailscale
+        uses: tailscale/github-action@v2
+        with:
+          oauth-client-id: ${{ secrets.TAILSCALE_OAUTH_CLIENT_ID }}
+          oauth-secret: ${{ secrets.TAILSCALE_OAUTH_SECRET }}
+          tags: tag:ci
 
-            - name: Setup Terraform
-              uses: hashicorp/setup-terraform@v3
-              with:
-                  terraform_version: 1.6.0
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.6.0
 
-            - name: Terraform init/plan/apply (staging infra)
-              working-directory: infra/environments/aws-staging
-              env:
-                  TF_VAR_github_repo: ${{ github.repository }}
-                  TF_VAR_deployment_id: ${{ env.SHORT_SHA }} # matches doc’s ephemeral ID
-                  TF_VAR_vault_addr: ${{ env.VAULT_ADDR }}
-                  VAULT_ADDR: ${{ env.VAULT_ADDR }}
-                  VAULT_TOKEN: ${{ secrets.VAULT_GITHUB_TOKEN }}
-              run: |
-                  set -euo pipefail
-                  terraform init -input=false
-                  terraform plan -out=plan.tfplan -input=false
-                  terraform apply -input=false -auto-approve plan.tfplan
+      - name: Get GitHub OIDC ID token
+        id: oidc
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const aud = `https://github.com/${{ github.repository }}`;
+            const idt = await core.getIDToken(aud);
+            core.setOutput('jwt', idt);
 
-            - name: Mint AppRole credentials (single-use)
-              id: approle
-              env:
-                  VAULT_ADDR: ${{ env.VAULT_ADDR }}
-                  VAULT_TOKEN: ${{ secrets.VAULT_GITHUB_TOKEN }}
-              run: |
-                  set -euo pipefail
-                  ROLE="staging-${SHORT_SHA}"
-                  HDRS=(-H "X-Vault-Token: ${VAULT_TOKEN}")
-                  ROLE_ID=$(curl -sS "${HDRS[@]}" "${VAULT_ADDR}/v1/auth/approle/role/${ROLE}/role-id" | jq -er '.data.role_id')
-                  SECRET_ID=$(curl -sS -X POST "${HDRS[@]}" "${VAULT_ADDR}/v1/auth/approle/role/${ROLE}/secret-id" | jq -er '.data.secret_id')
+      - name: Login to Vault via JWT
+        id: vault_login
+        env:
+          VAULT_ADDR: ${{ env.VAULT_ADDR }}
+          GITHUB_ID_TOKEN: ${{ steps.oidc.outputs.jwt }}
+        run: |
+          set -euo pipefail
+          VAULT_TOKEN=$(curl -fsS -X POST \
+            -H "Content-Type: application/json" \
+            -d '{"jwt":"'"${GITHUB_ID_TOKEN}"'","role":"gh-staging"}' \
+            "${VAULT_ADDR}/v1/auth/jwt/login" | jq -er '.auth.client_token')
+          echo "::add-mask::${VAULT_TOKEN}"
+          echo "VAULT_TOKEN=${VAULT_TOKEN}" >> "$GITHUB_ENV"
 
-                  echo "::add-mask::${ROLE_ID}"
-                  echo "::add-mask::${SECRET_ID}"
+      - name: Check Vault token
+        env:
+          VAULT_ADDR: ${{ env.VAULT_ADDR }}
+          VAULT_TOKEN: ${{ env.VAULT_TOKEN }}
+        run: |
+          set -euo pipefail
+          curl -fsS -H "X-Vault-Token: ${VAULT_TOKEN}" \
+            "${VAULT_ADDR}/v1/auth/token/lookup-self" | jq -r '.data.display_name,.data.ttl'
 
-                  {
-                    echo "ROLE_ID=${ROLE_ID}"
-                    echo "SECRET_ID=${SECRET_ID}"
-                  } >> "$GITHUB_ENV"
+      - name: Terraform init/plan/apply (staging infra)
+        working-directory: infra/environments/aws-staging
+        env:
+          TF_VAR_github_repo: ${{ github.repository }}
+          TF_VAR_deployment_id: ${{ env.SHORT_SHA }}
+          TF_VAR_vault_addr: ${{ env.VAULT_ADDR }}
+          VAULT_ADDR: ${{ env.VAULT_ADDR }} # provider picks these up
+          VAULT_TOKEN: ${{ env.VAULT_TOKEN }}
+        run: |
+          set -euo pipefail
+          terraform init -input=false
+          terraform plan -out=plan.tfplan -input=false
+          terraform apply -input=false -auto-approve plan.tfplan
 
-            - name: Remote deploy over Tailscale SSH (no env files on disk)
-              env:
-                  TS_SSH_DEST: ${{ secrets.TS_SSH_DEST }}
-                  GHCR_RO_TOKEN: ${{ secrets.GHCR_RO_TOKEN }} # optional if repo is private
-              run: |
-                  set -euo pipefail
-                  tailscale ssh -T "${TS_SSH_DEST}" 'bash -lc "set -a; . /dev/stdin; set +a; \
-                    docker login ghcr.io -u ${GITHUB_ACTOR} -p ${GHCR_RO_TOKEN:-} >/dev/null 2>&1 || true; \
-                    cd /opt/phyt && docker compose pull && docker compose up -d --remove-orphans; \
-                    docker logout ghcr.io >/dev/null 2>&1 || true"' <<EOF
-                    IMAGE_REGISTRY=${{ env.REGISTRY }}
-                    GITHUB_REPOSITORY=${{ env.REPO_LC }}
-                    IMAGE_TAG=${{ env.IMAGE_TAG }}
-                    COMPOSE_PROFILES=staging
-                    VAULT_ADDR=${{ env.VAULT_ADDR }}
-                    VAULT_ROLE_ID=${{ env.ROLE_ID }}
-                    VAULT_SECRET_ID=${{ env.SECRET_ID }}
-                    EOF
+      - name: Mint AppRole credentials (single-use)
+        id: approle
+        env:
+          VAULT_ADDR: ${{ env.VAULT_ADDR }}
+          VAULT_TOKEN: ${{ env.VAULT_TOKEN }}
+        run: |
+          set -euo pipefail
+          ROLE="staging-${SHORT_SHA}"
+          HDRS=(-H "X-Vault-Token: ${VAULT_TOKEN}")
+
+          ROLE_ID=$(curl -fsS "${HDRS[@]}" \
+            "${VAULT_ADDR}/v1/auth/approle/role/${ROLE}/role-id" | jq -er '.data.role_id')
+
+          SECRET_ID=$(curl -fsS -X POST "${HDRS[@]}" \
+            -H "Content-Type: application/json" \
+            -d '{"num_uses":1,"ttl":"10m"}' \
+            "${VAULT_ADDR}/v1/auth/approle/role/${ROLE}/secret-id" | jq -er '.data.secret_id')
+
+          echo "::add-mask::${ROLE_ID}"
+          echo "::add-mask::${SECRET_ID}"
+          {
+            echo "ROLE_ID=${ROLE_ID}"
+            echo "SECRET_ID=${SECRET_ID}"
+          } >> "$GITHUB_ENV"
+
+      - name: Remote deploy over Tailscale SSH (no env files on disk)
+        env:
+          TS_SSH_DEST: ${{ secrets.TS_SSH_DEST }}
+          GHCR_RO_TOKEN: ${{ secrets.GHCR_RO_TOKEN }}
+        run: |
+          set -euo pipefail
+          tailscale ssh -T "${TS_SSH_DEST}" 'bash -lc "set -a; . /dev/stdin; set +a; \
+            docker login ghcr.io -u ${GITHUB_ACTOR} -p ${GHCR_RO_TOKEN:-} >/dev/null 2>&1 || true; \
+            cd /opt/phyt && docker compose pull && docker compose up -d --remove-orphans; \
+            docker logout ghcr.io >/dev/null 2>&1 || true"' <<EOF
+            IMAGE_REGISTRY=${{ env.REGISTRY }}
+            GITHUB_REPOSITORY=${{ env.REPO_LC }}
+            IMAGE_TAG=${{ env.IMAGE_TAG }}
+            COMPOSE_PROFILES=staging
+            VAULT_ADDR=${{ env.VAULT_ADDR }}
+            VAULT_ROLE_ID=${{ env.ROLE_ID }}
+            VAULT_SECRET_ID=${{ env.SECRET_ID }}
+EOF
