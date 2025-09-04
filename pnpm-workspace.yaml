@@ -86,7 +86,7 @@ catalog:
   eslint-plugin-turbo: ^2.5.5
   globals: ^16.3.0
   hashids: ^2.3.0
-  hono: ^4.9.1
+  hono: ^4.9.6
   husky: ^9.1.7
   input-otp: ^1.4.2
   ioredis: 5.7.0
