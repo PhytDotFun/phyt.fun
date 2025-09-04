@@ -22,3 +22,6 @@ path "auth/approle/role/staging-*/secret-id" { capabilities = ["update"] }
 
 # Allow CI to create child tokens
 path "auth/token/create" { capabilities = ["update"] }
+
+# Allow CI to list staging metadata
+path "secret/metadata/staging" { capabilities = ["list"] }
