@@ -12,7 +12,7 @@
         devShells.default = pkgs.mkShell {
           packages = with pkgs; [
             pre-commit
-            nodejs_22
+            nodejs
             pnpm
             docker-compose
             go
