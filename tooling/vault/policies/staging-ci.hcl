@@ -17,5 +17,5 @@ path "auth/token/lookup-self" { capabilities = ["read"] }
 path "sys/capabilities-self" { capabilities = ["update"] }
 
 # CI must mint AppRole creds for staging-<sha>
-path "auth/approle/role/staging-*/role-id"   { capabilities = ["read"] }
+path "auth/approle/role/staging-*/role-id" { capabilities = ["read"] }
 path "auth/approle/role/staging-*/secret-id" { capabilities = ["update"] }

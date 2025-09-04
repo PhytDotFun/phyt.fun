@@ -214,4 +214,4 @@ jobs:
             VAULT_ADDR=${{ env.VAULT_ADDR }}
             VAULT_ROLE_ID=${{ env.ROLE_ID }}
             VAULT_SECRET_ID=${{ env.SECRET_ID }}
-EOF
+            EOF
