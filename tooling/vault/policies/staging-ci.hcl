@@ -19,3 +19,6 @@ path "sys/capabilities-self" { capabilities = ["update"] }
 # CI must mint AppRole creds for staging-<sha>
 path "auth/approle/role/staging-*/role-id" { capabilities = ["read"] }
 path "auth/approle/role/staging-*/secret-id" { capabilities = ["update"] }
+
+# Allow CI to create child tokens
+path "auth/token/create" { capabilities = ["update"] }
