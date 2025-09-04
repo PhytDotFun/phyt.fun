@@ -241,8 +241,8 @@ catalogs:
       specifier: ^2.3.0
       version: 2.3.0
     hono:
-      specifier: ^4.9.1
-      version: 4.9.1
+      specifier: ^4.9.6
+      version: 4.9.6
     husky:
       specifier: ^9.1.7
       version: 9.1.7
@@ -388,13 +388,13 @@ importers:
     dependencies:
       '@hono/node-server':
         specifier: 'catalog:'
-        version: 1.18.2(hono@4.9.1)
+        version: 1.18.2(hono@4.9.6)
       '@hono/trpc-server':
         specifier: 'catalog:'
-        version: 0.4.0(@trpc/server@11.4.4(typescript@5.9.2))(hono@4.9.1)
+        version: 0.4.0(@trpc/server@11.4.4(typescript@5.9.2))(hono@4.9.6)
       '@hono/zod-validator':
         specifier: 'catalog:'
-        version: 0.7.2(hono@4.9.1)(zod@4.0.17)
+        version: 0.7.2(hono@4.9.6)(zod@4.0.17)
       '@phyt/data-access':
         specifier: workspace:*
         version: link:../../packages/data-access
@@ -427,7 +427,7 @@ importers:
         version: 17.2.1
       hono:
         specifier: 'catalog:'
-        version: 4.9.1
+        version: 4.9.6
       superjson:
         specifier: 'catalog:'
         version: 2.2.2
@@ -3044,6 +3044,7 @@ packages:
 
   '@simplewebauthn/types@9.0.1':
     resolution: {integrity: sha512-tGSRP1QvsAvsJmnOlRQyw/mvK9gnPtjEc5fg2+m8n+QUa+D7rvrKkOYyfpy42GTs90X3RDOnqJgfHt+qO67/+w==}
+    deprecated: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
 
   '@solana/buffer-layout@4.0.1':
     resolution: {integrity: sha512-E1ImOIAD1tBZFRdjeM4/pzTiTApC0AOBGwyAMS4fwIodCWArzJ3DWdoh8cKxeFM2fElkxBh2Aqts1BPC373rHA==}
@@ -5408,8 +5409,8 @@ packages:
   hmac-drbg@1.0.1:
     resolution: {integrity: sha512-Tti3gMqLdZfhOQY1Mzf/AanLiqh1WTiJgEj26ZuYQ9fbkLomzGchCws4FyrSd4VkpBfiNhaE1On+lOz894jvXg==}
 
-  hono@4.9.1:
-    resolution: {integrity: sha512-qfvdJ42t6CQE0N/iSCa8KsW8SQqYD67YB+TYbwPHlnALvX+s7ynh8otR1NEk5jXtUg73gpV/B82OSufDmwtX3w==}
+  hono@4.9.6:
+    resolution: {integrity: sha512-doVjXhSFvYZ7y0dNokjwwSahcrAfdz+/BCLvAMa/vHLzjj8+CFyV5xteThGUsKdkaasgN+gF2mUxao+SGLpUeA==}
     engines: {node: '>=16.9.0'}
 
   html-encoding-sniffer@4.0.0:
@@ -9047,18 +9048,18 @@ snapshots:
     dependencies:
       react: 19.1.1
 
-  '@hono/node-server@1.18.2(hono@4.9.1)':
+  '@hono/node-server@1.18.2(hono@4.9.6)':
     dependencies:
-      hono: 4.9.1
+      hono: 4.9.6
 
-  '@hono/trpc-server@0.4.0(@trpc/server@11.4.4(typescript@5.9.2))(hono@4.9.1)':
+  '@hono/trpc-server@0.4.0(@trpc/server@11.4.4(typescript@5.9.2))(hono@4.9.6)':
     dependencies:
       '@trpc/server': 11.4.4(typescript@5.9.2)
-      hono: 4.9.1
+      hono: 4.9.6
 
-  '@hono/zod-validator@0.7.2(hono@4.9.1)(zod@4.0.17)':
+  '@hono/zod-validator@0.7.2(hono@4.9.6)(zod@4.0.17)':
     dependencies:
-      hono: 4.9.1
+      hono: 4.9.6
       zod: 4.0.17
 
   '@hookform/resolvers@5.2.1(react-hook-form@7.62.0(react@19.1.1))':
@@ -13922,7 +13923,7 @@ snapshots:
       minimalistic-assert: 1.0.1
       minimalistic-crypto-utils: 1.0.1
 
-  hono@4.9.1: {}
+  hono@4.9.6: {}
 
   html-encoding-sniffer@4.0.0:
     dependencies:
