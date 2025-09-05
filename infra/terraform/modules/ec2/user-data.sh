@@ -18,29 +18,23 @@ apt-get upgrade -y
 
 # Install essential packages
 apt-get install -y \
-    curl \
-    wget \
-    gnupg \
-    lsb-release \
-    ca-certificates \
-    software-properties-common \
-    htop \
-    net-tools \
-    jq \
-    git \
-    unzip
+  curl \
+  wget \
+  gnupg \
+  lsb-release \
+  ca-certificates \
+  software-properties-common \
+  htop \
+  net-tools \
+  jq \
+  git \
+  unzip
 
 # Install Docker
 curl -fsSL https://get.docker.com -o get-docker.sh
 sh get-docker.sh
 usermod -aG docker ubuntu
 rm get-docker.sh
-
-# Install Docker Compose
-# shellcheck disable=SC2034 # Shellcheck can't see but TF needs it escaped
-COMPOSE_VERSION="$$(curl -s https://api.github.com/repos/docker/compose/releases/latest | jq -r .tag_name)"
-curl -L "https://github.com/docker/compose/releases/download/$${COMPOSE_VERSION}/docker-compose-$$(uname -s)-$$(uname -m)" -o /usr/local/bin/docker-compose
-chmod +x /usr/local/bin/docker-compose
 
 # Configure Docker daemon
 cat >/etc/docker/daemon.json <<'EOF'
@@ -64,11 +58,11 @@ curl -fsSL https://tailscale.com/install.sh | sh
 # Auth key is single-use and expires after use
 # shellcheck disable=SC2154 # TF will validate and render this
 tailscale up --auth-key="${tailscale_auth_key}" \
-    --hostname="${deployment_id}" \
-    --accept-routes \
-    --accept-dns=false \
-    --ssh \
-    --advertise-tags=tag:staging
+  --hostname="${deployment_id}" \
+  --accept-routes \
+  --accept-dns=false \
+  --ssh \
+  --advertise-tags=tag:staging
 # Clear the auth key from memory
 unset tailscale_auth_key
 
@@ -77,16 +71,16 @@ unset tailscale_auth_key
 arch="$$(uname -m)"
 case "$arch" in
 aarch64 | arm64)
-    cfd_arch="arm64"
-    ;;
+  cfd_arch="arm64"
+  ;;
 x86_64 | amd64)
-    # shellcheck disable=SC2034 # TF will validate and render this
-    cfd_arch="amd64"
-    ;;
+  # shellcheck disable=SC2034 # TF will validate and render this
+  cfd_arch="amd64"
+  ;;
 *)
-    echo "Unsupported architecture: $arch"
-    exit 1
-    ;;
+  echo "Unsupported architecture: $arch"
+  exit 1
+  ;;
 esac
 wget -q "https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-$${cfd_arch}.deb"
 dpkg -i "cloudflared-linux-$${cfd_arch}.deb"
@@ -110,26 +104,24 @@ mkdir -p /etc/vault
 # shellcheck disable=SC2154 # TF will validate and render this
 echo "export VAULT_ADDR=${vault_addr}" >>/etc/environment
 
-# Create docker network
-docker network create phyt || true
-
 # Spot instance termination handler (graceful shutdown only)
 cat >/usr/local/bin/spot-handler.sh <<'HANDLER_SCRIPT'
 #!/bin/bash
+set -euo pipefail
+
 while true; do
-  if curl -s -f http://169.254.169.254/latest/meta-data/spot/termination-time > /dev/null 2>&1; then
+  if curl -s -f http://169.254.169.254/latest/meta-data/spot/termination-time >/dev/null 2>&1; then
     echo "$(date): Spot termination notice received!" >> /var/log/spot-handler.log
-
-    # TODO: Add staging backups
-    # docker-compose will stop workloads cleanly
-    docker-compose --profile $${COMPOSE_PROFILES:-staging} down || true
-
+    # Attempt a graceful down with the staging profile
+    if [ -d /opt/phyt ]; then
+      cd /opt/phyt
+      docker compose --profile "${COMPOSE_PROFILES:-staging}" down || true
+    fi
     break
   fi
   sleep 5
 done
 HANDLER_SCRIPT
-
 chmod +x /usr/local/bin/spot-handler.sh
 
 # Create systemd service for spot handler
