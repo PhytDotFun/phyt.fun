@@ -35,10 +35,11 @@ jobs:
             context: .
             buildargs: |
               PROJECT=workers
-
     outputs:
       skipped: ${{ steps.check_skip.outputs.skipped }}
-
+      image_tag: ${{ steps.meta.outputs.image_tag }}
+      short_sha: ${{ steps.meta.outputs.short_sha }}
+      repo_lc: ${{ steps.meta.outputs.repo_lc }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -47,21 +48,23 @@ jobs:
         id: check_skip
         run: |
           if [[ "${{ github.event.head_commit.message }}" == *"[skip build]"* ]]; then
-            echo "Commit message contains [skip build], skipping image build."
             echo "skipped=true" >> "$GITHUB_OUTPUT"
           else
-            echo "Commit message does not contain [skip build], proceeding with image build."
             echo "skipped=false" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Set SHORT_SHA and IMAGE_TAG
+      - name: Compute metadata (SHORT_SHA, IMAGE_TAG, REPO_LC)
+        id: meta
         run: |
-          echo "SHORT_SHA=${GITHUB_SHA::7}" >> "$GITHUB_ENV"
-          echo "IMAGE_TAG=staging-${GITHUB_SHA::7}" >> "$GITHUB_ENV" # Single source of truth tag
-
-      - name: Set lowercase repository name
-        if: steps.check_skip.outputs.skipped == 'false'
-        run: echo "REPO_LC=$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> "$GITHUB_ENV"
+          SHORT_SHA=${GITHUB_SHA::7}
+          echo "short_sha=${SHORT_SHA}" >> "$GITHUB_OUTPUT"
+          # If build is skipped, deploy will use the rolling tag 'staging'
+          if [[ '${{ steps.check_skip.outputs.skipped }}' == 'true' ]]; then
+            echo "image_tag=staging" >> "$GITHUB_OUTPUT"
+          else
+            echo "image_tag=staging-${SHORT_SHA}" >> "$GITHUB_OUTPUT"
+          fi
+          echo "repo_lc=$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> "$GITHUB_OUTPUT"
 
       - name: Set up Buildx
         if: steps.check_skip.outputs.skipped == 'false'
@@ -83,9 +86,11 @@ jobs:
           file: ${{ matrix.service.dockerfile }}
           push: true
           build-args: ${{ matrix.service.buildargs }}
+          # Build for your Spot ARM64 instance; use dual if you want multi-arch manifests:
+          platforms: linux/arm64
           tags: |
-            ${{ env.REGISTRY }}/${{ env.REPO_LC }}/${{ matrix.service.name }}:${{ env.IMAGE_TAG }}
-            ${{ env.REGISTRY }}/${{ env.REPO_LC }}/${{ matrix.service.name }}:staging
+            ${{ env.REGISTRY }}/${{ steps.meta.outputs.repo_lc }}/${{ matrix.service.name }}:${{ steps.meta.outputs.image_tag }}
+            ${{ env.REGISTRY }}/${{ steps.meta.outputs.repo_lc }}/${{ matrix.service.name }}:staging
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -97,16 +102,13 @@ jobs:
       id-token: write
       contents: read
       packages: read
-
+    env:
+      IMAGE_TAG: ${{ needs.build-images.outputs.image_tag }}
+      SHORT_SHA: ${{ needs.build-images.outputs.short_sha }}
+      REPO_LC: ${{ needs.build-images.outputs.repo_lc }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Set SHORT_SHA / IMAGE_TAG / REPO_LC
-        run: |
-          echo "SHORT_SHA=${GITHUB_SHA::7}" >> "$GITHUB_ENV"
-          echo "IMAGE_TAG=staging-${GITHUB_SHA::7}" >> "$GITHUB_ENV"
-          echo "REPO_LC=$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> "$GITHUB_ENV"
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -149,22 +151,13 @@ jobs:
           echo "::add-mask::${VAULT_TOKEN}"
           echo "VAULT_TOKEN=${VAULT_TOKEN}" >> "$GITHUB_ENV"
 
-      - name: Check Vault token
-        env:
-          VAULT_ADDR: ${{ env.VAULT_ADDR }}
-          VAULT_TOKEN: ${{ env.VAULT_TOKEN }}
-        run: |
-          set -euo pipefail
-          curl -fsS -H "X-Vault-Token: ${VAULT_TOKEN}" \
-            "${VAULT_ADDR}/v1/auth/token/lookup-self" | jq -r '.data.display_name,.data.ttl'
-
       - name: Terraform init/plan/apply (staging infra)
         working-directory: infra/environments/aws-staging
         env:
           TF_VAR_github_repo: ${{ github.repository }}
           TF_VAR_deployment_id: ${{ env.SHORT_SHA }}
           TF_VAR_vault_addr: ${{ env.VAULT_ADDR }}
-          VAULT_ADDR: ${{ env.VAULT_ADDR }} # provider picks these up
+          VAULT_ADDR: ${{ env.VAULT_ADDR }}
           VAULT_TOKEN: ${{ env.VAULT_TOKEN }}
         run: |
           set -euo pipefail
@@ -172,7 +165,7 @@ jobs:
           terraform plan -out=plan.tfplan -input=false
           terraform apply -input=false -auto-approve plan.tfplan
 
-      - name: Mint AppRole credentials (single-use)
+      - name: Mint AppRole credentials
         id: approle
         env:
           VAULT_ADDR: ${{ env.VAULT_ADDR }}
@@ -181,15 +174,12 @@ jobs:
           set -euo pipefail
           ROLE="staging-${SHORT_SHA}"
           HDRS=(-H "X-Vault-Token: ${VAULT_TOKEN}")
-
           ROLE_ID=$(curl -fsS "${HDRS[@]}" \
             "${VAULT_ADDR}/v1/auth/approle/role/${ROLE}/role-id" | jq -er '.data.role_id')
-
           SECRET_ID=$(curl -fsS -X POST "${HDRS[@]}" \
             -H "Content-Type: application/json" \
-            -d '{"num_uses":1,"ttl":"10m"}' \
+            -d '{"num_uses":1,"ttl":"30m"}' \
             "${VAULT_ADDR}/v1/auth/approle/role/${ROLE}/secret-id" | jq -er '.data.secret_id')
-
           echo "::add-mask::${ROLE_ID}"
           echo "::add-mask::${SECRET_ID}"
           {
@@ -197,21 +187,37 @@ jobs:
             echo "SECRET_ID=${SECRET_ID}"
           } >> "$GITHUB_ENV"
 
-      - name: Remote deploy over Tailscale SSH (no env files on disk)
+      - name: Ensure phyt directory exists
         env:
           TS_SSH_DEST: ${{ secrets.TS_SSH_DEST }}
-          GHCR_RO_TOKEN: ${{ secrets.GHCR_RO_TOKEN }}
+        run: |
+          tailscale ssh -T "${TS_SSH_DEST}" 'sudo mkdir -p /opt/phyt && sudo chown $USER:$USER /opt/phyt'
+
+      - name: Ship compose bundle to host
+        env:
+          TS_SSH_DEST: ${{ secrets.TS_SSH_DEST }}
+        run: |
+          set -euo pipefail
+          # add/remove paths as needed
+          tar -czf - docker-compose.yml tooling \
+            | tailscale ssh -T "${TS_SSH_DEST}" 'tar -xzf - -C /opt/phyt'
+
+      - name: Remote deploy over Tailscale SSH
+        env:
+          TS_SSH_DEST: ${{ secrets.TS_SSH_DEST }}
+          GHCR_RO_TOKEN: ${{ secrets.GHCR_RO_TOKEN }} # fine-grained PAT: read:packages
         run: |
           set -euo pipefail
           tailscale ssh -T "${TS_SSH_DEST}" 'bash -lc "set -a; . /dev/stdin; set +a; \
             docker login ghcr.io -u ${GITHUB_ACTOR} -p ${GHCR_RO_TOKEN:-} >/dev/null 2>&1 || true; \
             cd /opt/phyt && docker compose pull && docker compose up -d --remove-orphans; \
             docker logout ghcr.io >/dev/null 2>&1 || true"' <<EOF
-            IMAGE_REGISTRY=${{ env.REGISTRY }}
-            GITHUB_REPOSITORY=${{ env.REPO_LC }}
-            IMAGE_TAG=${{ env.IMAGE_TAG }}
-            COMPOSE_PROFILES=staging
-            VAULT_ADDR=${{ env.VAULT_ADDR }}
-            VAULT_ROLE_ID=${{ env.ROLE_ID }}
-            VAULT_SECRET_ID=${{ env.SECRET_ID }}
-            EOF
+          IMAGE_REGISTRY=${{ env.REGISTRY }}
+          GITHUB_REPOSITORY=${{ env.REPO_LC }}
+          IMAGE_TAG=${{ env.IMAGE_TAG }}
+          COMPOSE_PROFILES=staging
+          VAULT_ADDR=${{ env.VAULT_ADDR }}
+          VAULT_ROLE_ID=${{ env.ROLE_ID }}
+          VAULT_SECRET_ID=${{ env.SECRET_ID }}
+          DEPLOYMENT_ID=${{ env.SHORT_SHA }}
+          EOF
