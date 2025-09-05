@@ -224,8 +224,8 @@ module "staging_instance" {
 
   # Cloudflare and other credentials fetched from Vault at runtime
   cloudflare_tunnel_token = module.cloudflare.tunnel_token
-  cloudflare_account_id   = data.vault_kv_secret_v2.cloudflare.data["account_id"]
-  tailscale_auth_key      = data.vault_kv_secret_v2.tailscale.data["auth_key"]
+  cloudflare_account_id   = data.vault_kv_secret_v2.cloudflare.data["ACCOUNT_ID"]
+  tailscale_auth_key      = data.vault_kv_secret_v2.tailscale.data["AUTH_KEY"]
 
   volume_size = var.volume_size
 }
@@ -234,8 +234,8 @@ module "staging_instance" {
 module "cloudflare" {
   source = "../../terraform/modules/cloudflare"
 
-  zone_id       = data.vault_kv_secret_v2.cloudflare.data["zone_id"]
-  account_id    = data.vault_kv_secret_v2.cloudflare.data["account_id"]
+  zone_id       = data.vault_kv_secret_v2.cloudflare.data["ZONE_ID"]
+  account_id    = data.vault_kv_secret_v2.cloudflare.data["ACCOUNT_ID"]
   deployment_id = var.deployment_id
 }
 
