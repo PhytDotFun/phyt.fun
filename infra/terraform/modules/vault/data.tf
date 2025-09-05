@@ -1,7 +1,7 @@
 # Check if static secrets exist before trying to read them
 data "vault_kv_secrets_list_v2" "secrets_check" {
   mount = "secret"
-  path  = "staging"
+  name  = "staging"
 }
 
 data "vault_kv_secret_v2" "hono_api_static" {
