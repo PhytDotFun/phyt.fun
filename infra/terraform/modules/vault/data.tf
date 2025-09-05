@@ -1,9 +1,3 @@
-# Check if static secrets exist before trying to read them
-data "vault_kv_secrets_list_v2" "secrets_check" {
-  mount = "secret"
-  name  = "staging"
-}
-
 data "vault_kv_secret_v2" "hono_api_static" {
   count = (contains(data.vault_kv_secrets_list_v2.secrets_check.names, "hono-api/staging") || contains(data.vault_kv_secrets_list_v2.secrets_check.names, "hono-api/staging/")) ? 1 : 0
   mount = "secret"
