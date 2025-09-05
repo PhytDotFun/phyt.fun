@@ -1,198 +1,206 @@
 services:
-    vault-agent:
-        image: hashicorp/vault:latest
-        container_name: ${COMPOSE_PROJECT_NAME:-phyt}-vault-agent
-        entrypoint: ['/usr/local/bin/agent-entrypoint.sh']
-        environment:
-            VAULT_ENV: ${VAULT_ENV:-staging}
-            VAULT_ADDR: ${VAULT_ADDR:-}
-            VAULT_NAMESPACE: ${VAULT_NAMESPACE:-staging}
-            VAULT_PATH_PREFIX: ${VAULT_PATH_PREFIX:-phyt}
-            DEPLOYMENT_ID: ${DEPLOYMENT_ID:-staging}
-            VAULT_ROLE_ID: ${VAULT_ROLE_ID}
-            VAULT_SECRET_ID: ${VAULT_SECRET_ID}
-        security_opt: ['no-new-privileges:true']
-        volumes:
-            - ./tooling/vault:/vault/config:ro
-            - ./tooling/vault/templates:/vault/templates:ro
-            - ./tooling/ops/agent-entrypoint.sh:/usr/local/bin/agent-entrypoint.sh:ro
-            # Ephemeral credentials mounted read-only
-            # All secrets are mounted to tmfps volume (RAM only)
-            - vault-secrets:/vault/secrets:rw
-            - vault-credentials:/vault/credentials:rw
-        healthcheck:
-            test:
-                [
-                    'CMD-SHELL',
-                    'curl -fsS http://127.0.0.1:8007/v1/agent/health >/dev/null'
-                ]
-            interval: 30s
-            timeout: 5s
-            retries: 3
-        networks:
-            - phyt
-        profiles: ['dev', 'staging', 'prod']
-        restart: ${RESTART_POLICY:-unless-stopped}
+  vault-agent:
+    image: hashicorp/vault:latest
+    container_name: ${COMPOSE_PROJECT_NAME:-phyt}-vault-agent
+    entrypoint: ["/usr/local/bin/agent-entrypoint.sh"]
+    environment:
+      VAULT_ENV: ${VAULT_ENV:-staging}
+      VAULT_ADDR: ${VAULT_ADDR:-}
+      VAULT_NAMESPACE: ${VAULT_NAMESPACE:-staging}
+      VAULT_PATH_PREFIX: ${VAULT_PATH_PREFIX:-phyt}
+      DEPLOYMENT_ID: ${DEPLOYMENT_ID:-staging}
+      VAULT_ROLE_ID: ${VAULT_ROLE_ID}
+      VAULT_SECRET_ID: ${VAULT_SECRET_ID}
+    security_opt: ["no-new-privileges:true"]
+    volumes:
+      - ./tooling/vault:/vault/config:ro
+      - ./tooling/vault/templates:/vault/templates:ro
+      - ./tooling/ops/agent-entrypoint.sh:/usr/local/bin/agent-entrypoint.sh:ro
+      # Ephemeral credentials mounted read-only
+      # All secrets are mounted to tmfps volume (RAM only)
+      - vault-secrets:/vault/secrets:rw
+      - vault-credentials:/vault/credentials:rw
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "curl -fsS http://127.0.0.1:8007/v1/agent/health >/dev/null",
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    networks:
+      - phyt
+    profiles: ["dev", "staging", "prod"]
+    restart: ${RESTART_POLICY:-unless-stopped}
 
-    postgres:
-        image: postgres:17
-        container_name: ${COMPOSE_PROJECT_NAME:-phyt}-postgres
-        depends_on:
-            vault-agent: { condition: service_healthy }
-        volumes:
-            - postgres-data:/var/lib/postgresql/data
-            - vault-secrets:/vault/secrets:ro
-            - ./tooling/ops/wait-for-secrets.sh:/usr/local/bin/wait-for-secrets.sh:ro
-        entrypoint:
-            [
-                '/usr/local/bin/wait-for-secrets.sh',
-                '/usr/local/bin/docker-entrypoint.sh',
-                'postgres'
-            ]
-        environment:
-            WAIT_FOR_SECRET_FILE: /vault/secrets/postgres.env
-        healthcheck:
-            test:
-                [
-                    'CMD-SHELL',
-                    '. /vault/secrets/postgres.env && pg_isready -U "$POSTGRES_USER" -d "$POSTGRES_DB"'
-                ]
-            interval: 10s
-            timeout: 5s
-            retries: 10
-        networks:
-            - phyt
-        profiles: ['dev', 'staging', 'prod']
-        restart: ${RESTART_POLICY:-unless-stopped}
+  postgres:
+    image: postgres:17
+    container_name: ${COMPOSE_PROJECT_NAME:-phyt}-postgres
+    depends_on:
+      vault-agent: { condition: service_healthy }
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - vault-secrets:/vault/secrets:ro
+      - ./tooling/ops/wait-for-secrets.sh:/usr/local/bin/wait-for-secrets.sh:ro
+    entrypoint:
+      [
+        "/usr/local/bin/wait-for-secrets.sh",
+        "/usr/local/bin/docker-entrypoint.sh",
+        "postgres",
+      ]
+    environment:
+      WAIT_FOR_SECRET_FILE: /vault/secrets/postgres.env
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          '. /vault/secrets/postgres.env && pg_isready -U "$POSTGRES_USER" -d "$POSTGRES_DB"',
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - phyt
+    profiles: ["dev", "staging", "prod"]
+    restart: ${RESTART_POLICY:-unless-stopped}
 
-    pgbouncer:
-        image: edoburu/pgbouncer:latest
-        container_name: ${COMPOSE_PROJECT_NAME:-phyt}-pgbouncer
-        depends_on:
-            vault-agent: { condition: service_healthy }
-            postgres: { condition: service_healthy }
-        volumes:
-            - vault-secrets:/vault/secrets:ro
-            - ./tooling/ops/wait-for-secrets.sh:/usr/local/bin/wait-for-secrets.sh:ro
-            - ./tooling/ops/pgbouncer-entrypoint.sh:/usr/local/bin/pgbouncer-entrypoint.sh:ro
-        entrypoint:
-            [
-                '/usr/local/bin/pgbouncer-entrypoint.sh',
-                '/vault/secrets/pgbouncer.ini'
-            ]
-        environment:
-            WAIT_FOR_SECRET_FILE: /vault/secrets/pgbouncer.ini
-        networks:
-            - phyt
-        profiles: ['dev', 'staging', 'prod']
-        restart: ${RESTART_POLICY:-unless-stopped}
+  pgbouncer:
+    image: edoburu/pgbouncer:latest
+    container_name: ${COMPOSE_PROJECT_NAME:-phyt}-pgbouncer
+    depends_on:
+      vault-agent: { condition: service_healthy }
+      postgres: { condition: service_healthy }
+    volumes:
+      - vault-secrets:/vault/secrets:ro
+      - ./tooling/ops/wait-for-secrets.sh:/usr/local/bin/wait-for-secrets.sh:ro
+      - ./tooling/ops/pgbouncer-entrypoint.sh:/usr/local/bin/pgbouncer-entrypoint.sh:ro
+    entrypoint:
+      ["/usr/local/bin/pgbouncer-entrypoint.sh", "/vault/secrets/pgbouncer.ini"]
+    environment:
+      WAIT_FOR_SECRET_FILE: /vault/secrets/pgbouncer.ini
+    networks:
+      - phyt
+    profiles: ["dev", "staging", "prod"]
+    restart: ${RESTART_POLICY:-unless-stopped}
 
-    redis:
-        image: redis:7-alpine
-        container_name: ${COMPOSE_PROJECT_NAME:-phyt}-redis
-        command: redis-server --maxmemory ${REDIS_MEMORY:-128mb} --maxmemory-policy allkeys-lru --save ""
-        healthcheck:
-            test: ['CMD-SHELL', 'redis-cli -h 127.0.0.1 ping | grep PONG']
-            interval: 5s
-            timeout: 3s
-            retries: 5
-        networks:
-            - phyt
-        profiles: ['dev', 'staging', 'prod']
-        restart: ${RESTART_POLICY:-unless-stopped}
+  redis:
+    image: redis:7-alpine
+    container_name: ${COMPOSE_PROJECT_NAME:-phyt}-redis
+    command: redis-server --maxmemory ${REDIS_MEMORY:-128mb} --maxmemory-policy allkeys-lru --save ""
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli -h 127.0.0.1 ping | grep PONG"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - phyt
+    profiles: ["dev", "staging", "prod"]
+    restart: ${RESTART_POLICY:-unless-stopped}
 
-    hono-api:
-        image: ${IMAGE_REGISTRY:-ghcr.io}/${GITHUB_REPOSITORY}/hono-api:${IMAGE_TAG:-latest}
-        # No container_name -> scale to >= 2 instances
-        # docker compose up -d --scale hono-api=2 nginx
-        depends_on:
-            vault-agent: { condition: service_started }
-            pgbouncer: { condition: service_started }
-            postgres: { condition: service_started }
-            redis: { condition: service_started }
-        volumes:
-            - vault-secrets:/vault/secrets:ro
-            - ./tooling/ops/wait-for-secrets.sh:/usr/local/bin/wait-for-secrets.sh:ro
-        entrypoint:
-            [
-                '/usr/local/bin/wait-for-secrets.sh',
-                'node',
-                '/app/dist/server.js'
-            ]
-        environment:
-            WAIT_FOR_SECRET_FILE: /vault/secrets/hono-api.env
-        healthcheck:
-            test:
-                [
-                    'CMD-SHELL',
-                    'curl -fsS http://127.0.0.1:8000/health >/dev/null || exit 1'
-                ]
-            interval: 15s
-            timeout: 5s
-            retries: 10
-        networks:
-            - phyt
-        profiles: ['staging', 'prod']
-        restart: ${RESTART_POLICY:-always}
+  hono-api:
+    image: ${IMAGE_REGISTRY:-ghcr.io}/${GITHUB_REPOSITORY}/hono-api:${IMAGE_TAG:-latest}
+    # No container_name -> scale to >= 2 instances
+    # docker compose up -d --scale hono-api=2 nginx
+    depends_on:
+      vault-agent: { condition: service_started }
+      pgbouncer: { condition: service_started }
+      postgres: { condition: service_started }
+      redis: { condition: service_started }
+    volumes:
+      - vault-secrets:/vault/secrets:ro
+      - ./tooling/ops/wait-for-secrets.sh:/usr/local/bin/wait-for-secrets.sh:ro
+    entrypoint:
+      ["/usr/local/bin/wait-for-secrets.sh", "node", "/app/dist/server.js"]
+    environment:
+      WAIT_FOR_SECRET_FILE: /vault/secrets/hono-api.env
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "curl -fsS http://127.0.0.1:8000/health >/dev/null || exit 1",
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+    init: true
+    stop_grace_period: 15s
+    networks:
+      - phyt
+    profiles: ["staging", "prod"]
+    restart: ${RESTART_POLICY:-always}
 
-    workers:
-        image: ${IMAGE_REGISTRY:-ghcr.io}/${GITHUB_REPOSITORY}/workers:${IMAGE_TAG:-latest}
-        container_name: workers-${COMPOSE_PROJECT_NAME:-phyt}
-        depends_on:
-            vault-agent:
-                condition: service_started
-            pgbouncer:
-                condition: service_started
-            postgres:
-                condition: service_healthy
-            redis:
-                condition: service_healthy
-        volumes:
-            - vault-secrets:/vault/secrets:ro
-            - ./tooling/ops/wait-for-secrets.sh:/usr/local/bin/wait-for-secrets.sh:ro
-        entrypoint:
-            ['/usr/local/bin/wait-for-secrets.sh', 'node', '/app/dist/index.js']
-        environment:
-            WAIT_FOR_SECRET_FILE: /vault/secrets/workers.env
-        networks:
-            - phyt
-        profiles: ['dev', 'staging', 'prod']
-        restart: ${RESTART_POLICY:-unless-stopped}
+  workers:
+    image: ${IMAGE_REGISTRY:-ghcr.io}/${GITHUB_REPOSITORY}/workers:${IMAGE_TAG:-latest}
+    container_name: workers-${COMPOSE_PROJECT_NAME:-phyt}
+    depends_on:
+      vault-agent:
+        condition: service_started
+      pgbouncer:
+        condition: service_started
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - vault-secrets:/vault/secrets:ro
+      - ./tooling/ops/wait-for-secrets.sh:/usr/local/bin/wait-for-secrets.sh:ro
+    entrypoint:
+      ["/usr/local/bin/wait-for-secrets.sh", "node", "/app/dist/index.js"]
+    environment:
+      WAIT_FOR_SECRET_FILE: /vault/secrets/workers.env
+    init: true
+    stop_grace_period: 15s
+    networks:
+      - phyt
+    profiles: ["dev", "staging", "prod"]
+    restart: ${RESTART_POLICY:-unless-stopped}
 
-    nginx:
-        image: nginx:alpine
-        depends_on: [hono-api]
-        ports:
-            - '${NGINX_BIND_HOST:-127.0.0.1}:${NGINX_BIND_PORT:-8080}:8080'
-        volumes:
-            - ./tooling/nginx/staging.nginx.conf:/templates/staging.nginx.conf:ro
-            - ./tooling/nginx/prod.nginx.conf:/templates/prod.nginx.conf:ro
-            - ./tooling/ops/nginx-entrypoint.sh:/docker-entrypoint.d/99-nginx-mode.sh:ro
-        environment:
-            NGINX_MODE: ${NGINX_MODE:-staging}
-        networks:
-            - phyt
-        profiles: ['staging', 'prod']
-        restart: ${RESTART_POLICY:-unless-stopped}
+  nginx:
+    image: nginx:alpine
+    depends_on:
+      hono-api:
+        condition: service_healthy
+    ports:
+      - "${NGINX_BIND_HOST:-127.0.0.1}:${NGINX_BIND_PORT:-8080}:8080"
+    volumes:
+      - ./tooling/nginx/staging.nginx.conf:/templates/staging.nginx.conf:ro
+      - ./tooling/nginx/prod.nginx.conf:/templates/prod.nginx.conf:ro
+      - ./tooling/ops/nginx-entrypoint.sh:/docker-entrypoint.d/99-nginx-mode.sh:ro
+    environment:
+      NGINX_MODE: ${NGINX_MODE:-staging}
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "wget -qO- http://127.0.0.1:8080/nginx-health >/dev/null || exit 1",
+        ]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+    networks:
+      - phyt
+    profiles: ["staging", "prod"]
+    restart: ${RESTART_POLICY:-unless-stopped}
 
 networks:
-    phyt:
-        driver: bridge
-        ipam:
-            config:
-                - subnet: 172.20.0.0/16
+  phyt:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
 
 volumes:
-    postgres-data:
-    vault-secrets:
-        driver: local
-        driver_opts:
-            type: tmpfs
-            device: tmpfs
-            o: nodev,nosuid,noexec,size=10m
-    vault-credentials:
-        driver: local
-        driver_opts:
-            type: tmpfs
-            device: tmpfs
-            o: nodev,nosuid,noexec,size=1m
+  postgres-data:
+  vault-secrets:
+    driver: local
+    driver_opts:
+      type: tmpfs
+      device: tmpfs
+      o: nodev,nosuid,noexec,size=10m
+  vault-credentials:
+    driver: local
+    driver_opts:
+      type: tmpfs
+      device: tmpfs
+      o: nodev,nosuid,noexec,size=1m
