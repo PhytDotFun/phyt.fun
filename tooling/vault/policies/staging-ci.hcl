@@ -14,3 +14,6 @@ path "sys/capabilities-self" { capabilities = ["update"] }
 # Name the runtime role: staging-app
 path "auth/approle/role/staging-app/role-id" { capabilities = ["read"] }
 path "auth/approle/role/staging-app/secret-id" { capabilities = ["update"] }
+
+# Allow CI to create child tokens
+path "auth/token/create" { capabilities = ["update"] }
