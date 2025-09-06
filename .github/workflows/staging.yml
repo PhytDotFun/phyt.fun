@@ -53,12 +53,11 @@ jobs:
             echo "skipped=false" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Compute metadata (SHORT_SHA, IMAGE_TAG, REPO_LC)
+      - name: Compute metadata
         id: meta
         run: |
           SHORT_SHA=${GITHUB_SHA::7}
           echo "short_sha=${SHORT_SHA}" >> "$GITHUB_OUTPUT"
-          # If build is skipped, deploy will use the rolling tag 'staging'
           if [[ '${{ steps.check_skip.outputs.skipped }}' == 'true' ]]; then
             echo "image_tag=staging" >> "$GITHUB_OUTPUT"
           else
@@ -151,6 +150,18 @@ jobs:
           echo "::add-mask::${VAULT_TOKEN}"
           echo "VAULT_TOKEN=${VAULT_TOKEN}" >> "$GITHUB_ENV"
 
+      - name: Export Cloudflare token from Vault
+        env:
+          VAULT_ADDR: ${{ env.VAULT_ADDR }}
+          VAULT_TOKEN: ${{ env.VAULT_TOKEN }}
+        run: |
+          set -euo pipefail
+          cf_json=$(curl -fsS -H "X-Vault-Token: ${VAULT_TOKEN}" \
+            "${VAULT_ADDR}/v1/secret/data/staging/cloudflare")
+          CF_TOKEN=$(echo "$cf_json" | jq -er '.data.data.API_TOKEN')
+          echo "TF_VAR_cloudflare_api_token=${CF_TOKEN}" >> "$GITHUB_ENV"
+          echo "CLOUDFLARE_API_TOKEN=${CF_TOKEN}" >> "$GITHUB_ENV"
+
       - name: Terraform init/plan/apply (staging infra)
         working-directory: infra/environments/aws-staging
         env:
@@ -165,14 +176,14 @@ jobs:
           terraform plan -out=plan.tfplan -input=false
           terraform apply -input=false -auto-approve plan.tfplan
 
-      - name: Mint AppRole credentials
+      - name: Mint approle credentials
         id: approle
         env:
           VAULT_ADDR: ${{ env.VAULT_ADDR }}
           VAULT_TOKEN: ${{ env.VAULT_TOKEN }}
         run: |
           set -euo pipefail
-          ROLE="staging-${SHORT_SHA}"
+          ROLE="staging-app"
           HDRS=(-H "X-Vault-Token: ${VAULT_TOKEN}")
           ROLE_ID=$(curl -fsS "${HDRS[@]}" \
             "${VAULT_ADDR}/v1/auth/approle/role/${ROLE}/role-id" | jq -er '.data.role_id')
@@ -182,10 +193,7 @@ jobs:
             "${VAULT_ADDR}/v1/auth/approle/role/${ROLE}/secret-id" | jq -er '.data.secret_id')
           echo "::add-mask::${ROLE_ID}"
           echo "::add-mask::${SECRET_ID}"
-          {
-            echo "ROLE_ID=${ROLE_ID}"
-            echo "SECRET_ID=${SECRET_ID}"
-          } >> "$GITHUB_ENV"
+          { echo "ROLE_ID=${ROLE_ID}"; echo "SECRET_ID=${SECRET_ID}"; } >> "$GITHUB_ENV"
 
       - name: Ensure phyt directory exists
         env:
@@ -198,14 +206,13 @@ jobs:
           TS_SSH_DEST: ${{ secrets.TS_SSH_DEST }}
         run: |
           set -euo pipefail
-          # add/remove paths as needed
           tar -czf - docker-compose.yml tooling \
             | tailscale ssh -T "${TS_SSH_DEST}" 'tar -xzf - -C /opt/phyt'
 
       - name: Remote deploy over Tailscale SSH
         env:
           TS_SSH_DEST: ${{ secrets.TS_SSH_DEST }}
-          GHCR_RO_TOKEN: ${{ secrets.GHCR_RO_TOKEN }} # fine-grained PAT: read:packages
+          GHCR_RO_TOKEN: ${{ secrets.GHCR_RO_TOKEN }}
         run: |
           set -euo pipefail
           tailscale ssh -T "${TS_SSH_DEST}" 'bash -lc "set -a; . /dev/stdin; set +a; \
@@ -219,5 +226,4 @@ jobs:
           VAULT_ADDR=${{ env.VAULT_ADDR }}
           VAULT_ROLE_ID=${{ env.ROLE_ID }}
           VAULT_SECRET_ID=${{ env.SECRET_ID }}
-          DEPLOYMENT_ID=${{ env.SHORT_SHA }}
           EOF
