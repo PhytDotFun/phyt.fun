@@ -6,6 +6,10 @@ terraform {
       source  = "hashicorp/aws"
       version = "~> 6.0"
     }
+    null = {
+      source  = "hashicorp/null"
+      version = "~> 3.0"
+    }
   }
 }
 
@@ -69,9 +73,18 @@ resource "aws_eip" "staging" {
   }
 }
 
+resource "null_resource" "wait_for_instance" {
+  depends_on = [aws_spot_instance_request.staging]
+
+  provisioner "local-exec" {
+    command = "sleep 60"
+  }
+}
+
 resource "aws_eip_association" "staging" {
   instance_id   = aws_spot_instance_request.staging.spot_instance_id
   allocation_id = aws_eip.staging.id
+  depends_on    = [null_resource.wait_for_instance]
 }
 
 # CloudWatch alarm for spot instance termination
