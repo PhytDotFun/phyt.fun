@@ -17,7 +17,10 @@ terraform {
   }
 }
 
-# Providers use data sources - no stored credentials
+########################
+# Providers (no static creds in code)
+########################
+
 provider "aws" {
   region = var.aws_region
 
@@ -32,23 +35,39 @@ provider "aws" {
   }
 }
 
+# Vault use VAULT_ADDR & VAULT_TOKEN from CI
 provider "vault" {}
 
-# Fetch Cloudflare credentials from Vault at runtime
-data "vault_kv_secret_v2" "cloudflare" {
-  mount = "secret"
-  name  = "cloudflare/staging"
+# Cloudflare provider must NOT read from a data source here.
+# CI sets TF_VAR_cloudflare_api_token (or CLOUDFLARE_API_TOKEN).
+variable "cloudflare_api_token" {
+  type      = string
+  sensitive = true
 }
 
 provider "cloudflare" {
-  api_token = data.vault_kv_secret_v2.cloudflare.data["API_TOKEN"]
+  api_token = var.cloudflare_api_token
 }
 
-# Fetch Tailscale auth from Vault at runtime
+########################
+# Secrets from Vault (data only)
+########################
+
+# Cloudflare account/zone (values used as plain strings elsewhere)
+data "vault_kv_secret_v2" "cloudflare" {
+  mount = "secret"
+  name  = "staging/cloudflare"
+}
+
+# Tailscale ephemeral auth key for user-data
 data "vault_kv_secret_v2" "tailscale" {
   mount = "secret"
-  name  = "tailscale/staging"
+  name  = "staging/tailscale"
 }
+
+########################
+# AMI / AZs
+########################
 
 # Get latest Ubuntu AMI
 data "aws_ami" "ubuntu" {
@@ -59,32 +78,31 @@ data "aws_ami" "ubuntu" {
     name   = "name"
     values = ["ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-arm64-server-*"]
   }
-
   filter {
     name   = "virtualization-type"
     values = ["hvm"]
   }
-
   filter {
     name   = "architecture"
     values = ["arm64"]
   }
-
   filter {
     name   = "root-device-type"
     values = ["ebs"]
   }
-
   filter {
     name   = "image-type"
     values = ["machine"]
   }
 }
 
-
 data "aws_availability_zones" "available" {
   state = "available"
 }
+
+########################
+# Networking
+########################
 
 # VPC Config
 resource "aws_vpc" "staging" {
@@ -134,14 +152,16 @@ resource "aws_route_table_association" "public" {
   route_table_id = aws_route_table.public.id
 }
 
+########################
+# Security & IAM
+########################
+
 # Security group
 resource "aws_security_group" "staging" {
   name_prefix = "staging-sg-"
   vpc_id      = aws_vpc.staging.id
 
-  # Removed dead/unsafe ingress (no 127.0.0.1/32, no SSH—Tailscale handles SSH)
-  # Intentionally no ingress because nginx listens on loopback and is reached via tunnel.
-
+  # No ingress: nginx binds 127.0.0.1 and is exposed via Cloudflare Tunnel.
   egress {
     from_port   = 0
     to_port     = 0
@@ -195,16 +215,9 @@ resource "aws_iam_instance_profile" "staging" {
   role = aws_iam_role.staging_instance.name
 }
 
-# Generate vault approle credentials for this deployment
-resource "vault_approle_auth_backend_role" "staging" {
-  backend        = "approle"
-  role_name      = "staging-${var.deployment_id}"
-  token_policies = ["staging-approle"]
-
-  # Very short TTL
-  token_ttl     = 300
-  token_max_ttl = 600
-}
+########################
+# EC2 Spot instance
+########################
 
 # Spot instance with dynamic credentials
 module "staging_instance" {
@@ -219,32 +232,24 @@ module "staging_instance" {
   iam_instance_profile = aws_iam_instance_profile.staging.name
   vault_addr           = var.vault_addr
 
-  # Pass tunnel ID so user-data can write correct cloudflared credentials
-  cloudflare_tunnel_id = module.cloudflare.tunnel_id
-
-  # Cloudflare and other credentials fetched from Vault at runtime
+  # Cloudflare tunnel info for user-data
+  cloudflare_tunnel_id    = module.cloudflare.tunnel_id
   cloudflare_tunnel_token = module.cloudflare.tunnel_token
   cloudflare_account_id   = data.vault_kv_secret_v2.cloudflare.data["ACCOUNT_ID"]
-  tailscale_auth_key      = data.vault_kv_secret_v2.tailscale.data["AUTH_KEY"]
+
+  # Tailscale ephemeral auth key
+  tailscale_auth_key = data.vault_kv_secret_v2.tailscale.data["AUTH_KEY"]
 
   volume_size = var.volume_size
 }
 
-# Cloudflare config
-module "cloudflare" {
-  source = "../../terraform/modules/cloudflare"
+########################
+# Cloudflare tunnel module
+########################
 
+module "cloudflare" {
+  source        = "../../terraform/modules/cloudflare"
   zone_id       = data.vault_kv_secret_v2.cloudflare.data["ZONE_ID"]
   account_id    = data.vault_kv_secret_v2.cloudflare.data["ACCOUNT_ID"]
-  deployment_id = var.deployment_id
-}
-
-# Vault config with dynamic secrets
-module "vault" {
-  address = var.vault_addr
-  source  = "../../terraform/modules/vault"
-  db_name = "primary_staging"
-  db_user = "phyt"
-
   deployment_id = var.deployment_id
 }
