@@ -110,7 +110,7 @@ while true; do
     # Attempt a graceful down with the staging profile
     if [ -d /opt/phyt ]; then
       cd /opt/phyt
-      docker compose --profile "${{COMPOSE_PROFILES:-staging}}" down || true
+      docker compose --profile "$${COMPOSE_PROFILES:-staging}" down || true
     fi
     break
   fi
