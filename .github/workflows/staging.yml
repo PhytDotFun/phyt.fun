@@ -105,6 +105,7 @@ jobs:
       IMAGE_TAG: ${{ needs.build-images.outputs.image_tag }}
       SHORT_SHA: ${{ needs.build-images.outputs.short_sha }}
       REPO_LC: ${{ needs.build-images.outputs.repo_lc }}
+      TS_SSH_DEST: staging-${{ needs.build-images.outputs.short_sha }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -196,35 +197,50 @@ jobs:
           echo "::add-mask::${SECRET_ID}"
           { echo "ROLE_ID=${ROLE_ID}"; echo "SECRET_ID=${SECRET_ID}"; } >> "$GITHUB_ENV"
 
+      - name: Wait for Tailscale node to be ready
+        run: |
+          echo "Waiting for ${TS_SSH_DEST} to appear in Tailscale network..."
+          for i in {1..30}; do
+            if tailscale status --json | jq -e --arg hostname "${TS_SSH_DEST}" '.Peer[] | select(.HostName == $hostname)' > /dev/null; then
+              echo "Found ${TS_SSH_DEST} in Tailscale network"
+              break
+            fi
+            echo "Attempt $i/30: ${TS_SSH_DEST} not found, waiting 10 seconds..."
+            sleep 10
+          done
+
+          if ! tailscale ping "${TS_SSH_DEST}" --c 1 --timeout 10s; then
+            echo "ERROR: Cannot ping ${TS_SSH_DEST}"
+            echo "Current Tailscale status:"
+            tailscale status
+            exit 1
+          fi
+          echo "${TS_SSH_DEST} is ready"
+
       - name: Ensure phyt directory exists
-        env:
-          TS_SSH_DEST: staging-${{ env.SHORT_SHA }}
         run: |
           tailscale ssh "${TS_SSH_DEST}" 'sudo mkdir -p /opt/phyt && sudo chown $USER:$USER /opt/phyt'
 
       - name: Ship compose bundle to host
-        env:
-          TS_SSH_DEST: staging-${{ env.SHORT_SHA }}
         run: |
           set -euo pipefail
           tar -czf - docker-compose.yml tooling \
-            | tailscale ssh -T "${TS_SSH_DEST}" 'tar -xzf - -C /opt/phyt'
+            | tailscale ssh "${TS_SSH_DEST}" 'tar -xzf - -C /opt/phyt'
 
       - name: Remote deploy over Tailscale SSH
         env:
-          TS_SSH_DEST: staging-${{ env.SHORT_SHA }}
           GHCR_RO_TOKEN: ${{ secrets.GHCR_RO_TOKEN }}
         run: |
           set -euo pipefail
-          tailscale ssh -T "${TS_SSH_DEST}" 'bash -lc "set -a; . /dev/stdin; set +a; \
+          tailscale ssh "${TS_SSH_DEST}" 'bash -lc "set -a; . /dev/stdin; set +a; \
             docker login ghcr.io -u ${GITHUB_ACTOR} -p ${GHCR_RO_TOKEN:-} >/dev/null 2>&1 || true; \
             cd /opt/phyt && docker compose pull && docker compose up -d --remove-orphans; \
             docker logout ghcr.io >/dev/null 2>&1 || true"' <<EOF
-          IMAGE_REGISTRY=${{ env.REGISTRY }}
-          GITHUB_REPOSITORY=${{ env.REPO_LC }}
-          IMAGE_TAG=${{ env.IMAGE_TAG }}
-          COMPOSE_PROFILES=staging
-          VAULT_ADDR=${{ env.VAULT_ADDR }}
-          VAULT_ROLE_ID=${{ env.ROLE_ID }}
-          VAULT_SECRET_ID=${{ env.SECRET_ID }}
-          EOF
+              IMAGE_REGISTRY=${{ env.REGISTRY }}
+              GITHUB_REPOSITORY=${{ env.REPO_LC }}
+              IMAGE_TAG=${{ env.IMAGE_TAG }}
+              COMPOSE_PROFILES=staging
+              VAULT_ADDR=${{ env.VAULT_ADDR }}
+              VAULT_ROLE_ID=${{ env.ROLE_ID }}
+              VAULT_SECRET_ID=${{ env.SECRET_ID }}
+            EOF
