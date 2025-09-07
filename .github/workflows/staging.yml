@@ -157,8 +157,9 @@ jobs:
         run: |
           set -euo pipefail
           cf_json=$(curl -fsS -H "X-Vault-Token: ${VAULT_TOKEN}" \
-            "${VAULT_ADDR}/v1/secret/data/staging/cloudflare")
+          "${VAULT_ADDR}/v1/secret/data/staging/cloudflare")
           CF_TOKEN=$(echo "$cf_json" | jq -er '.data.data.API_TOKEN')
+          echo "::add-mask::${CF_TOKEN}"
           echo "TF_VAR_cloudflare_api_token=${CF_TOKEN}" >> "$GITHUB_ENV"
           echo "CLOUDFLARE_API_TOKEN=${CF_TOKEN}" >> "$GITHUB_ENV"
 
@@ -197,13 +198,13 @@ jobs:
 
       - name: Ensure phyt directory exists
         env:
-          TS_SSH_DEST: ${{ secrets.TS_SSH_DEST }}
+          TS_SSH_DEST: staging-${{ env.SHORT_SHA }}
         run: |
           tailscale ssh "${TS_SSH_DEST}" 'sudo mkdir -p /opt/phyt && sudo chown $USER:$USER /opt/phyt'
 
       - name: Ship compose bundle to host
         env:
-          TS_SSH_DEST: ${{ secrets.TS_SSH_DEST }}
+          TS_SSH_DEST: staging-${{ env.SHORT_SHA }}
         run: |
           set -euo pipefail
           tar -czf - docker-compose.yml tooling \
@@ -211,7 +212,7 @@ jobs:
 
       - name: Remote deploy over Tailscale SSH
         env:
-          TS_SSH_DEST: ${{ secrets.TS_SSH_DEST }}
+          TS_SSH_DEST: staging-${{ env.SHORT_SHA }}
           GHCR_RO_TOKEN: ${{ secrets.GHCR_RO_TOKEN }}
         run: |
           set -euo pipefail

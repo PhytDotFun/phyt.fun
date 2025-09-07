@@ -58,7 +58,7 @@ curl -fsSL https://tailscale.com/install.sh | sh
 # Auth key is single-use and expires after use
 # shellcheck disable=SC2154 # TF will validate and render this
 tailscale up --auth-key="${tailscale_auth_key}" \
-  --hostname="${deployment_id}" \
+  --hostname="staging-${deployment_id}" \
   --accept-routes \
   --accept-dns=false \
   --ssh \
