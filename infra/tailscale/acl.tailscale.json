@@ -1,21 +1,41 @@
 {
-    "ssh": [
-        {
-            "action": "accept",
-            "src": ["tag:ci"],
-            "dst": ["tag:staging"],
-            "users": ["ubuntu"]
-        },
-        {
-            "action": "accept",
-            "src": ["tag:dokploy"],
-            "dst": ["tag:staging"],
-            "users": ["ubuntu"]
-        }
-    ],
-    "tagOwners": {
-        "tag:staging": ["autogroup:admin"],
-        "tag:ci": ["autogroup:admin"],
-        "tag:dokploy": ["autogroup:admin"]
+  "ssh": [
+    {
+      "action": "accept",
+      "src": [
+        "tag:ci"
+      ],
+      "dst": [
+        "tag:staging"
+      ],
+      "users": [
+        "ubuntu",
+        "runner"
+      ]
+    },
+    {
+      "action": "accept",
+      "src": [
+        "tag:dokploy"
+      ],
+      "dst": [
+        "tag:staging"
+      ],
+      "users": [
+        "ubuntu",
+        "runner"
+      ]
     }
+  ],
+  "tagOwners": {
+    "tag:staging": [
+      "autogroup:admin"
+    ],
+    "tag:ci": [
+      "autogroup:admin"
+    ],
+    "tag:dokploy": [
+      "autogroup:admin"
+    ]
+  }
 }
