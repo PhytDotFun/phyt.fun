@@ -209,13 +209,21 @@ jobs:
             sleep 10
           done
 
-          if ! tailscale ping "${TS_SSH_DEST}" --c 1 --timeout 10s; then
+          if ! timeout 10s tailscale ping "${TS_SSH_DEST}"; then
             echo "ERROR: Cannot ping ${TS_SSH_DEST}"
             echo "Current Tailscale status:"
             tailscale status
-            exit 1
+            # Sometimes the device is ready but ping fails - try SSH directly
+            echo "Attempting direct SSH test..."
+            if tailscale ssh "${TS_SSH_DEST}" 'echo "SSH connection successful"' 2>/dev/null; then
+              echo "SSH connection works, proceeding despite ping failure"
+            else
+              echo "SSH also failed, exiting"
+              exit 1
+            fi
+          else
+            echo "${TS_SSH_DEST} is ready"
           fi
-          echo "${TS_SSH_DEST} is ready"
 
       - name: Ensure phyt directory exists
         run: |
