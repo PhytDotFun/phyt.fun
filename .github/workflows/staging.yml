@@ -199,7 +199,7 @@ jobs:
         env:
           TS_SSH_DEST: ${{ secrets.TS_SSH_DEST }}
         run: |
-          tailscale ssh -T "${TS_SSH_DEST}" 'sudo mkdir -p /opt/phyt && sudo chown $USER:$USER /opt/phyt'
+          tailscale ssh "${TS_SSH_DEST}" 'sudo mkdir -p /opt/phyt && sudo chown $USER:$USER /opt/phyt'
 
       - name: Ship compose bundle to host
         env:
