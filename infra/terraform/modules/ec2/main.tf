@@ -20,6 +20,12 @@ resource "aws_instance" "staging" {
   vpc_security_group_ids = [var.security_group_id]
   iam_instance_profile   = var.iam_instance_profile
 
+  metadata_options {
+    http_endpoint               = "enabled"  # keep reachable
+    http_tokens                 = "required" # enforce IMDSv2
+    http_put_response_hop_limit = 1
+  }
+
   user_data = templatefile("${path.module}/user-data.sh", {
     deployment_id           = var.deployment_id
     cloudflare_tunnel_token = var.cloudflare_tunnel_token
