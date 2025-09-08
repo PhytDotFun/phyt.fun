@@ -172,7 +172,7 @@ jobs:
         run: |
           set -euo pipefail
           app_json=$(curl -fsS -H "X-Vault-Token: ${VAULT_TOKEN}" \
-            "${VAULT_ADDR}/v1/secret/data/staging/github-app")
+            "${VAULT_ADDR}/v1/secret/data/staging/gh-app)
           APP_ID=$(echo "$app_json" | jq -er '.data.data.APP_ID')
           PRIV=$(echo "$app_json" | jq -er '.data.data.PRIVATE_KEY')
           echo "::add-mask::${PRIV}"
