@@ -172,7 +172,7 @@ jobs:
         run: |
           set -euo pipefail
           app_json=$(curl -fsS -H "X-Vault-Token: ${VAULT_TOKEN}" \
-            "${VAULT_ADDR}/v1/secret/data/staging/gh-app)
+          "${VAULT_ADDR}/v1/secret/data/staging/gh-app")
           APP_ID=$(echo "$app_json" | jq -er '.data.data.APP_ID')
           PRIV=$(echo "$app_json" | jq -er '.data.data.PRIVATE_KEY')
           echo "::add-mask::${PRIV}"
@@ -276,13 +276,14 @@ jobs:
 
           tailscale ssh "ubuntu@${TS_SSH_DEST}" 'chmod +x /opt/phyt/deploy/remote-deploy.sh'
 
-          tailscale ssh "ubuntu@${TS_SSH_DEST}" "bash -lc 'IMAGE_REGISTRY=${{ env.REGISTRY }} \
-                GITHUB_REPOSITORY=${{ env.REPO_LC }} \
-                IMAGE_TAG=${{ env.IMAGE_TAG }} \
-                COMPOSE_PROFILES=staging \
-                VAULT_ADDR=${{ env.VAULT_ADDR }} \
-                VAULT_ROLE_ID=${{ env.ROLE_ID }} \
-                VAULT_SECRET_ID=${{ env.SECRET_ID }} \
-                GHCR_USER=x-access-token \
-                GHCR_TOKEN=${GHCR_APP_TOKEN:-} \
-                /opt/phyt/deploy/remote-deploy.sh'"
+          tailscale ssh "ubuntu@${TS_SSH_DEST}" \
+            IMAGE_REGISTRY="${{ env.REGISTRY }}" \
+            GITHUB_REPOSITORY="${{ env.REPO_LC }}" \
+            IMAGE_TAG="${{ env.IMAGE_TAG }}" \
+            COMPOSE_PROFILES="staging" \
+            VAULT_ADDR="${{ env.VAULT_ADDR }}" \
+            VAULT_ROLE_ID="${{ env.ROLE_ID }}" \
+            VAULT_SECRET_ID="${{ env.SECRET_ID }}" \
+            GHCR_USER="x-access-token" \
+            GHCR_TOKEN="${GHCR_APP_TOKEN}" \
+            /opt/phyt/deploy/remote-deploy.sh
