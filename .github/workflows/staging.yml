@@ -172,24 +172,41 @@ jobs:
         run: |
           set -euo pipefail
           app_json=$(curl -fsS -H "X-Vault-Token: ${VAULT_TOKEN}" \
-          "${VAULT_ADDR}/v1/secret/data/staging/gh-app")
+            "${VAULT_ADDR}/v1/secret/data/staging/gh-app")
           APP_ID=$(echo "$app_json" | jq -er '.data.data.APP_ID')
-          PRIV=$(echo "$app_json" | jq -er '.data.data.PRIVATE_KEY')
-          echo "::add-mask::${PRIV}"
+          PRIV_B64=$(echo "$app_json" | jq -er '.data.data.PRIVATE_KEY')
+          echo "::add-mask::${PRIV_B64}"
           {
             echo "GH_APP_ID=${APP_ID}"
-            printf "GH_APP_PRIVATE_KEY<<'EOF'\n%s\nEOF\n" "$PRIV"
+            echo "GH_APP_PRIVATE_KEY_B64=${PRIV_B64}"
           } >> "$GITHUB_ENV"
 
-      - name: Mint GitHub app installation token
+      - name: Mint Github app credentials
         id: gh_app_token
+        run: |
+          set -euo pipefail
+          # Decode the base64 private key
+          DECODED_KEY=$(echo "${{ env.GH_APP_PRIVATE_KEY_B64 }}" | base64 -d)
+          echo "::add-mask::${DECODED_KEY}"
+
+          # Write to a temporary file for the action
+          echo "$DECODED_KEY" > /tmp/gh_app_key.pem
+          chmod 600 /tmp/gh_app_key.pem
+
+      - name: Create GitHub app token
+        id: create_token
         uses: actions/create-github-app-token@v1
         with:
           app-id: ${{ env.GH_APP_ID }}
-          private-key: ${{ env.GH_APP_PRIVATE_KEY }}
+          private-key-path: /tmp/gh_app_key.pem
           owner: ${{ github.repository_owner }}
           repositories: |
             phyt.fun
+
+      - name: Clean up private key file
+        if: always()
+        run: |
+          rm -f /tmp/gh_app_key.pem
 
       - name: Terraform init/plan/apply (staging infra)
         working-directory: infra/environments/aws-staging
@@ -249,6 +266,7 @@ jobs:
           else
             echo "${TS_SSH_DEST} is ready"
           fi
+
       - name: Ensure phyt directory exists
         run: |
           tailscale ssh "ubuntu@${TS_SSH_DEST}" 'sudo mkdir -p /opt/phyt && sudo chown ubuntu:ubuntu /opt/phyt'
@@ -261,18 +279,15 @@ jobs:
 
       - name: Remote deploy over Tailscale SSH
         env:
-          GHCR_APP_TOKEN: ${{ steps.gh_app_token.outputs.token }}
+          GHCR_APP_TOKEN: ${{ steps.create_token.outputs.token }}
         run: |
           set -euo pipefail
-
           # Ship deployment script
           tailscale ssh "ubuntu@${TS_SSH_DEST}" 'sudo mkdir -p /opt/phyt/deploy && sudo chown -R ubuntu:ubuntu /opt/phyt/deploy'
           scp -o StrictHostKeyChecking=no \
           infra/environments/aws-staging/remote-deploy.sh \
           "ubuntu@${TS_SSH_DEST}:/opt/phyt/deploy/remote-deploy.sh"
-
           tailscale ssh "ubuntu@${TS_SSH_DEST}" 'chmod +x /opt/phyt/deploy/remote-deploy.sh'
-
           tailscale ssh "ubuntu@${TS_SSH_DEST}" \
             IMAGE_REGISTRY="${{ env.REGISTRY }}" \
             GITHUB_REPOSITORY="${{ env.REPO_LC }}" \
@@ -281,6 +296,3 @@ jobs:
             VAULT_ADDR="${{ env.VAULT_ADDR }}" \
             VAULT_ROLE_ID="${{ env.ROLE_ID }}" \
             VAULT_SECRET_ID="${{ env.SECRET_ID }}" \
-            GHCR_USER="x-access-token" \
-            GHCR_TOKEN="${GHCR_APP_TOKEN}" \
-            /opt/phyt/deploy/remote-deploy.sh
