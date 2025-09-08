@@ -85,7 +85,7 @@ jobs:
           file: ${{ matrix.service.dockerfile }}
           push: true
           build-args: ${{ matrix.service.buildargs }}
-          # Build for your Spot ARM64 instance; use dual if you want multi-arch manifests:
+          # Build for ARM64 instance; use dual if want multi-arch manifests:
           platforms: linux/arm64
           tags: |
             ${{ env.REGISTRY }}/${{ steps.meta.outputs.repo_lc }}/${{ matrix.service.name }}:${{ steps.meta.outputs.image_tag }}
@@ -240,15 +240,22 @@ jobs:
           GHCR_RO_TOKEN: ${{ secrets.GHCR_RO_TOKEN }}
         run: |
           set -euo pipefail
-          tailscale ssh "ubuntu@${TS_SSH_DEST}" 'bash -lc "set -a; . /dev/stdin; set +a; \
-            docker login ghcr.io -u ${GITHUB_ACTOR} -p ${GHCR_RO_TOKEN:-} >/dev/null 2>&1 || true; \
-            cd /opt/phyt && docker compose pull && docker compose up -d --remove-orphans; \
-            docker logout ghcr.io >/dev/null 2>&1 || true"' <<EOF
-              IMAGE_REGISTRY=${{ env.REGISTRY }}
-              GITHUB_REPOSITORY=${{ env.REPO_LC }}
-              IMAGE_TAG=${{ env.IMAGE_TAG }}
-              COMPOSE_PROFILES=staging
-              VAULT_ADDR=${{ env.VAULT_ADDR }}
-              VAULT_ROLE_ID=${{ env.ROLE_ID }}
-              VAULT_SECRET_ID=${{ env.SECRET_ID }}
-            EOF
+
+          # Ship deployment script
+          tailscale ssh "ubuntu@${TS_SSH_DEST}" 'sudo mkdir -p /opt/phyt/deploy'
+          scp -o StrictHostKeyChecking=no \
+          infra/environments/aws-staging/remote-deploy.sh \
+          "ubuntu@${TS_SSH_DEST}:/opt/phyt/deploy/remote-deploy.sh"
+
+          tailscale ssh "ubuntu@${TS_SSH_DEST}" 'chmod +x /opt/phyt/deploy/remote-deploy.sh'
+
+          tailscale ssh "ubuntu@${TS_SSH_DEST}" "bash -lc 'IMAGE_REGISTRY=${{ env.REGISTRY }} \
+                GITHUB_REPOSITORY=${{ env.REPO_LC }} \
+                IMAGE_TAG=${{ env.IMAGE_TAG }} \
+                COMPOSE_PROFILES=staging \
+                VAULT_ADDR=${{ env.VAULT_ADDR }} \
+                VAULT_ROLE_ID=${{ env.ROLE_ID }} \
+                VAULT_SECRET_ID=${{ env.SECRET_ID }} \
+                GHCR_USER=${GITHUB_ACTOR} \
+                GHCR_TOKEN=${GHCR_RO_TOKEN:-} \
+                /opt/phyt/deploy/remote-deploy.sh'"
