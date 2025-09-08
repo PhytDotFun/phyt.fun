@@ -232,30 +232,38 @@ jobs:
           { echo "ROLE_ID=${ROLE_ID}"; echo "SECRET_ID=${SECRET_ID}"; } >> "$GITHUB_ENV"
 
       - name: Wait for Tailscale node to be ready
+        shell: bash
         run: |
           set -euo pipefail
-          echo "Waiting for ${TS_SSH_DEST} to appear in Tailscale network..."
+
+          DEST="${TS_SSH_DEST}"
+          echo "Waiting for '${DEST}' to appear in Tailscale and become SSH-able..."
+
           for i in {1..30}; do
-            if tailscale status | grep -q "${TS_SSH_DEST}"; then
-              echo "Found ${TS_SSH_DEST}"
-              break
+            PEER_JSON="$(tailscale status --json || true)"
+            TS_IP="$(jq -r --arg H "$DEST" '
+              (.Peer[]? | select(.HostName==$H or (.DNSName|startswith($H+"."))) | .TailscaleIPs[0]) // empty
+            ' <<<"$PEER_JSON")"
+
+            if [[ -n "${TS_IP}" ]]; then
+              echo "Found peer ${DEST} at ${TS_IP}"
+              if tailscale ssh -q -o ConnectTimeout=5 "ubuntu@${TS_IP}" 'echo SSH_OK' 2>/dev/null; then
+                echo "Tailscale SSH OK"
+                echo "TS_TARGET_IP=${TS_IP}" >> "$GITHUB_ENV"
+                exit 0
+              else
+                echo "Peer found but SSH not ready yet; retrying..."
+              fi
+            else
+              echo "Attempt $i/30: ${DEST} not found, waiting 10s..."
             fi
-            echo "Attempt $i/30: ${TS_SSH_DEST} not found, waiting 10 seconds..."
             sleep 10
           done
 
-          # Try ping, fall back to SSH test
-          if ! timeout 10s tailscale ping "${TS_SSH_DEST}"; then
-            echo "Ping failed, trying SSH test..."
-            if tailscale ssh "${TS_SSH_DEST}" 'echo SSH OK' 2>/dev/null; then
-              echo "SSH works; proceeding"
-            else
-              echo "SSH failed; aborting"
-              exit 1
-            fi
-          else
-            echo "${TS_SSH_DEST} is ready"
-          fi
+          echo "ERROR: Could not find a ready Tailscale peer for '${DEST}'"
+          echo "Debug snapshot:"
+          tailscale status
+          exit 1
 
       - name: Ensure phyt directory exists
         run: |
