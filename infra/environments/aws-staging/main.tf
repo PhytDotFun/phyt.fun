@@ -225,7 +225,7 @@ module "staging_instance" {
 
   deployment_id        = var.deployment_id
   instance_type        = var.instance_type
-  spot_price           = var.spot_price
+  spot_price           = null
   ami_id               = data.aws_ami.ubuntu.id
   subnet_id            = aws_subnet.public.id
   security_group_id    = aws_security_group.staging.id

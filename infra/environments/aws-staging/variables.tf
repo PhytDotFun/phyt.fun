@@ -15,12 +15,12 @@ variable "instance_type" {
   default     = "t4g.medium"
 }
 
-variable "spot_price" {
-  description = "Maximum spot price"
-  type        = string
-
-  default = "0.0336"
-}
+# variable "spot_price" {
+#   description = "Maximum spot price"
+#   type        = string
+#
+#   default = "0.0336"
+# }
 
 variable "volume_size" {
   description = "Root volume size in GB"
