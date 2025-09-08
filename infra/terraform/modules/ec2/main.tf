@@ -14,11 +14,12 @@ terraform {
 }
 
 resource "aws_instance" "staging" {
-  ami                    = var.ami_id
-  instance_type          = var.instance_type
-  subnet_id              = var.subnet_id
-  vpc_security_group_ids = [var.security_group_id]
-  iam_instance_profile   = var.iam_instance_profile
+  ami                         = var.ami_id
+  instance_type               = var.instance_type
+  subnet_id                   = var.subnet_id
+  vpc_security_group_ids      = [var.security_group_id]
+  iam_instance_profile        = var.iam_instance_profile
+  user_data_replace_on_change = true
 
   metadata_options {
     http_endpoint               = "enabled"  # keep reachable

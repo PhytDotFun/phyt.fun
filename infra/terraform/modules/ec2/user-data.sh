@@ -55,14 +55,30 @@ systemctl enable docker
 
 # Install Tailscale with ephemeral auth key
 curl -fsSL https://tailscale.com/install.sh | sh
+systemctl enable --now tailscaled
+attempts=0
 # Auth key is single-use and expires after use
 # shellcheck disable=SC2154 # TF will validate and render this
-tailscale up --auth-key="${tailscale_auth_key}" \
+until tailscale up --auth-key="${tailscale_auth_key}" \
   --hostname="staging-${deployment_id}" \
   --accept-routes \
   --accept-dns=false \
   --ssh \
-  --advertise-tags=tag:staging
+  --advertise-tags=tag:staging; do
+  attempts=$((attempts + 1))
+  if [ "$attempts" -ge 5 ]; then
+    echo "Tailscale join failed after $attempts attempts"
+    exit 1
+  fi
+  echo "tailscale up failed (attempt $attempts), retrying in 5s..."
+  sleep 5
+done
+# Verify we’re actually in the tailnet
+tailscale status || {
+  echo "Tailscale status check failed"
+  exit 1
+}
+
 # Clear the auth key from memory
 unset tailscale_auth_key
 
