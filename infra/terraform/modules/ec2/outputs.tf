@@ -1,12 +1,12 @@
 output "instance_id" {
-  value       = aws_spot_instance_request.staging.spot_instance_id
+  value       = aws_instance.staging.id
   description = "EC2 instance ID"
 }
 
-output "spot_request_id" {
-  value       = aws_spot_instance_request.staging.id
-  description = "Spot instance request ID"
-}
+# output "spot_request_id" {
+#   value       = aws_spot_instance_request.staging.id
+#   description = "Spot instance request ID"
+# }
 
 output "public_ip" {
   value       = aws_eip.staging.public_ip
@@ -14,6 +14,6 @@ output "public_ip" {
 }
 
 output "private_ip" {
-  value       = aws_spot_instance_request.staging.private_ip
+  value       = aws_instance.staging.private_ip
   description = "Private IP address"
 }

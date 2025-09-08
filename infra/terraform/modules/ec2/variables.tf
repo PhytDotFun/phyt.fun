@@ -8,10 +8,10 @@ variable "instance_type" {
   type        = string
 }
 
-variable "spot_price" {
-  description = "Maximum spot price"
-  type        = string
-}
+# variable "spot_price" {
+#   description = "Maximum spot price"
+#   type        = string
+# }
 
 variable "ami_id" {
   description = "AMI ID for the instance"

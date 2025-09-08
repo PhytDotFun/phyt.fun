@@ -8,10 +8,10 @@ output "instance_ip" {
   description = "Public IP address of the instance"
 }
 
-output "spot_instance_request_id" {
-  value       = module.staging_instance.spot_request_id
-  description = "Spot instance request ID"
-}
+# output "spot_instance_request_id" {
+#   value       = module.staging_instance.spot_request_id
+#   description = "Spot instance request ID"
+# }
 
 output "tunnel_id" {
   value       = module.cloudflare.tunnel_id

@@ -1,394 +1,383 @@
-version: '3'
+version: "3"
 
 env:
-    VAULT_ADDR: '{{.VAULT_ADDR | default "https://vault.tailea8363.ts.net"}}'
-    AWS_REGION: '{{.AWS_REGION | default "us-east-1"}}'
-    COMPOSE_PROJECT_NAME: phyt
-    DEPLOYMENT_ID: '{{.DEPLOYMENT_ID | default .GIT_SHA}}'
-    IMAGE_TAG: '{{.IMAGE_TAG | default "latest"}}'
+  VAULT_ADDR: '{{.VAULT_ADDR | default "https://vault.tailea8363.ts.net"}}'
+  AWS_REGION: '{{.AWS_REGION | default "us-east-1"}}'
+  COMPOSE_PROJECT_NAME: phyt
+  DEPLOYMENT_ID: "{{.DEPLOYMENT_ID | default .GIT_SHA}}"
+  IMAGE_TAG: '{{.IMAGE_TAG | default "latest"}}'
 
 vars:
-    GIT_SHA:
-        sh: git rev-parse --short HEAD
-    GIT_BRANCH:
-        sh: git branch --show-current
-    TIMESTAMP:
-        sh: date +%Y%m%d-%H%M%S
+  GIT_SHA:
+    sh: git rev-parse --short HEAD
+  GIT_BRANCH:
+    sh: git branch --show-current
+  TIMESTAMP:
+    sh: date +%Y%m%d-%H%M%S
 
 tasks:
-    # ============================================================
-    # LOCAL DEVELOPMENT
-    # ============================================================
+  # ============================================================
+  # LOCAL DEVELOPMENT
+  # ============================================================
 
-    dev:
-        desc: 'Start local development environment'
-        cmds:
-            - docker compose --profile dev up -d postgres redis
-            - 'echo "PostgreSQL: localhost:5432"'
-            - 'echo "Redis: localhost:6379"'
-            - 'echo "Run ''pnpm dev'' to start services"'
-        silent: false
+  dev:
+    desc: "Start local development environment"
+    cmds:
+      - docker compose --profile dev up -d postgres redis
+      - 'echo "PostgreSQL: localhost:5432"'
+      - 'echo "Redis: localhost:6379"'
+      - 'echo "Run ''pnpm dev'' to start services"'
+    silent: false
 
-    dev:down:
-        desc: 'Stop local development environment'
-        cmds:
-            - docker compose --profile dev down
+  dev:down:
+    desc: "Stop local development environment"
+    cmds:
+      - docker compose --profile dev down
 
-    dev:reset:
-        desc: 'Reset local development database'
-        cmds:
-            - docker compose --profile dev down -v
-            - docker compose --profile dev up -d postgres redis
-            - sleep 5
-            - pnpm db:migrate
-            - pnpm db:seed
-        silent: false
+  dev:reset:
+    desc: "Reset local development database"
+    cmds:
+      - docker compose --profile dev down -v
+      - docker compose --profile dev up -d postgres redis
+      - sleep 5
+      - pnpm db:migrate
+      - pnpm db:seed
+    silent: false
 
-    dev:logs:
-        desc: 'Show development container logs'
-        cmds:
-            - docker compose --profile dev logs -f {{.CLI_ARGS}}
+  dev:logs:
+    desc: "Show development container logs"
+    cmds:
+      - docker compose --profile dev logs -f {{.CLI_ARGS}}
 
-    # ============================================================
-    # CHANGESETS & VERSION MANAGEMENT
-    # ============================================================
+  # ============================================================
+  # CHANGESETS & VERSION MANAGEMENT
+  # ============================================================
 
-    changeset:
-        desc: 'Create a new changeset'
-        cmds:
-            - pnpm changeset
-            - git add .changeset/*.md
-            - "echo \"✓ Changeset created. Commit with 'git commit -m \\\"chore: add changeset\\\"'\""
-        silent: false
+  changeset:
+    desc: "Create a new changeset"
+    cmds:
+      - pnpm changeset
+      - git add .changeset/*.md
+      - "echo \"✓ Changeset created. Commit with 'git commit -m \\\"chore: add changeset\\\"'\""
+    silent: false
 
-    changeset:version:
-        desc: 'Apply changesets and bump versions (usually done in CI)'
-        cmds:
-            - pnpm changeset version
-            - echo "✓ Versions bumped. Commit changes before pushing."
-        silent: false
+  changeset:version:
+    desc: "Apply changesets and bump versions (usually done in CI)"
+    cmds:
+      - pnpm changeset version
+      - echo "✓ Versions bumped. Commit changes before pushing."
+    silent: false
 
-    changeset:status:
-        desc: 'Check changeset status'
-        cmds:
-            - pnpm changeset status --verbose
+  changeset:status:
+    desc: "Check changeset status"
+    cmds:
+      - pnpm changeset status --verbose
 
-    # ============================================================
-    # VAULT OPERATIONS
-    # ============================================================
+  # ============================================================
+  # VAULT OPERATIONS
+  # ============================================================
 
-    vault:login:
-        desc: 'Login to Vault with GitHub auth (5 min token)'
-        cmds:
-            - export VAULT_TOKEN=$(vault login -method=github -token-only -ttl=5m) && echo "export VAULT_TOKEN=$VAULT_TOKEN" > .vault-token
-            - echo "✓ Logged into Vault (token expires in 5 minutes)"
-            - 'echo "Run: source .vault-token"'
-        silent: false
+  vault:login:
+    desc: "Login to Vault with GitHub auth (5 min token)"
+    cmds:
+      - export VAULT_TOKEN=$(vault login -method=github -token-only -ttl=5m) && echo "export VAULT_TOKEN=$VAULT_TOKEN" > .vault-token
+      - echo "✓ Logged into Vault (token expires in 5 minutes)"
+      - 'echo "Run: source .vault-token"'
+    silent: false
 
-    vault:setup:
-        desc: 'Initial Vault setup (run once)'
-        cmds:
-            - vault auth enable approle || true
-            - vault policy write staging-ci tooling/vault/staging-ci.hcl
-            - vault policy write staging-approle tooling/vault/staging-approle.hcl
-            - echo "✓ Vault policies created"
-        preconditions:
-            - sh: '[ -n "$VAULT_TOKEN" ]'
-              msg: "Run 'task vault:login' first"
+  vault:setup:
+    desc: "Initial Vault setup (run once)"
+    cmds:
+      - vault auth enable approle || true
+      - vault policy write staging-ci tooling/vault/staging-ci.hcl
+      - vault policy write staging-approle tooling/vault/staging-approle.hcl
+      - echo "✓ Vault policies created"
+    preconditions:
+      - sh: '[ -n "$VAULT_TOKEN" ]'
+        msg: "Run 'task vault:login' first"
 
-    vault:secrets:list:
-        desc: 'List all staging secrets in Vault'
-        cmds:
-            - vault kv list secret/staging || echo "No staging secrets found"
-            - vault kv get -format=json secret/hono-api/staging | jq '.data.data | keys' || true
-            - vault kv get -format=json secret/workers/staging | jq '.data.data | keys' || true
-        preconditions:
-            - sh: '[ -n "$VAULT_TOKEN" ]'
-              msg: "Run 'task vault:login' first"
+  vault:secrets:list:
+    desc: "List all staging secrets in Vault"
+    cmds:
+      - vault kv list secret/staging || echo "No staging secrets found"
+      - vault kv get -format=json secret/hono-api/staging | jq '.data.data | keys' || true
+      - vault kv get -format=json secret/workers/staging | jq '.data.data | keys' || true
+    preconditions:
+      - sh: '[ -n "$VAULT_TOKEN" ]'
+        msg: "Run 'task vault:login' first"
 
-    vault:secret:set:
-        desc: 'Set a secret in Vault (usage: task vault:secret:set -- PATH KEY=VALUE)'
-        cmds:
-            - vault kv patch secret/{{index .CLI_ARGS 0}} {{slice .CLI_ARGS 1}}
-        preconditions:
-            - sh: '[ -n "$VAULT_TOKEN" ]'
-              msg: "Run 'task vault:login' first"
+  vault:secret:set:
+    desc: "Set a secret in Vault (usage: task vault:secret:set -- PATH KEY=VALUE)"
+    cmds:
+      - vault kv patch secret/{{index .CLI_ARGS 0}} {{slice .CLI_ARGS 1}}
+    preconditions:
+      - sh: '[ -n "$VAULT_TOKEN" ]'
+        msg: "Run 'task vault:login' first"
 
-    vault:rotate:staging:
-        desc: 'Rotate staging AppRole credentials'
-        vars:
-            ROLE_NAME: staging-{{.GIT_SHA}}
-        cmds:
-            - |
-                vault write auth/approle/role/{{.ROLE_NAME}} \
-                  token_policies="staging-approle" \
-                  token_ttl=300 \
-                  token_max_ttl=600
-            - 'echo "✓ New AppRole created: {{.ROLE_NAME}}"'
-        preconditions:
-            - sh: '[ -n "$VAULT_TOKEN" ]'
-              msg: "Run 'task vault:login' first"
+  vault:rotate:staging:
+    desc: "Rotate staging AppRole credentials"
+    vars:
+      ROLE_NAME: staging-{{.GIT_SHA}}
+    cmds:
+      - |
+        vault write auth/approle/role/{{.ROLE_NAME}} \
+          token_policies="staging-approle" \
+          token_ttl=300 \
+          token_max_ttl=600
+      - 'echo "✓ New AppRole created: {{.ROLE_NAME}}"'
+    preconditions:
+      - sh: '[ -n "$VAULT_TOKEN" ]'
+        msg: "Run 'task vault:login' first"
 
-    # ============================================================
-    # TERRAFORM OPERATIONS
-    # ============================================================
+  # ============================================================
+  # TERRAFORM OPERATIONS
+  # ============================================================
 
-    tf:init:
-        desc: 'Initialize Terraform for staging'
-        dir: infra/environments/aws-staging
-        cmds:
-            - terraform init -upgrade
-        silent: false
+  tf:init:
+    desc: "Initialize Terraform for staging"
+    dir: infra/environments/aws-staging
+    cmds:
+      - terraform init -upgrade
+    silent: false
 
-    tf:plan:
-        desc: 'Plan staging infrastructure changes'
-        dir: infra/environments/aws-staging
-        cmds:
-            - terraform plan -var="deployment_id={{.DEPLOYMENT_ID}}" -out=plan.tfplan
-        preconditions:
-            - sh: '[ -n "$VAULT_TOKEN" ]'
-              msg: "Run 'task vault:login' first"
+  tf:plan:
+    desc: "Plan staging infrastructure changes"
+    dir: infra/environments/aws-staging
+    cmds:
+      - terraform plan -var="deployment_id={{.DEPLOYMENT_ID}}" -out=plan.tfplan
+    preconditions:
+      - sh: '[ -n "$VAULT_TOKEN" ]'
+        msg: "Run 'task vault:login' first"
 
-    tf:apply:
-        desc: 'Apply staging infrastructure changes'
-        dir: infra/environments/aws-staging
-        cmds:
-            - terraform apply -var="deployment_id={{.DEPLOYMENT_ID}}" -auto-approve
-        deps:
-            - tf:plan
-        preconditions:
-            - sh: '[ -n "$VAULT_TOKEN" ]'
-              msg: "Run 'task vault:login' first"
+  tf:apply:
+    desc: "Apply staging infrastructure changes"
+    dir: infra/environments/aws-staging
+    cmds:
+      - terraform apply -var="deployment_id={{.DEPLOYMENT_ID}}" -auto-approve
+    deps:
+      - tf:plan
+    preconditions:
+      - sh: '[ -n "$VAULT_TOKEN" ]'
+        msg: "Run 'task vault:login' first"
 
-    tf:destroy:
-        desc: '⚠️  DESTROY staging infrastructure'
-        dir: infra/environments/aws-staging
-        prompt: 'This will DESTROY all staging infrastructure. Continue?'
-        cmds:
-            - terraform destroy -var="deployment_id={{.DEPLOYMENT_ID}}" -auto-approve
-        preconditions:
-            - sh: '[ -n "$VAULT_TOKEN" ]'
-              msg: "Run 'task vault:login' first"
+  tf:destroy:
+    desc: "⚠️  DESTROY staging infrastructure"
+    dir: infra/environments/aws-staging
+    prompt: "This will DESTROY all staging infrastructure. Continue?"
+    cmds:
+      - terraform destroy -var="deployment_id={{.DEPLOYMENT_ID}}" -auto-approve
+    preconditions:
+      - sh: '[ -n "$VAULT_TOKEN" ]'
+        msg: "Run 'task vault:login' first"
 
-    tf:output:
-        desc: 'Show Terraform outputs'
-        dir: infra/environments/aws-staging
-        cmds:
-            - terraform output -json | jq '.'
+  tf:output:
+    desc: "Show Terraform outputs"
+    dir: infra/environments/aws-staging
+    cmds:
+      - terraform output -json | jq '.'
 
-    # ============================================================
-    # AWS OPERATIONS
-    # ============================================================
+  # ============================================================
+  # AWS OPERATIONS
+  # ============================================================
 
-    aws:setup:
-        desc: 'One-time AWS backend setup'
-        cmds:
-            - |
-                aws s3api create-bucket \
-                  --bucket phyt-terraform-staging-state \
-                  --region {{.AWS_REGION}} || echo "Bucket exists"
-            - |
-                aws s3api put-bucket-versioning \
-                  --bucket phyt-terraform-staging-state \
-                  --versioning-configuration Status=Enabled
-            - |
-                aws dynamodb create-table \
-                  --table-name phyt-terraform-staging-lock \
-                  --attribute-definitions AttributeName=LockID,AttributeType=S \
-                  --key-schema AttributeName=LockID,KeyType=HASH \
-                  --provisioned-throughput ReadCapacityUnits=5,WriteCapacityUnits=5 \
-                  --region {{.AWS_REGION}} || echo "Table exists"
-            - echo "✓ AWS backend configured"
+  aws:setup:
+    desc: "One-time AWS backend setup"
+    cmds:
+      - |
+        aws s3api create-bucket \
+          --bucket phyt-terraform-staging-state \
+          --region {{.AWS_REGION}} || echo "Bucket exists"
+      - |
+        aws s3api put-bucket-versioning \
+          --bucket phyt-terraform-staging-state \
+          --versioning-configuration Status=Enabled
+      - |
+        aws dynamodb create-table \
+          --table-name phyt-terraform-staging-lock \
+          --attribute-definitions AttributeName=LockID,AttributeType=S \
+          --key-schema AttributeName=LockID,KeyType=HASH \
+          --provisioned-throughput ReadCapacityUnits=5,WriteCapacityUnits=5 \
+          --region {{.AWS_REGION}} || echo "Table exists"
+      - echo "✓ AWS backend configured"
 
-    aws:spot:prices:
-        desc: 'Check current spot prices'
-        cmds:
-            - |
-                aws ec2 describe-spot-price-history \
-                  --instance-types t4g.medium t4g.large t4g.xlarge \
-                  --product-descriptions "Linux/UNIX" \
-                  --max-results 10 \
-                  --region {{.AWS_REGION}} | \
-                jq -r '.SpotPriceHistory[] | "\(.InstanceType): $\(.SpotPrice)"' | sort -u
+  # ============================================================
+  # DOCKER & DEPLOYMENT
+  # ============================================================
 
-    # ============================================================
-    # DOCKER & DEPLOYMENT
-    # ============================================================
+  build:
+    desc: "Build Docker images locally"
+    cmds:
+      - docker build -t ghcr.io/{{.GITHUB_REPOSITORY | default "phytdotfun/phyt.fun"}}/hono-api:local --build-arg PROJECT=hono-api .
+      - docker build -t ghcr.io/{{.GITHUB_REPOSITORY | default "phytdotfun/phyt.fun"}}/workers:local --build-arg PROJECT=workers .
+      - 'echo "✓ Images built with tag: local"'
+    silent: false
 
-    build:
-        desc: 'Build Docker images locally'
-        cmds:
-            - docker build -t ghcr.io/{{.GITHUB_REPOSITORY | default "phytdotfun/phyt.fun"}}/hono-api:local --build-arg PROJECT=hono-api .
-            - docker build -t ghcr.io/{{.GITHUB_REPOSITORY | default "phytdotfun/phyt.fun"}}/workers:local --build-arg PROJECT=workers .
-            - 'echo "✓ Images built with tag: local"'
-        silent: false
+  staging:up:
+    desc: "Start staging stack locally (for testing)"
+    cmds:
+      - docker compose --profile staging up -d
+    env:
+      IMAGE_TAG: local
+      NGINX_MODE: staging
 
-    staging:up:
-        desc: 'Start staging stack locally (for testing)'
-        cmds:
-            - docker compose --profile staging up -d
-        env:
-            IMAGE_TAG: local
-            NGINX_MODE: staging
+  staging:down:
+    desc: "Stop staging stack"
+    cmds:
+      - docker compose --profile staging down
 
-    staging:down:
-        desc: 'Stop staging stack'
-        cmds:
-            - docker compose --profile staging down
+  staging:logs:
+    desc: "View staging logs"
+    cmds:
+      - docker compose --profile staging logs -f {{.CLI_ARGS}}
 
-    staging:logs:
-        desc: 'View staging logs'
-        cmds:
-            - docker compose --profile staging logs -f {{.CLI_ARGS}}
+  # ============================================================
+  # REMOTE OPERATIONS (via Tailscale)
+  # ============================================================
 
-    # ============================================================
-    # REMOTE OPERATIONS (via Tailscale)
-    # ============================================================
+  remote:ssh:
+    desc: "SSH to staging instance"
+    cmds:
+      - tailscale ssh ubuntu@{{.DEPLOYMENT_ID}}
 
-    remote:ssh:
-        desc: 'SSH to staging instance'
-        cmds:
-            - tailscale ssh ubuntu@{{.DEPLOYMENT_ID}}
+  remote:status:
+    desc: "Check remote staging status"
+    cmds:
+      - |
+        tailscale ssh ubuntu@{{.DEPLOYMENT_ID}} 'docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"'
 
-    remote:status:
-        desc: 'Check remote staging status'
-        cmds:
-            - |
-                tailscale ssh ubuntu@{{.DEPLOYMENT_ID}} 'docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"'
+  remote:logs:
+    desc: "View remote logs (usage: task remote:logs -- container-name)"
+    cmds:
+      - tailscale ssh ubuntu@{{.DEPLOYMENT_ID}} 'docker logs -f {{.CLI_ARGS | default "phyt-hono-api"}}'
 
-    remote:logs:
-        desc: 'View remote logs (usage: task remote:logs -- container-name)'
-        cmds:
-            - tailscale ssh ubuntu@{{.DEPLOYMENT_ID}} 'docker logs -f {{.CLI_ARGS | default "phyt-hono-api"}}'
+  remote:restart:
+    desc: "Restart remote services"
+    cmds:
+      - |
+        tailscale ssh ubuntu@{{.DEPLOYMENT_ID}} \
+          'cd /opt/phyt && docker compose --profile staging restart {{.CLI_ARGS}}'
 
-    remote:restart:
-        desc: 'Restart remote services'
-        cmds:
-            - |
-                tailscale ssh ubuntu@{{.DEPLOYMENT_ID}} \
-                  'cd /opt/phyt && docker compose --profile staging restart {{.CLI_ARGS}}'
+  remote:deploy:
+    desc: "Deploy to staging (manual)"
+    vars:
+      ROLE_ID:
+        sh: vault read -field=role_id auth/approle/role/staging-{{.GIT_SHA}}/role-id
+      SECRET_ID:
+        sh: vault write -field=secret_id auth/approle/role/staging-{{.GIT_SHA}}/secret-id
+    cmds:
+      - |
+        tailscale ssh ubuntu@{{.DEPLOYMENT_ID}} 'bash -lc "set -a; . /dev/stdin; set +a; cd /opt/phyt && docker compose pull && docker compose up -d --remove-orphans"' <<EOF
+        VAULT_ROLE_ID={{.ROLE_ID}}
+        VAULT_SECRET_ID={{.SECRET_ID}}
+        IMAGE_TAG=staging-{{.GIT_SHA}}
+        DEPLOYMENT_ID={{.GIT_SHA}}
+        EOF
+    preconditions:
+      - sh: '[ -n "$VAULT_TOKEN" ]'
+        msg: "Run 'task vault:login' first"
 
-    remote:deploy:
-        desc: 'Deploy to staging (manual)'
-        vars:
-            ROLE_ID:
-                sh: vault read -field=role_id auth/approle/role/staging-{{.GIT_SHA}}/role-id
-            SECRET_ID:
-                sh: vault write -field=secret_id auth/approle/role/staging-{{.GIT_SHA}}/secret-id
-        cmds:
-            - |
-                tailscale ssh ubuntu@{{.DEPLOYMENT_ID}} 'bash -lc "set -a; . /dev/stdin; set +a; cd /opt/phyt && docker compose pull && docker compose up -d --remove-orphans"' <<EOF
-                VAULT_ROLE_ID={{.ROLE_ID}}
-                VAULT_SECRET_ID={{.SECRET_ID}}
-                IMAGE_TAG=staging-{{.GIT_SHA}}
-                DEPLOYMENT_ID={{.GIT_SHA}}
-                EOF
-        preconditions:
-            - sh: '[ -n "$VAULT_TOKEN" ]'
-              msg: "Run 'task vault:login' first"
+  # ============================================================
+  # MONITORING & DEBUGGING
+  # ============================================================
 
-    # ============================================================
-    # MONITORING & DEBUGGING
-    # ============================================================
+  health:staging:
+    desc: "Check staging health"
+    cmds:
+      - 'curl -s https://staging.phyt.fun/api/health | jq . || echo "❌ API unhealthy"'
+      - 'curl -s https://staging.phyt.fun/nginx-health || echo "❌ Nginx unhealthy"'
 
-    health:staging:
-        desc: 'Check staging health'
-        cmds:
-            - 'curl -s https://staging.phyt.fun/api/health | jq . || echo "❌ API unhealthy"'
-            - 'curl -s https://staging.phyt.fun/nginx-health || echo "❌ Nginx unhealthy"'
+  health:local:
+    desc: "Check local health"
+    cmds:
+      - 'curl -s localhost:8080/api/health | jq . || echo "❌ API unhealthy"'
+      - 'curl -s localhost:8080/nginx-health || echo "❌ Nginx unhealthy"'
 
-    health:local:
-        desc: 'Check local health'
-        cmds:
-            - 'curl -s localhost:8080/api/health | jq . || echo "❌ API unhealthy"'
-            - 'curl -s localhost:8080/nginx-health || echo "❌ Nginx unhealthy"'
+  debug:vault:
+    desc: "Debug Vault agent locally"
+    cmds:
+      - docker compose run --rm vault-agent vault agent -config=/vault/config/agent.hcl -log-level=debug
 
-    debug:vault:
-        desc: 'Debug Vault agent locally'
-        cmds:
-            - docker compose run --rm vault-agent vault agent -config=/vault/config/agent.hcl -log-level=debug
+  debug:secrets:
+    desc: "Check if secrets are mounted correctly"
+    cmds:
+      - docker compose exec hono-api ls -la /vault/secrets/
+      - docker compose exec hono-api cat /vault/secrets/hono-api.env | head -5
 
-    debug:secrets:
-        desc: 'Check if secrets are mounted correctly'
-        cmds:
-            - docker compose exec hono-api ls -la /vault/secrets/
-            - docker compose exec hono-api cat /vault/secrets/hono-api.env | head -5
+  # ============================================================
+  # DATABASE OPERATIONS
+  # ============================================================
 
-    # ============================================================
-    # DATABASE OPERATIONS
-    # ============================================================
+  db:migrate:
+    desc: "Run database migrations"
+    cmds:
+      - pnpm db:migrate
 
-    db:migrate:
-        desc: 'Run database migrations'
-        cmds:
-            - pnpm db:migrate
+  db:migrate:staging:
+    desc: "Run migrations on staging"
+    cmds:
+      - |
+        tailscale ssh ubuntu@{{.DEPLOYMENT_ID}} \
+          'docker compose exec -T hono-api pnpm db:migrate'
 
-    db:migrate:staging:
-        desc: 'Run migrations on staging'
-        cmds:
-            - |
-                tailscale ssh ubuntu@{{.DEPLOYMENT_ID}} \
-                  'docker compose exec -T hono-api pnpm db:migrate'
+  db:backup:staging:
+    desc: "Backup staging database"
+    vars:
+      BACKUP_FILE: backup-staging-{{.TIMESTAMP}}.sql
+    cmds:
+      - |
+        tailscale ssh ubuntu@{{.DEPLOYMENT_ID}} \
+          'docker compose exec -T postgres pg_dump -U $POSTGRES_USER $POSTGRES_DB' > {{.BACKUP_FILE}}
+      - echo "✓ Backup saved to {{.BACKUP_FILE}}"
 
-    db:backup:staging:
-        desc: 'Backup staging database'
-        vars:
-            BACKUP_FILE: backup-staging-{{.TIMESTAMP}}.sql
-        cmds:
-            - |
-                tailscale ssh ubuntu@{{.DEPLOYMENT_ID}} \
-                  'docker compose exec -T postgres pg_dump -U $POSTGRES_USER $POSTGRES_DB' > {{.BACKUP_FILE}}
-            - echo "✓ Backup saved to {{.BACKUP_FILE}}"
+  # ============================================================
+  # WORKFLOW HELPERS
+  # ============================================================
 
-    # ============================================================
-    # WORKFLOW HELPERS
-    # ============================================================
+  pr:staging:
+    desc: "Create PR to staging branch"
+    cmds:
+      - gh pr create --base staging --title "{{.GIT_BRANCH}} → staging" --body "$(cat .changeset/*.md 2>/dev/null || echo 'No changeset')"
 
-    pr:staging:
-        desc: 'Create PR to staging branch'
-        cmds:
-            - gh pr create --base staging --title "{{.GIT_BRANCH}} → staging" --body "$(cat .changeset/*.md 2>/dev/null || echo 'No changeset')"
+  pr:release:
+    desc: "Create release PR (staging → main)"
+    cmds:
+      - git checkout staging
+      - git pull origin staging
+      - 'gh pr create --base main --head staging --title "Release: staging → main" --body "## Release\n\nPromoting staging to production"'
 
-    pr:release:
-        desc: 'Create release PR (staging → main)'
-        cmds:
-            - git checkout staging
-            - git pull origin staging
-            - 'gh pr create --base main --head staging --title "Release: staging → main" --body "## Release\n\nPromoting staging to production"'
+  release:check:
+    desc: "Pre-release checklist"
+    cmds:
+      - task: changeset:status
+      - task: health:staging
+      - echo "✓ Ready for release if all checks pass"
 
-    release:check:
-        desc: 'Pre-release checklist'
-        cmds:
-            - task: changeset:status
-            - task: health:staging
-            - echo "✓ Ready for release if all checks pass"
+  # ============================================================
+  # UTILITY
+  # ============================================================
 
-    # ============================================================
-    # UTILITY
-    # ============================================================
+  clean:
+    desc: "Clean up local environment"
+    cmds:
+      - docker compose down -v
+      - rm -f .vault-token
+      - rm -f infra/environments/aws-staging/*.tfplan
+      - rm -f infra/environments/aws-staging/.terraform.lock.hcl
+      - echo "✓ Cleaned up"
 
-    clean:
-        desc: 'Clean up local environment'
-        cmds:
-            - docker compose down -v
-            - rm -f .vault-token
-            - rm -f infra/environments/aws-staging/*.tfplan
-            - rm -f infra/environments/aws-staging/.terraform.lock.hcl
-            - echo "✓ Cleaned up"
+  setup:
+    desc: "First-time setup"
+    cmds:
+      - task: aws:setup
+      - task: vault:setup
+      - task: tf:init
+      - echo "✓ Initial setup complete"
 
-    setup:
-        desc: 'First-time setup'
-        cmds:
-            - task: aws:setup
-            - task: vault:setup
-            - task: tf:init
-            - echo "✓ Initial setup complete"
-
-    status:
-        desc: 'Show current status'
-        cmds:
-            - 'echo "Branch: {{.GIT_BRANCH}}"'
-            - 'echo "SHA: {{.GIT_SHA}}"'
-            - 'echo "Deployment ID: {{.DEPLOYMENT_ID}}"'
-            - task: health:staging
-            - task: changeset:status
+  status:
+    desc: "Show current status"
+    cmds:
+      - 'echo "Branch: {{.GIT_BRANCH}}"'
+      - 'echo "SHA: {{.GIT_SHA}}"'
+      - 'echo "Deployment ID: {{.DEPLOYMENT_ID}}"'
+      - task: health:staging
+      - task: changeset:status

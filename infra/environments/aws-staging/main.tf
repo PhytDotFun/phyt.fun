@@ -30,7 +30,7 @@ provider "aws" {
       ManagedBy    = "terraform"
       DeploymentId = var.deployment_id
       Project      = "phyt"
-      InstanceType = "spot"
+      InstanceType = "ondemand"
     }
   }
 }
@@ -216,16 +216,16 @@ resource "aws_iam_instance_profile" "staging" {
 }
 
 ########################
-# EC2 Spot instance
+# EC2 instance
 ########################
 
-# Spot instance with dynamic credentials
+# On-demand instance with dynamic credentials
 module "staging_instance" {
   source = "../../terraform/modules/ec2"
 
-  deployment_id        = var.deployment_id
-  instance_type        = var.instance_type
-  spot_price           = null
+  deployment_id = var.deployment_id
+  instance_type = var.instance_type
+  # spot_price           = var.spot_price
   ami_id               = data.aws_ami.ubuntu.id
   subnet_id            = aws_subnet.public.id
   security_group_id    = aws_security_group.staging.id
