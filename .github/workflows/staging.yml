@@ -227,7 +227,7 @@ jobs:
 
       - name: Ensure phyt directory exists
         run: |
-          tailscale ssh "ubuntu@${TS_SSH_DEST}" 'sudo mkdir -p /opt/phyt && sudo chown $USER:$USER /opt/phyt'
+          tailscale ssh "ubuntu@${TS_SSH_DEST}" 'sudo mkdir -p /opt/phyt && sudo chown ubuntu:ubuntu /opt/phyt'
 
       - name: Ship compose bundle to host
         run: |
@@ -242,7 +242,7 @@ jobs:
           set -euo pipefail
 
           # Ship deployment script
-          tailscale ssh "ubuntu@${TS_SSH_DEST}" 'sudo mkdir -p /opt/phyt/deploy'
+          tailscale ssh "ubuntu@${TS_SSH_DEST}" 'sudo mkdir -p /opt/phyt/deploy && sudo chown -R ubuntu:ubuntu /opt/phyt/deploy'
           scp -o StrictHostKeyChecking=no \
           infra/environments/aws-staging/remote-deploy.sh \
           "ubuntu@${TS_SSH_DEST}:/opt/phyt/deploy/remote-deploy.sh"
