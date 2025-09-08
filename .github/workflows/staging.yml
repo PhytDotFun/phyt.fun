@@ -233,14 +233,14 @@ jobs:
         run: |
           set -euo pipefail
           tar -czf - docker-compose.yml tooling \
-            | tailscale ssh "${TS_SSH_DEST}" 'tar -xzf - -C /opt/phyt'
+            | tailscale ssh "ubuntu@${TS_SSH_DEST}" 'tar -xzf - -C /opt/phyt'
 
       - name: Remote deploy over Tailscale SSH
         env:
           GHCR_RO_TOKEN: ${{ secrets.GHCR_RO_TOKEN }}
         run: |
           set -euo pipefail
-          tailscale ssh "${TS_SSH_DEST}" 'bash -lc "set -a; . /dev/stdin; set +a; \
+          tailscale ssh "ubuntu@${TS_SSH_DEST}" 'bash -lc "set -a; . /dev/stdin; set +a; \
             docker login ghcr.io -u ${GITHUB_ACTOR} -p ${GHCR_RO_TOKEN:-} >/dev/null 2>&1 || true; \
             cd /opt/phyt && docker compose pull && docker compose up -d --remove-orphans; \
             docker logout ghcr.io >/dev/null 2>&1 || true"' <<EOF
