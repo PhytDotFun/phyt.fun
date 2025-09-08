@@ -175,38 +175,30 @@ jobs:
             "${VAULT_ADDR}/v1/secret/data/staging/gh-app")
           APP_ID=$(echo "$app_json" | jq -er '.data.data.APP_ID')
           PRIV_B64=$(echo "$app_json" | jq -er '.data.data.PRIVATE_KEY')
-          echo "::add-mask::${PRIV_B64}"
-          {
-            echo "GH_APP_ID=${APP_ID}"
-            echo "GH_APP_PRIVATE_KEY_B64=${PRIV_B64}"
-          } >> "$GITHUB_ENV"
+          echo "GH_APP_ID=${APP_ID}" >> "$GITHUB_ENV"
+          echo "GH_APP_PRIVATE_KEY_B64=${PRIV_B64}" >> "$GITHUB_ENV"
 
-      - name: Mint Github app credentials
-        id: gh_app_token
+      # Decode the base64 to a multiline PEM and expose it as a step output
+      - name: Decode GitHub App private key (PEM)
+        id: decode_pem
+        shell: bash
         run: |
           set -euo pipefail
-          # Decode the base64 private key
-          DECODED_KEY=$(echo "${{ env.GH_APP_PRIVATE_KEY_B64 }}" | base64 -d)
-          echo "::add-mask::${DECODED_KEY}"
-
-          # Write to a temporary file for the action
-          echo "$DECODED_KEY" > /tmp/gh_app_key.pem
-          chmod 600 /tmp/gh_app_key.pem
+          {
+            echo 'pem<<EOF'
+            echo "${GH_APP_PRIVATE_KEY_B64}" | base64 -d
+            echo 'EOF'
+          } >> "$GITHUB_OUTPUT"
 
       - name: Create GitHub app token
         id: create_token
-        uses: actions/create-github-app-token@v1
+        uses: actions/create-github-app-token@v2
         with:
           app-id: ${{ env.GH_APP_ID }}
-          private-key-path: /tmp/gh_app_key.pem
+          private-key: ${{ steps.decode_pem.outputs.pem }} # <-- PEM content, not a path
           owner: ${{ github.repository_owner }}
           repositories: |
             phyt.fun
-
-      - name: Clean up private key file
-        if: always()
-        run: |
-          rm -f /tmp/gh_app_key.pem
 
       - name: Terraform init/plan/apply (staging infra)
         working-directory: infra/environments/aws-staging
