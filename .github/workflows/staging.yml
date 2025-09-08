@@ -178,16 +178,15 @@ jobs:
           PRIV_B64=$(echo "$app_json" | jq -er '.data.data.PRIVATE_KEY')
 
           echo "::add-mask::${PRIV_B64}"
+
           PRIV_PEM="$(echo "${PRIV_B64}" | base64 -d)"
-          echo "::add-mask::${PRIV_PEM}"
 
           {
             echo "app_id=${APP_ID}"
             echo 'pem<<EOF'
-            echo "${PRIV_PEM}"
+            printf '%s\n' "${PRIV_PEM}"
             echo 'EOF'
           } >> "$GITHUB_OUTPUT"
-
       - name: Create GitHub app token
         id: create_token
         uses: actions/create-github-app-token@v2
