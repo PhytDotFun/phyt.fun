@@ -164,6 +164,33 @@ jobs:
           echo "TF_VAR_cloudflare_api_token=${CF_TOKEN}" >> "$GITHUB_ENV"
           echo "CLOUDFLARE_API_TOKEN=${CF_TOKEN}" >> "$GITHUB_ENV"
 
+      - name: Export GitHub app creds from Vault
+        id: gh_app_creds
+        env:
+          VAULT_ADDR: ${{ env.VAULT_ADDR }}
+          VAULT_TOKEN: ${{ env.VAULT_TOKEN }}
+        run: |
+          set -euo pipefail
+          app_json=$(curl -fsS -H "X-Vault-Token: ${VAULT_TOKEN}" \
+            "${VAULT_ADDR}/v1/secret/data/staging/github-app")
+          APP_ID=$(echo "$app_json" | jq -er '.data.data.APP_ID')
+          PRIV=$(echo "$app_json" | jq -er '.data.data.PRIVATE_KEY')
+          echo "::add-mask::${PRIV}"
+          {
+            echo "GH_APP_ID=${APP_ID}"
+            printf "GH_APP_PRIVATE_KEY<<'EOF'\n%s\nEOF\n" "$PRIV"
+          } >> "$GITHUB_ENV"
+
+      - name: Mint GitHub app installation token
+        id: gh_app_token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ env.GH_APP_ID }}
+          private-key: ${{ env.GH_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: |
+            phyt.fun
+
       - name: Terraform init/plan/apply (staging infra)
         working-directory: infra/environments/aws-staging
         env:
@@ -237,7 +264,7 @@ jobs:
 
       - name: Remote deploy over Tailscale SSH
         env:
-          GHCR_RO_TOKEN: ${{ secrets.GHCR_RO_TOKEN }}
+          GHCR_APP_TOKEN: ${{ steps.gh_app_token.outputs.token }}
         run: |
           set -euo pipefail
 
@@ -256,6 +283,6 @@ jobs:
                 VAULT_ADDR=${{ env.VAULT_ADDR }} \
                 VAULT_ROLE_ID=${{ env.ROLE_ID }} \
                 VAULT_SECRET_ID=${{ env.SECRET_ID }} \
-                GHCR_USER=${GITHUB_ACTOR} \
-                GHCR_TOKEN=${GHCR_RO_TOKEN:-} \
+                GHCR_USER=x-access-token \
+                GHCR_TOKEN=${GHCR_APP_TOKEN:-} \
                 /opt/phyt/deploy/remote-deploy.sh'"
