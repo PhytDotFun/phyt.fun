@@ -227,7 +227,7 @@ jobs:
 
       - name: Ensure phyt directory exists
         run: |
-          tailscale ssh "${TS_SSH_DEST}" 'sudo mkdir -p /opt/phyt && sudo chown $USER:$USER /opt/phyt'
+          tailscale ssh --ssh-user=ubuntu "${TS_SSH_DEST}" 'sudo mkdir -p /opt/phyt && sudo chown $USER:$USER /opt/phyt'
 
       - name: Ship compose bundle to host
         run: |
