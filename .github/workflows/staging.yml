@@ -169,24 +169,22 @@ jobs:
         env:
           VAULT_ADDR: ${{ env.VAULT_ADDR }}
           VAULT_TOKEN: ${{ env.VAULT_TOKEN }}
+        shell: bash
         run: |
           set -euo pipefail
           app_json=$(curl -fsS -H "X-Vault-Token: ${VAULT_TOKEN}" \
             "${VAULT_ADDR}/v1/secret/data/staging/gh-app")
           APP_ID=$(echo "$app_json" | jq -er '.data.data.APP_ID')
           PRIV_B64=$(echo "$app_json" | jq -er '.data.data.PRIVATE_KEY')
-          echo "GH_APP_ID=${APP_ID}" >> "$GITHUB_ENV"
-          echo "GH_APP_PRIVATE_KEY_B64=${PRIV_B64}" >> "$GITHUB_ENV"
 
-      # Decode the base64 to a multiline PEM and expose it as a step output
-      - name: Decode GitHub App private key (PEM)
-        id: decode_pem
-        shell: bash
-        run: |
-          set -euo pipefail
+          echo "::add-mask::${PRIV_B64}"
+          PRIV_PEM="$(echo "${PRIV_B64}" | base64 -d)"
+          echo "::add-mask::${PRIV_PEM}"
+
           {
+            echo "app_id=${APP_ID}"
             echo 'pem<<EOF'
-            echo "${GH_APP_PRIVATE_KEY_B64}" | base64 -d
+            echo "${PRIV_PEM}"
             echo 'EOF'
           } >> "$GITHUB_OUTPUT"
 
@@ -194,8 +192,8 @@ jobs:
         id: create_token
         uses: actions/create-github-app-token@v2
         with:
-          app-id: ${{ env.GH_APP_ID }}
-          private-key: ${{ steps.decode_pem.outputs.pem }} # <-- PEM content, not a path
+          app-id: ${{ steps.gh_app_creds.outputs.app_id }}
+          private-key: ${{ steps.gh_app_creds.outputs.pem }}
           owner: ${{ github.repository_owner }}
           repositories: |
             phyt.fun
@@ -274,12 +272,12 @@ jobs:
           GHCR_APP_TOKEN: ${{ steps.create_token.outputs.token }}
         run: |
           set -euo pipefail
-          # Ship deployment script
           tailscale ssh "ubuntu@${TS_SSH_DEST}" 'sudo mkdir -p /opt/phyt/deploy && sudo chown -R ubuntu:ubuntu /opt/phyt/deploy'
           scp -o StrictHostKeyChecking=no \
-          infra/environments/aws-staging/remote-deploy.sh \
-          "ubuntu@${TS_SSH_DEST}:/opt/phyt/deploy/remote-deploy.sh"
+            infra/environments/aws-staging/remote-deploy.sh \
+            "ubuntu@${TS_SSH_DEST}:/opt/phyt/deploy/remote-deploy.sh"
           tailscale ssh "ubuntu@${TS_SSH_DEST}" 'chmod +x /opt/phyt/deploy/remote-deploy.sh'
+
           tailscale ssh "ubuntu@${TS_SSH_DEST}" \
             IMAGE_REGISTRY="${{ env.REGISTRY }}" \
             GITHUB_REPOSITORY="${{ env.REPO_LC }}" \
@@ -288,3 +286,5 @@ jobs:
             VAULT_ADDR="${{ env.VAULT_ADDR }}" \
             VAULT_ROLE_ID="${{ env.ROLE_ID }}" \
             VAULT_SECRET_ID="${{ env.SECRET_ID }}" \
+            GHCR_APP_TOKEN="${GHCR_APP_TOKEN}" \
+            'bash -lc "/opt/phyt/deploy/remote-deploy.sh"'
