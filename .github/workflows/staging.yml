@@ -284,5 +284,5 @@ jobs:
             VAULT_ADDR="${{ env.VAULT_ADDR }}" \
             VAULT_ROLE_ID="${{ env.ROLE_ID }}" \
             VAULT_SECRET_ID="${{ env.SECRET_ID }}" \
-            GHCR_APP_TOKEN="${GHCR_APP_TOKEN}" \
+            GHCR_TOKEN="${GHCR_APP_TOKEN}" \
             'bash -lc "/opt/phyt/deploy/remote-deploy.sh"'
