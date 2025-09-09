@@ -13,26 +13,12 @@ error() {
 log "Starting Vault Agent initialization"
 
 # Verify required environment variables
-[ -z "$VAULT_ROLE_ID" ] && error "VAULT_ROLE_ID is required"
-[ -z "$VAULT_SECRET_ID" ] && error "VAULT_SECRET_ID is required"
-
-# Use VAULT_ADDR if set, otherwise fall back to config file
-if [ -n "$VAULT_ADDR" ]; then
-  log "Using VAULT_ADDR: $VAULT_ADDR"
-
-  # Test Vault connectivity
-  log "Testing Vault connectivity..."
-  if ! curl -s --max-time 10 --fail "$VAULT_ADDR/v1/sys/health" >/dev/null; then
-    error "Cannot reach Vault at $VAULT_ADDR"
-  fi
-  log "Vault connectivity OK"
-else
-  log "No VAULT_ADDR set, using config file address"
-fi
+[ -z "${VAULT_ROLE_ID:-}" ] && error "VAULT_ROLE_ID is required"
+[ -z "${VAULT_SECRET_ID:-}" ] && error "VAULT_SECRET_ID is required"
 
 # Ensure credential directories exist with proper permissions
 log "Setting up credential directories"
-mkdir -p /vault/credentials
+mkdir -p /vault/credentials /vault/secrets
 chmod 0700 /vault/credentials
 
 # Write AppRole credentials to files
