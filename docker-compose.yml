@@ -27,6 +27,8 @@ services:
       retries: 3
     networks:
       - phyt
+    dns:
+      - 100.100.100.100
     profiles: ["dev", "staging", "prod"]
     restart: ${RESTART_POLICY:-unless-stopped}
 
