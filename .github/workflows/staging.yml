@@ -85,7 +85,6 @@ jobs:
           file: ${{ matrix.service.dockerfile }}
           push: true
           build-args: ${{ matrix.service.buildargs }}
-          # Build for ARM64 instance; use dual if want multi-arch manifests:
           platforms: linux/arm64
           tags: |
             ${{ env.REGISTRY }}/${{ steps.meta.outputs.repo_lc }}/${{ matrix.service.name }}:${{ steps.meta.outputs.image_tag }}
@@ -119,14 +118,16 @@ jobs:
       - name: Connect to Tailscale
         uses: tailscale/github-action@v2
         with:
+          version: "1.86.2" # pin a stable version you’ve tested
           oauth-client-id: ${{ secrets.TAILSCALE_OAUTH_CLIENT_ID }}
           oauth-secret: ${{ secrets.TAILSCALE_OAUTH_SECRET }}
           tags: tag:ci
+          args: --ssh
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
-          terraform_version: 1.6.0
+          terraform_version: 1.13.1
 
       - name: Get GitHub OIDC ID token
         id: oidc
@@ -178,6 +179,22 @@ jobs:
           terraform plan -out=plan.tfplan -input=false
           terraform apply -input=false -auto-approve plan.tfplan
 
+      # Reduce race with cloud-init/tsd joining
+      - name: Wait for instance status checks
+        run: |
+          set -euo pipefail
+          NAME="staging-${SHORT_SHA}"
+          INSTANCE_ID=$(aws ec2 describe-instances \
+            --filters "Name=tag:Name,Values=${NAME}" "Name=instance-state-name,Values=pending,running" \
+            --query 'Reservations[].Instances[?State.Name==`running`].InstanceId' \
+            --output text | head -n1 || true)
+          if [[ -z "${INSTANCE_ID}" ]]; then
+            echo "Could not find running instance for ${NAME}; continuing anyway."
+          else
+            echo "Waiting for EC2 status checks to pass on ${INSTANCE_ID}…"
+            aws ec2 wait instance-status-ok --instance-ids "${INSTANCE_ID}"
+          fi
+
       - name: Mint approle credentials
         id: approle
         env:
@@ -198,51 +215,80 @@ jobs:
           { echo "ROLE_ID=${ROLE_ID}"; echo "SECRET_ID=${SECRET_ID}"; } >> "$GITHUB_ENV"
 
       - name: Wait for Tailscale node to be ready
+        env:
+          TS_SSH_DEST: ${{ env.TS_SSH_DEST }}
         run: |
+          set -euo pipefail
           echo "Waiting for ${TS_SSH_DEST} to appear in Tailscale network..."
-          for i in {1..30}; do
-            if tailscale status --json | jq -e --arg hostname "${TS_SSH_DEST}" '.Peer[] | select(.HostName == $hostname)' > /dev/null; then
+
+          # Wait up to 8 minutes for the peer to appear in status
+          for i in $(seq 1 48); do
+            if tailscale status --json | jq -e --arg h "${TS_SSH_DEST}" '
+                .Peer | to_entries[].value
+                | select(.HostName == $h or (.DNSName|startswith($h + ".")))
+              ' >/dev/null; then
               echo "Found ${TS_SSH_DEST} in Tailscale network"
               break
             fi
-            echo "Attempt $i/30: ${TS_SSH_DEST} not found, waiting 10 seconds..."
+            echo "Attempt $i/48: ${TS_SSH_DEST} not found, waiting 10s..."
             sleep 10
           done
-          if ! timeout 10s tailscale ping "${TS_SSH_DEST}"; then
-            echo "ERROR: Cannot ping ${TS_SSH_DEST}"
-            echo "Current Tailscale status:"
+
+          TARGET=$(
+            tailscale status --json | jq -r --arg h "${TS_SSH_DEST}" '
+              .Peer | to_entries[].value
+              | select(.HostName == $h or (.DNSName|startswith($h + ".")))
+              | (.DNSName // (.TailscaleIPs[0] // ""))
+            ' | head -n1
+          )
+
+          if [[ -z "${TARGET}" ]]; then
+            echo "ERROR: Could not resolve a canonical target for ${TS_SSH_DEST}"
             tailscale status
-            # Sometimes the device is ready but ping fails - try SSH directly
-            echo "Attempting direct SSH test..."
-            if tailscale ssh "${TS_SSH_DEST}" 'echo "SSH connection successful"' 2>/dev/null; then
-              echo "SSH connection works, proceeding despite ping failure"
-            else
-              echo "SSH also failed, exiting"
-              exit 1
-            fi
-          else
-            echo "${TS_SSH_DEST} is ready"
+            exit 1
+          fi
+          echo "Using target: ${TARGET}"
+          echo "TS_TARGET=${TARGET}" >> "$GITHUB_ENV"
+
+          # Prefer a direct path (gives control-plane/MagicDNS time to settle)
+          if ! tailscale ping --until-direct --timeout=90s "${TARGET}"; then
+            echo "Direct path not ready; trying normal ping as a fallback…"
+            tailscale ping --timeout=30s "${TARGET}" || true
           fi
 
-      - name: Ensure phyt directory exists
+          # Probe Tailscale SSH readiness with retries (sshd may lag)
+          for i in $(seq 1 15); do
+            if tailscale ssh -q "${TARGET}" 'true' 2>/dev/null; then
+              echo "Tailscale SSH is ready (attempt $i)"
+              break
+            fi
+            echo "TS-SSH not ready (attempt $i/15); sleeping 6s…"
+            sleep 6
+          done
+
+          tailscale ssh "${TARGET}" 'echo "SSH connection successful ($(hostname))"'
+          echo "OK: ${TARGET} is ready."
+
+      - name: Ensure /opt/phyt exists (over Tailscale SSH)
         run: |
-          tailscale ssh "ubuntu@${TS_SSH_DEST}" 'sudo mkdir -p /opt/phyt && sudo chown ubuntu:ubuntu /opt/phyt'
+          tailscale ssh "ubuntu@${TS_TARGET}" 'sudo mkdir -p /opt/phyt && sudo chown ubuntu:ubuntu /opt/phyt'
 
       - name: Ship compose bundle to host
         run: |
           set -euo pipefail
           tar -czf - docker-compose.yml tooling \
-            | tailscale ssh "ubuntu@${TS_SSH_DEST}" 'tar -xzf - -C /opt/phyt'
+            | tailscale ssh "ubuntu@${TS_TARGET}" 'tar -xzf - -C /opt/phyt'
 
-      - name: Remote deploy over Tailscale SSH
+      - name: Remote deploy over Tailscale
         run: |
           set -euo pipefail
-          tailscale ssh "ubuntu@${TS_SSH_DEST}" 'sudo mkdir -p /opt/phyt/deploy && sudo chown -R ubuntu:ubuntu /opt/phyt/deploy'
-          scp -o StrictHostKeyChecking=no \
-            infra/environments/aws-staging/remote-deploy.sh \
-            "ubuntu@${TS_SSH_DEST}:/opt/phyt/deploy/remote-deploy.sh"
-          tailscale ssh "ubuntu@${TS_SSH_DEST}" 'chmod +x /opt/phyt/deploy/remote-deploy.sh'
-          tailscale ssh "ubuntu@${TS_SSH_DEST}" \
+          tailscale ssh "ubuntu@${TS_TARGET}" 'sudo mkdir -p /opt/phyt/deploy && sudo chown -R ubuntu:ubuntu /opt/phyt/deploy'
+
+          # Send the script over Tailscale via stdin
+          tailscale ssh "ubuntu@${TS_TARGET}" 'cat > /opt/phyt/deploy/remote-deploy.sh' < infra/environments/aws-staging/remote-deploy.sh
+          tailscale ssh "ubuntu@${TS_TARGET}" 'chmod +x /opt/phyt/deploy/remote-deploy.sh'
+
+          tailscale ssh "ubuntu@${TS_TARGET}" \
             IMAGE_REGISTRY="${{ env.REGISTRY }}" \
             GITHUB_REPOSITORY="${{ env.REPO_LC }}" \
             IMAGE_TAG="${{ env.IMAGE_TAG }}" \
