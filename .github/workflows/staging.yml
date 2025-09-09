@@ -105,6 +105,7 @@ jobs:
       SHORT_SHA: ${{ needs.build-images.outputs.short_sha }}
       REPO_LC: ${{ needs.build-images.outputs.repo_lc }}
       TS_SSH_DEST: staging-${{ needs.build-images.outputs.short_sha }}
+      TS_SSH_USER: ubuntu
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -165,7 +166,7 @@ jobs:
           echo "TF_VAR_cloudflare_api_token=${CF_TOKEN}" >> "$GITHUB_ENV"
           echo "CLOUDFLARE_API_TOKEN=${CF_TOKEN}" >> "$GITHUB_ENV"
 
-      - name: Terraform init/plan/apply (staging infra)
+      - name: Terraform init/plan/apply
         working-directory: infra/environments/aws-staging
         env:
           TF_VAR_github_repo: ${{ github.repository }}
@@ -217,6 +218,7 @@ jobs:
       - name: Wait for Tailscale node to be ready
         env:
           TS_SSH_DEST: ${{ env.TS_SSH_DEST }}
+          TS_SSH_USER: ${{ env.TS_SSH_USER }}
         run: |
           set -euo pipefail
           echo "Waiting for ${TS_SSH_DEST} to appear in Tailscale network..."
@@ -258,7 +260,7 @@ jobs:
 
           # Probe Tailscale SSH readiness with retries (sshd may lag)
           for i in $(seq 1 15); do
-            if tailscale ssh -q "${TARGET}" 'true' 2>/dev/null; then
+            if tailscale ssh -q "${TS_SSH_USER}@${TARGET}" 'true' 2>/dev/null; then
               echo "Tailscale SSH is ready (attempt $i)"
               break
             fi
@@ -266,29 +268,29 @@ jobs:
             sleep 6
           done
 
-          tailscale ssh "${TARGET}" 'echo "SSH connection successful ($(hostname))"'
+          tailscale ssh "${TS_SSH_USER}@${TARGET}" 'echo "SSH connection successful ($(hostname))"'
           echo "OK: ${TARGET} is ready."
 
-      - name: Ensure /opt/phyt exists (over Tailscale SSH)
+      - name: Ensure /opt/phyt exists
         run: |
-          tailscale ssh "ubuntu@${TS_TARGET}" 'sudo mkdir -p /opt/phyt && sudo chown ubuntu:ubuntu /opt/phyt'
+          tailscale ssh "${TS_SSH_USER}@${TS_TARGET}" 'sudo mkdir -p /opt/phyt && sudo chown ubuntu:ubuntu /opt/phyt'
 
       - name: Ship compose bundle to host
         run: |
           set -euo pipefail
           tar -czf - docker-compose.yml tooling \
-            | tailscale ssh "ubuntu@${TS_TARGET}" 'tar -xzf - -C /opt/phyt'
+            | tailscale ssh "${TS_SSH_USER}@${TS_TARGET}" 'tar -xzf - -C /opt/phyt'
 
       - name: Remote deploy over Tailscale
         run: |
           set -euo pipefail
-          tailscale ssh "ubuntu@${TS_TARGET}" 'sudo mkdir -p /opt/phyt/deploy && sudo chown -R ubuntu:ubuntu /opt/phyt/deploy'
+          tailscale ssh "${TS_SSH_USER}@${TS_TARGET}" 'sudo mkdir -p /opt/phyt/deploy && sudo chown -R ubuntu:ubuntu /opt/phyt/deploy'
 
           # Send the script over Tailscale via stdin
-          tailscale ssh "ubuntu@${TS_TARGET}" 'cat > /opt/phyt/deploy/remote-deploy.sh' < infra/environments/aws-staging/remote-deploy.sh
-          tailscale ssh "ubuntu@${TS_TARGET}" 'chmod +x /opt/phyt/deploy/remote-deploy.sh'
+          tailscale ssh "${TS_SSH_USER}@${TS_TARGET}" 'cat > /opt/phyt/deploy/remote-deploy.sh' < infra/environments/aws-staging/remote-deploy.sh
+          tailscale ssh "${TS_SSH_USER}@${TS_TARGET}" 'chmod +x /opt/phyt/deploy/remote-deploy.sh'
 
-          tailscale ssh "ubuntu@${TS_TARGET}" \
+          tailscale ssh "${TS_SSH_USER}@${TS_TARGET}" \
             IMAGE_REGISTRY="${{ env.REGISTRY }}" \
             GITHUB_REPOSITORY="${{ env.REPO_LC }}" \
             IMAGE_TAG="${{ env.IMAGE_TAG }}" \
