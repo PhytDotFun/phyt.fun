@@ -164,36 +164,6 @@ jobs:
           echo "TF_VAR_cloudflare_api_token=${CF_TOKEN}" >> "$GITHUB_ENV"
           echo "CLOUDFLARE_API_TOKEN=${CF_TOKEN}" >> "$GITHUB_ENV"
 
-      - name: Export GitHub app creds from Vault
-        id: gh_app_creds
-        env:
-          VAULT_ADDR: ${{ env.VAULT_ADDR }}
-          VAULT_TOKEN: ${{ env.VAULT_TOKEN }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          app_json=$(curl -fsS -H "X-Vault-Token: ${VAULT_TOKEN}" \
-            "${VAULT_ADDR}/v1/secret/data/staging/gh-app")
-          APP_ID=$(echo "$app_json" | jq -er '.data.data.APP_ID')
-          PRIV_B64=$(echo "$app_json" | jq -er '.data.data.PRIVATE_KEY')
-          echo "::add-mask::${PRIV_B64}"
-          PRIV_PEM="$(echo "${PRIV_B64}" | base64 -d)"
-          {
-            echo "app_id=${APP_ID}"
-            echo 'pem<<EOF'
-            printf '%s\n' "${PRIV_PEM}"
-            echo 'EOF'
-          } >> "$GITHUB_OUTPUT"
-      - name: Create GitHub app token
-        id: create_token
-        uses: actions/create-github-app-token@v2
-        with:
-          app-id: ${{ steps.gh_app_creds.outputs.app_id }}
-          private-key: ${{ steps.gh_app_creds.outputs.pem }}
-          owner: ${{ github.repository_owner }}
-          repositories: |
-            phyt.fun
-
       - name: Terraform init/plan/apply (staging infra)
         working-directory: infra/environments/aws-staging
         env:
@@ -215,29 +185,62 @@ jobs:
           VAULT_TOKEN: ${{ env.VAULT_TOKEN }}
         run: |
           set -euo pipefail
+
+          echo "Validating Vault token..."
+          token_info=$(curl -fsS -H "X-Vault-Token: ${VAULT_TOKEN}" \
+            "${VAULT_ADDR}/v1/auth/token/lookup-self" || {
+              echo "ERROR: Failed to validate Vault token"
+              exit 1
+          })
+          echo "Token TTL: $(echo "$token_info" | jq -r '.data.ttl // "unknown"')"
+
           ROLE="staging-app"
           HDRS=(-H "X-Vault-Token: ${VAULT_TOKEN}")
+
+          echo "Checking AppRole role existence..."
+          roles_response=$(curl -fsS "${HDRS[@]}" \
+            "${VAULT_ADDR}/v1/auth/approle/role?list=true" || {
+              echo "ERROR: Failed to list AppRole roles"
+              exit 1
+          })
+
+          if ! echo "$roles_response" | jq -e --arg role "$ROLE" '.data.keys | index($role)' >/dev/null; then
+            echo "ERROR: Role '${ROLE}' not found in AppRole roles"
+            echo "Available roles: $(echo "$roles_response" | jq -r '.data.keys | join(", ")')"
+            exit 1
+          fi
+
+          echo "Fetching role-id for role: ${ROLE}"
           ROLE_ID=$(curl -fsS "${HDRS[@]}" \
-            "${VAULT_ADDR}/v1/auth/approle/role/${ROLE}/role-id" | jq -er '.data.role_id')
+            "${VAULT_ADDR}/v1/auth/approle/role/${ROLE}/role-id" | jq -er '.data.role_id' || {
+              echo "ERROR: Failed to fetch role-id for ${ROLE}"
+              exit 1
+          })
+
+          echo "Generating secret-id for role: ${ROLE}"
           SECRET_ID=$(curl -fsS -X POST "${HDRS[@]}" \
             -H "Content-Type: application/json" \
-            -d '{"num_uses":1,"ttl":"30m"}' \
-            "${VAULT_ADDR}/v1/auth/approle/role/${ROLE}/secret-id" | jq -er '.data.secret_id')
+            -d '{"num_uses":5,"ttl":"30m"}' \
+            "${VAULT_ADDR}/v1/auth/approle/role/${ROLE}/secret-id" | jq -er '.data.secret_id' || {
+              echo "ERROR: Failed to generate secret-id for ${ROLE}"
+              exit 1
+          })
+
           echo "::add-mask::${ROLE_ID}"
           echo "::add-mask::${SECRET_ID}"
           { echo "ROLE_ID=${ROLE_ID}"; echo "SECRET_ID=${SECRET_ID}"; } >> "$GITHUB_ENV"
-
-      - name: Wait for Tailscale node to be ready
-        run: |
-          echo "Waiting for ${TS_SSH_DEST} to appear in Tailscale network..."
-          for i in {1..30}; do
-            if tailscale status --json | jq -e --arg hostname "${TS_SSH_DEST}" '.Peer[] | select(.HostName == $hostname)' > /dev/null; then
-              echo "Found ${TS_SSH_DEST} in Tailscale network"
-              break
-            fi
-            echo "Attempt $i/30: ${TS_SSH_DEST} not found, waiting 10 seconds..."
-            sleep 10
-          done
+          echo "Successfully generated AppRole credentials"
+            - name: Wait for Tailscale node to be ready
+              run: |
+                echo "Waiting for ${TS_SSH_DEST} to appear in Tailscale network..."
+                for i in {1..30}; do
+                  if tailscale status --json | jq -e --arg hostname "${TS_SSH_DEST}" '.Peer[] | select(.HostName == $hostname)' > /dev/null; then
+                    echo "Found ${TS_SSH_DEST} in Tailscale network"
+                    break
+                  fi
+                  echo "Attempt $i/30: ${TS_SSH_DEST} not found, waiting 10 seconds..."
+                  sleep 10
+                done
 
           if ! timeout 10s tailscale ping "${TS_SSH_DEST}"; then
             echo "ERROR: Cannot ping ${TS_SSH_DEST}"
@@ -266,8 +269,6 @@ jobs:
             | tailscale ssh "ubuntu@${TS_SSH_DEST}" 'tar -xzf - -C /opt/phyt'
 
       - name: Remote deploy over Tailscale SSH
-        env:
-          GHCR_APP_TOKEN: ${{ steps.create_token.outputs.token }}
         run: |
           set -euo pipefail
           tailscale ssh "ubuntu@${TS_SSH_DEST}" 'sudo mkdir -p /opt/phyt/deploy && sudo chown -R ubuntu:ubuntu /opt/phyt/deploy'
@@ -284,5 +285,4 @@ jobs:
             VAULT_ADDR="${{ env.VAULT_ADDR }}" \
             VAULT_ROLE_ID="${{ env.ROLE_ID }}" \
             VAULT_SECRET_ID="${{ env.SECRET_ID }}" \
-            GHCR_TOKEN="${GHCR_APP_TOKEN}" \
             'bash -lc "/opt/phyt/deploy/remote-deploy.sh"'

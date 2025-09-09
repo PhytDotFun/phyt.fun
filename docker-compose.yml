@@ -21,11 +21,7 @@ services:
       - vault-secrets:/vault/secrets:rw
       - vault-credentials:/vault/credentials:rw
     healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "curl -fsS http://127.0.0.1:8007/v1/agent/health >/dev/null",
-        ]
+      test: ["CMD-SHELL", "test -s /vault/secrets/postgres.env"]
       interval: 30s
       timeout: 5s
       retries: 3
@@ -132,7 +128,7 @@ services:
 
   workers:
     image: ${IMAGE_REGISTRY:-ghcr.io}/${GITHUB_REPOSITORY}/workers:${IMAGE_TAG:-latest}
-    container_name: workers-${COMPOSE_PROJECT_NAME:-phyt}
+    container_name: ${COMPOSE_PROJECT_NAME:-phyt}-workers
     depends_on:
       vault-agent:
         condition: service_started
