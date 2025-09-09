@@ -6,7 +6,6 @@
      NOTE: This template intentionally avoids non-core funcs like "default" or "or".
 */ -}}
 
-{{- $ns  := env "VAULT_NAMESPACE" -}}
 {{- $dep := env "DEPLOYMENT_ID" -}}
 {{- $env := env "VAULT_ENV" -}}
 
