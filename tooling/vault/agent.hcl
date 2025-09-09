@@ -3,9 +3,10 @@ disable_mlock = true
 log_level     = "info"
 
 vault {
-  address = "https://vault.tailea8363.ts.net"
   retry {
     num_retries = 5
+    backoff     = "1s"
+    max_backoff = "10s"
   }
 }
 
@@ -18,50 +19,56 @@ auto_auth {
   method "approle" {
     mount_path = "auth/approle"
     config = {
-      role_id_file_path   = "/vault/credentials/role_id"
-      secret_id_file_path = "/vault/credentials/secret_id"
-      # Secret ID is single use
+      role_id_file_path                   = "/vault/credentials/role_id"
+      secret_id_file_path                 = "/vault/credentials/secret_id"
       remove_secret_id_file_after_reading = true
     }
   }
-
   sink "file" {
     config = {
-      path                 = "/vault/secrets/token"
-      mode                 = 0640
-      delete_after_reading = true
+      path = "/vault/secrets/token"
+      mode = 0640
     }
   }
 }
 
-# Minimal cache
 cache {
   use_auto_auth_token  = true
   enforce_consistency  = "always"
   cache_static_secrets = false
 }
 
-# Write templates to tmpfs (RAM) and refresh frequently
 template {
-  source      = "/vault/templates/hono-api.ctmpl"
-  destination = "/vault/secrets/hono-api.env"
-  perms       = "0644"
-  # Refresh every 60 seconds
-  wait { min = "60s" ; max = "120s" }
+  source               = "/vault/templates/hono-api.ctmpl"
+  destination          = "/vault/secrets/hono-api.env"
+  perms                = "0644"
+  error_on_missing_key = true
+  wait {
+    min = "60s"
+    max = "120s"
+  }
 }
 
 template {
-  source      = "/vault/templates/postgres.ctmpl"
-  destination = "/vault/secrets/postgres.env"
-  perms       = "0644"
-  wait { min = "60s" ; max = "120s" }
+  source               = "/vault/templates/postgres.ctmpl"
+  destination          = "/vault/secrets/postgres.env"
+  perms                = "0644"
+  error_on_missing_key = true
+  wait {
+    min = "60s"
+    max = "120s"
+  }
 }
 
 template {
-  source      = "/vault/templates/workers.ctmpl"
-  destination = "/vault/secrets/workers.env"
-  perms       = "0644"
-  wait { min = "60s" ; max = "120s" }
+  source               = "/vault/templates/workers.ctmpl"
+  destination          = "/vault/secrets/workers.env"
+  perms                = "0644"
+  error_on_missing_key = true
+  wait {
+    min = "60s"
+    max = "120s"
+  }
 }
 
 template {
@@ -69,4 +76,8 @@ template {
   destination          = "/vault/secrets/pgbouncer.ini"
   perms                = "0640"
   error_on_missing_key = true
+  wait {
+    min = "60s"
+    max = "120s"
+  }
 }
