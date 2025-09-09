@@ -1,5 +1,4 @@
-{{- $dep := env "DEPLOYMENT_ID" -}}
-{{- with secret (printf "secret/data/staging/%s/hono-api" $dep) -}}
+{{- with secret  "secret/data/staging/%s/hono-api"  -}}
 {{- range $k, $v := .Data.data -}}
 {{ $k }}={{ $v }}
 {{- end -}}

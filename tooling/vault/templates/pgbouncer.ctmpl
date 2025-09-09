@@ -9,9 +9,9 @@
 {{- $dep := env "DEPLOYMENT_ID" -}}
 {{- $env := env "VAULT_ENV" -}}
 
-{{- with secret (printf "secret/data/%s/%s/postgres" $ns $dep) -}}
+{{- with secret "secret/data/staging/postgres" -}}
 {{-   $pg := .Data.data -}}
-{{-   with secret (printf "secret/data/%s/%s/pgbouncer" $ns $dep) -}}
+{{-   with secret "secret/data/staging/pgbouncer"  -}}
 {{-     $pb := .Data.data -}}
 
 [databases]
@@ -19,9 +19,9 @@
 ; In staging (trust), user/password also not needed.
 
 appdb = host={{- if $pb.DATABASES_HOST -}}{{ $pb.DATABASES_HOST }}{{- else -}}postgres{{- end -}} \
- port={{- if $pb.DATABASES_PORT -}}{{ $pb.DATABASES_PORT }}{{- else -}}5432{{- end -}} \
- dbname={{- if $pb.DATABASES_NAME -}}{{ $pb.DATABASES_NAME }}{{- else if $pg.POSTGRES_DB -}}{{ $pg.POSTGRES_DB }}{{- else -}}app{{- end -}}{{- if $pb.DATABASES_SSLMODE -}} \
- sslmode={{ $pb.DATABASES_SSLMODE }}{{- end }}
+port={{- if $pb.DATABASES_PORT -}}{{ $pb.DATABASES_PORT }}{{- else -}}5432{{- end -}} \
+dbname={{- if $pb.DATABASES_NAME -}}{{ $pb.DATABASES_NAME }}{{- else if $pg.POSTGRES_DB -}}{{ $pg.POSTGRES_DB }}{{- else -}}app{{- end -}}{{- if $pb.DATABASES_SSLMODE -}} \
+sslmode={{ $pb.DATABASES_SSLMODE }}{{- end }}
 
 [pgbouncer]
 listen_addr = 0.0.0.0
