@@ -197,33 +197,33 @@ jobs:
           echo "::add-mask::${SECRET_ID}"
           { echo "ROLE_ID=${ROLE_ID}"; echo "SECRET_ID=${SECRET_ID}"; } >> "$GITHUB_ENV"
 
-      - name: Wait for Tailscale node to be ready
-        run: |
-          echo "Waiting for ${TS_SSH_DEST} to appear in Tailscale network..."
-          for i in {1..30}; do
-            if tailscale status --json | jq -e --arg hostname "${TS_SSH_DEST}" '.Peer[] | select(.HostName == $hostname)' > /dev/null; then
-              echo "Found ${TS_SSH_DEST} in Tailscale network"
-              break
-            fi
-            echo "Attempt $i/30: ${TS_SSH_DEST} not found, waiting 10 seconds..."
-            sleep 10
-          done
+          - name: Wait for Tailscale node to be ready
+            run: |
+              echo "Waiting for ${TS_SSH_DEST} to appear in Tailscale network..."
+              for i in {1..30}; do
+                if tailscale status --json | jq -e --arg hostname "${TS_SSH_DEST}" '.Peer[] | select(.HostName == $hostname)' > /dev/null; then
+                  echo "Found ${TS_SSH_DEST} in Tailscale network"
+                  break
+                fi
+                echo "Attempt $i/30: ${TS_SSH_DEST} not found, waiting 10 seconds..."
+                sleep 10
+              done
 
-          if ! timeout 10s tailscale ping "${TS_SSH_DEST}"; then
-            echo "ERROR: Cannot ping ${TS_SSH_DEST}"
-            echo "Current Tailscale status:"
-            tailscale status
-            # Sometimes the device is ready but ping fails - try SSH directly
-            echo "Attempting direct SSH test..."
-            if tailscale ssh "${TS_SSH_DEST}" 'echo "SSH connection successful"' 2>/dev/null; then
-              echo "SSH connection works, proceeding despite ping failure"
-            else
-              echo "SSH also failed, exiting"
-              exit 1
-            fi
-          else
-            echo "${TS_SSH_DEST} is ready"
-          fi
+              if ! timeout 10s tailscale ping "${TS_SSH_DEST}"; then
+                echo "ERROR: Cannot ping ${TS_SSH_DEST}"
+                echo "Current Tailscale status:"
+                tailscale status
+                # Sometimes the device is ready but ping fails - try SSH directly
+                echo "Attempting direct SSH test..."
+                if tailscale ssh "${TS_SSH_DEST}" 'echo "SSH connection successful"' 2>/dev/null; then
+                  echo "SSH connection works, proceeding despite ping failure"
+                else
+                  echo "SSH also failed, exiting"
+                  exit 1
+                fi
+              else
+                echo "${TS_SSH_DEST} is ready"
+              fi
 
       - name: Ensure phyt directory exists
         run: |
