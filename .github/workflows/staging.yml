@@ -176,11 +176,8 @@ jobs:
             "${VAULT_ADDR}/v1/secret/data/staging/gh-app")
           APP_ID=$(echo "$app_json" | jq -er '.data.data.APP_ID')
           PRIV_B64=$(echo "$app_json" | jq -er '.data.data.PRIVATE_KEY')
-
           echo "::add-mask::${PRIV_B64}"
-
           PRIV_PEM="$(echo "${PRIV_B64}" | base64 -d)"
-
           {
             echo "app_id=${APP_ID}"
             echo 'pem<<EOF'
@@ -235,32 +232,19 @@ jobs:
         run: |
           set -euo pipefail
 
-          DEST="${TS_SSH_DEST}"
-          echo "Waiting for '${DEST}' to appear in Tailscale and become SSH-able..."
+          echo "Waiting for ${TS_SSH_DEST} to be SSH-ready..."
 
           for i in {1..30}; do
-            PEER_JSON="$(tailscale status --json || true)"
-            TS_IP="$(jq -r --arg H "$DEST" '
-              (.Peer[]? | select(.HostName==$H or (.DNSName|startswith($H+"."))) | .TailscaleIPs[0]) // empty
-            ' <<<"$PEER_JSON")"
-
-            if [[ -n "${TS_IP}" ]]; then
-              echo "Found peer ${DEST} at ${TS_IP}"
-              if tailscale ssh -q -o ConnectTimeout=5 "ubuntu@${TS_IP}" 'echo SSH_OK' 2>/dev/null; then
-                echo "Tailscale SSH OK"
-                echo "TS_TARGET_IP=${TS_IP}" >> "$GITHUB_ENV"
-                exit 0
-              else
-                echo "Peer found but SSH not ready yet; retrying..."
-              fi
-            else
-              echo "Attempt $i/30: ${DEST} not found, waiting 10s..."
+            echo "Attempt $i/30: Testing SSH connection..."
+            if tailscale ssh -q -o ConnectTimeout=10 "ubuntu@${TS_SSH_DEST}" 'echo "SSH Ready"' 2>/dev/null; then
+              echo "✓ SSH connection successful to ${TS_SSH_DEST}"
+              exit 0
             fi
+            echo "SSH not ready, waiting 10s..."
             sleep 10
           done
-
-          echo "ERROR: Could not find a ready Tailscale peer for '${DEST}'"
-          echo "Debug snapshot:"
+          echo "SSH connection failed after 10 minutes"
+          echo "Current Tailscale status:"
           tailscale status
           exit 1
 
