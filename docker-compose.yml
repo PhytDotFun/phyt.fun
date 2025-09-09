@@ -6,7 +6,6 @@ services:
     environment:
       VAULT_ENV: ${VAULT_ENV:-staging}
       VAULT_ADDR: ${VAULT_ADDR:-}
-      VAULT_NAMESPACE: ${VAULT_NAMESPACE:-staging}
       VAULT_PATH_PREFIX: ${VAULT_PATH_PREFIX:-phyt}
       DEPLOYMENT_ID: ${DEPLOYMENT_ID:-staging}
       VAULT_ROLE_ID: ${VAULT_ROLE_ID}
