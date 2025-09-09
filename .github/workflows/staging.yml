@@ -209,7 +209,7 @@ jobs:
             "${VAULT_ADDR}/v1/auth/approle/role/${ROLE}/role-id" | jq -er '.data.role_id')
           SECRET_ID=$(curl -fsS -X POST "${HDRS[@]}" \
             -H "Content-Type: application/json" \
-            -d '{"num_uses":1,"ttl":"30m"}' \
+            -d '{"num_uses":5,"ttl":"30m"}' \
             "${VAULT_ADDR}/v1/auth/approle/role/${ROLE}/secret-id" | jq -er '.data.secret_id')
           echo "::add-mask::${ROLE_ID}"
           echo "::add-mask::${SECRET_ID}"
