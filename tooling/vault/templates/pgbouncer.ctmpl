@@ -1,12 +1,14 @@
 {{- /* tooling/vault/templates/pgbouncer.ctmpl
-      Rendered by Vault Agent directly to /etc/pgbouncer/pgbouncer.ini
-      ENV behavior:
-        - ENV=staging  -> auth_type=trust (simple smoke)
-        - otherwise    -> scram + auth_query (prod posture)
+     Rendered by Vault Agent to /vault/secrets/pgbouncer.ini
+     ENV behavior:
+       - VAULT_ENV=staging -> auth_type=trust
+       - otherwise         -> scram + auth_query
+     NOTE: This template intentionally avoids non-core funcs like "default" or "or".
 */ -}}
-{{- $ns  := env "VAULT_NAMESPACE" | default "staging" -}}
-{{- $dep := env "DEPLOYMENT_ID"   | default "local"   -}}
-{{- $env := env "ENV"             | default "staging" -}}
+
+{{- $ns  := env "VAULT_NAMESPACE" -}}
+{{- $dep := env "DEPLOYMENT_ID" -}}
+{{- $env := env "VAULT_ENV" -}}
 
 {{- with secret (printf "secret/data/%s/%s/postgres" $ns $dep) -}}
 {{-   $pg := .Data.data -}}
@@ -14,13 +16,13 @@
 {{-     $pb := .Data.data -}}
 
 [databases]
-; In prod we avoid embedding user/password here—app supplies its own creds.
+; In prod avoid embedding user/password here—app supplies its own creds.
 ; In staging (trust), user/password also not needed.
-{{- $appdb_host := or $pb.DATABASES_HOST "postgres" -}}
-{{- $appdb_port := or $pb.DATABASES_PORT "5432" -}}
-{{- $appdb_dbname := or $pb.DATABASES_NAME (or $pg.POSTGRES_DB "app") -}}
-{{- $appdb_sslmode := $pb.DATABASES_SSLMODE -}}
-appdb = host={{ $appdb_host }} port={{ $appdb_port }} dbname={{ $appdb_dbname }}{{ if $appdb_sslmode }} sslmode={{ $appdb_sslmode }}{{ end }}
+
+appdb = host={{- if $pb.DATABASES_HOST -}}{{ $pb.DATABASES_HOST }}{{- else -}}postgres{{- end -}} \
+ port={{- if $pb.DATABASES_PORT -}}{{ $pb.DATABASES_PORT }}{{- else -}}5432{{- end -}} \
+ dbname={{- if $pb.DATABASES_NAME -}}{{ $pb.DATABASES_NAME }}{{- else if $pg.POSTGRES_DB -}}{{ $pg.POSTGRES_DB }}{{- else -}}app{{- end -}}{{- if $pb.DATABASES_SSLMODE -}} \
+ sslmode={{ $pb.DATABASES_SSLMODE }}{{- end }}
 
 [pgbouncer]
 listen_addr = 0.0.0.0
@@ -45,10 +47,10 @@ server_tls_sslmode = disable
 {{- else }}
 ; ── PROD: DB-side auth (no app creds in .ini) ───────────────────────────────────
 auth_type = scram-sha-256
-auth_user = {{ or $pb.AUTH_USER "pgbouncer_auth" }}
-auth_query = {{ or $pb.AUTH_QUERY "SELECT username, password FROM pgbouncer.get_auth($1)" }}
-; Optional client TLS to PgBouncer (enable if you terminate TLS at PgBouncer)
-; client_tls_sslmode = {{ or $pb.CLIENT_TLS_SSLMODE "disable" }}
+auth_user = {{- if $pb.AUTH_USER -}}{{ $pb.AUTH_USER }}{{- else -}}pgbouncer_auth{{- end }}
+auth_query = {{- if $pb.AUTH_QUERY -}}{{ $pb.AUTH_QUERY }}{{- else -}}SELECT username, password FROM pgbouncer.get_auth($1){{- end }}
+; Optional client TLS to PgBouncer (enable if terminating TLS here)
+; client_tls_sslmode = {{- if $pb.CLIENT_TLS_SSLMODE -}}{{ $pb.CLIENT_TLS_SSLMODE }}{{- else -}}disable{{- end }}
 {{- end }}
 
 server_fast_close = 1
@@ -60,5 +62,5 @@ tcp_keepcnt = 3
 
 ; No [users] section required (trust in staging; auth_query in prod)
 
-{{-   end -}}
+{{-     end -}}
 {{- end -}}
