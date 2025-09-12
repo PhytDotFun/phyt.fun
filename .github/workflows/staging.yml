@@ -295,6 +295,7 @@ jobs:
             GITHUB_REPOSITORY="${{ env.REPO_LC }}" \
             IMAGE_TAG="${{ env.IMAGE_TAG }}" \
             COMPOSE_PROFILES="staging" \
+            VAULT_ENV="staging" \
             VAULT_ADDR="${{ env.VAULT_ADDR }}" \
             VAULT_ROLE_ID="${{ env.ROLE_ID }}" \
             VAULT_SECRET_ID="${{ env.SECRET_ID }}" \
