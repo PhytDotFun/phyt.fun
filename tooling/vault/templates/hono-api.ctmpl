@@ -1,4 +1,4 @@
-{{- with secret  "secret/data/staging/hono-api"  -}}
+{{- with secret (env "HONO_API_SECRET_PATH")  -}}
 {{- range $k, $v := .Data.data -}}
 {{ $k }}={{ $v }}
 {{- end -}}

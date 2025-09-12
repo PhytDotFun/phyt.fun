@@ -1,4 +1,4 @@
-{{- with secret  "secret/data/staging/workers"  -}}
+{{- with secret (env "WORKERS_SECRET_PATH") -}}
 {{- range $k, $v := .Data.data -}}
 {{ $k }}={{ $v }}
 {{- end -}}
