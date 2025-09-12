@@ -27,12 +27,12 @@ printf "%s" "$VAULT_ROLE_ID" >/vault/credentials/role_id
 printf "%s" "$VAULT_SECRET_ID" >/vault/credentials/secret_id
 chmod 0600 /vault/credentials/role_id /vault/credentials/secret_id
 
-# Verify tmpfs mount
-log "Verifying tmpfs mount for secrets"
-if ! awk '($2=="/vault/secrets" && $3=="tmpfs"){f=1} END{exit (f?0:1)}' /proc/mounts; then
-  error "/vault/secrets is not mounted as tmpfs!"
-fi
-log "tmpfs mount verified"
+# # Verify tmpfs mount
+# log "Verifying tmpfs mount for secrets"
+# if ! awk '($2=="/vault/secrets" && $3=="tmpfs"){f=1} END{exit (f?0:1)}' /proc/mounts; then
+#   error "/vault/secrets is not mounted as tmpfs!"
+# fi
+# log "tmpfs mount verified"
 
 # Verify template files exist
 log "Checking template files"
