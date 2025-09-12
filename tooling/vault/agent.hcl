@@ -40,7 +40,7 @@ cache {
 
 template {
   source               = "/vault/templates/hono-api.ctmpl"
-  destination          = "/vault/secrets/hono-api.env"
+  destination          = "/secrets/hono-api/hono-api.env"
   perms                = "0644"
   error_on_missing_key = true
   wait {
@@ -51,7 +51,7 @@ template {
 
 template {
   source               = "/vault/templates/postgres.ctmpl"
-  destination          = "/vault/secrets/postgres.env"
+  destination          = "/secrets/postgres/postgres.env"
   perms                = "0644"
   error_on_missing_key = true
   wait {
@@ -62,7 +62,7 @@ template {
 
 template {
   source               = "/vault/templates/workers.ctmpl"
-  destination          = "/vault/secrets/workers.env"
+  destination          = "/secrets/workers/workers.env"
   perms                = "0644"
   error_on_missing_key = true
   wait {
@@ -73,7 +73,7 @@ template {
 
 template {
   source               = "/vault/templates/pgbouncer.ctmpl"
-  destination          = "/vault/secrets/pgbouncer.ini"
+  destination          = "/secrets/pgbouncer/pgbouncer.ini"
   perms                = "0640"
   error_on_missing_key = true
   wait {
