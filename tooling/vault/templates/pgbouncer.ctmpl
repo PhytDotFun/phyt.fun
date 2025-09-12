@@ -9,10 +9,11 @@
 {{- $dep := env "DEPLOYMENT_ID" -}}
 {{- $env := env "VAULT_ENV" -}}
 
-{{- with secret "secret/data/staging/postgres" -}}
+{{- with secret (env "POSTGRES_SECRET_PATH") -}}
 {{-   $pg := .Data.data -}}
-{{-   with secret "secret/data/staging/pgbouncer"  -}}
-{{-     $pb := .Data.data -}}
+
+{{- with secret (env "PGBOUNCER_SECRET_PATH") -}}
+{{-   $pb := .Data.data -}}
 
 [databases]
 ; In prod avoid embedding user/password here—app supplies its own creds.
