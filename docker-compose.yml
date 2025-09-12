@@ -7,18 +7,28 @@ services:
       VAULT_ENV: ${VAULT_ENV:-staging}
       VAULT_ADDR: ${VAULT_ADDR:-}
       VAULT_PATH_PREFIX: ${VAULT_PATH_PREFIX:-phyt}
-      DEPLOYMENT_ID: ${DEPLOYMENT_ID:-staging}
       VAULT_ROLE_ID: ${VAULT_ROLE_ID}
       VAULT_SECRET_ID: ${VAULT_SECRET_ID}
+
+      POSTGRES_SECRET_PATH: secret/data/${VAULT_ENV}/postgres
+      PGBOUNCER_SECRET_PATH: secret/data/${VAULT_ENV}/pgbouncer
+      HONO_API_SECRET_PATH: secret/data/${VAULT_ENV}/hono-api
+      WORKERS_SECRET_PATH: secret/data/${VAULT_ENV}/workers
     security_opt: ["no-new-privileges:true"]
     volumes:
+      # Agent initialization
       - ./tooling/vault:/vault/config:ro
       - ./tooling/vault/templates:/vault/templates:ro
       - ./tooling/ops/agent-entrypoint.sh:/usr/local/bin/agent-entrypoint.sh:ro
-      # Ephemeral credentials mounted read-only
-      # All secrets are mounted to tmfps volume (RAM only)
-      - vault-secrets:/vault/secrets:rw
+
+      # Agent creds (tokens)
       - vault-credentials:/vault/credentials:rw
+
+      # Container secrets
+      - vault-secrets-postgres:/secrets/postgres:rw
+      - vault-secrets-pgbouncer:/secrets/pgbouncer:rw
+      - vault-secrets-hono:/secrets/hono:rw
+      - vault-secrets-workers:/secrets/workers:rw
     healthcheck:
       test: ["CMD-SHELL", "test -s /vault/secrets/postgres.env"]
       interval: 30s
@@ -38,7 +48,7 @@ services:
       vault-agent: { condition: service_healthy }
     volumes:
       - postgres-data:/var/lib/postgresql/data
-      - vault-secrets:/vault/secrets:ro
+      - vault-secrets-postgres:/secrets/postgres:ro
       - ./tooling/ops/wait-for-secrets.sh:/usr/local/bin/wait-for-secrets.sh:ro
     entrypoint:
       [
@@ -48,12 +58,9 @@ services:
       ]
     environment:
       WAIT_FOR_SECRET_FILE: /vault/secrets/postgres.env
+      WAIT_FOR_SECRET_TIMEOUT: "180"
     healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          '. /vault/secrets/postgres.env && pg_isready -U "$POSTGRES_USER" -d "$POSTGRES_DB"',
-        ]
+      test: ["CMD-SHELL", "pg_isready -U postgres -h 127.0.0.1"]
       interval: 10s
       timeout: 5s
       retries: 10
@@ -69,7 +76,7 @@ services:
       vault-agent: { condition: service_healthy }
       postgres: { condition: service_healthy }
     volumes:
-      - vault-secrets:/vault/secrets:ro
+      - vault-secrets-pgbouncer:/secrets/pgbouncer:ro
       - ./tooling/ops/wait-for-secrets.sh:/usr/local/bin/wait-for-secrets.sh:ro
       - ./tooling/ops/pgbouncer-entrypoint.sh:/usr/local/bin/pgbouncer-entrypoint.sh:ro
     entrypoint:
@@ -105,7 +112,7 @@ services:
       postgres: { condition: service_started }
       redis: { condition: service_started }
     volumes:
-      - vault-secrets:/vault/secrets:ro
+      - vault-secrets-hono:/secrets/hono:ro
       - ./tooling/ops/wait-for-secrets.sh:/usr/local/bin/wait-for-secrets.sh:ro
     entrypoint:
       ["/usr/local/bin/wait-for-secrets.sh", "node", "/app/dist/server.js"]
@@ -140,7 +147,7 @@ services:
       redis:
         condition: service_healthy
     volumes:
-      - vault-secrets:/vault/secrets:ro
+      - vault-secrets-workers:/secrets/workers:ro
       - ./tooling/ops/wait-for-secrets.sh:/usr/local/bin/wait-for-secrets.sh:ro
     entrypoint:
       ["/usr/local/bin/wait-for-secrets.sh", "node", "/app/dist/index.js"]
@@ -189,12 +196,12 @@ networks:
 
 volumes:
   postgres-data:
-  vault-secrets:
-    driver: local
-    driver_opts:
-      type: tmpfs
-      device: tmpfs
-      o: nodev,nosuid,noexec,size=10m
+
+  vault-secrets-postgres: {}
+  vault-secrets-pgbouncer: {}
+  vault-secrets-hono: {}
+  vault-secrets-workers: {}
+
   vault-credentials:
     driver: local
     driver_opts:
