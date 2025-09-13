@@ -71,13 +71,3 @@ template {
   }
 }
 
-template {
-  source               = "/vault/templates/pgbouncer.ctmpl"
-  destination          = "/secrets/pgbouncer/pgbouncer.ini"
-  perms                = "0640"
-  error_on_missing_key = true
-  wait {
-    min = "60s"
-    max = "120s"
-  }
-}

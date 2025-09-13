@@ -112,12 +112,6 @@ if $COMPOSE ps redis >/dev/null 2>&1; then
   check_cmd "redis ping" docker exec "$($COMPOSE ps -q redis)" redis-cli -h 127.0.0.1 ping
 fi
 
-# pgbouncer ping (if enabled)
-if $COMPOSE ps pgbouncer >/dev/null 2>&1; then
-  # best-effort: check process alive inside container
-  check_cmd "pgbouncer alive" docker exec "$($COMPOSE ps -q pgbouncer)" sh -lc 'pgrep -x pgbouncer'
-fi
-
 if [[ -n "${GHCR_TOKEN}" ]]; then
   docker logout ghcr.io >/dev/null 2>&1 || true
 fi

@@ -11,7 +11,6 @@ services:
       VAULT_SECRET_ID: ${VAULT_SECRET_ID}
 
       POSTGRES_SECRET_PATH: secret/data/${VAULT_ENV}/postgres
-      PGBOUNCER_SECRET_PATH: secret/data/${VAULT_ENV}/pgbouncer
       HONO_API_SECRET_PATH: secret/data/${VAULT_ENV}/hono-api
       WORKERS_SECRET_PATH: secret/data/${VAULT_ENV}/workers
     security_opt: ["no-new-privileges:true"]
@@ -26,7 +25,6 @@ services:
 
       # Container secrets
       - vault-secrets-postgres:/secrets/postgres:rw
-      - vault-secrets-pgbouncer:/secrets/pgbouncer:rw
       - vault-secrets-hono:/secrets/hono:rw
       - vault-secrets-workers:/secrets/workers:rw
     healthcheck:
@@ -69,25 +67,6 @@ services:
     profiles: ["dev", "staging", "prod"]
     restart: ${RESTART_POLICY:-unless-stopped}
 
-  pgbouncer:
-    image: edoburu/pgbouncer:latest
-    container_name: ${COMPOSE_PROJECT_NAME:-phyt}-pgbouncer
-    depends_on:
-      vault-agent: { condition: service_healthy }
-      postgres: { condition: service_healthy }
-    volumes:
-      - vault-secrets-pgbouncer:/secrets/pgbouncer:ro
-      - ./tooling/ops/wait-for-secrets.sh:/usr/local/bin/wait-for-secrets.sh:ro
-      - ./tooling/ops/pgbouncer-entrypoint.sh:/usr/local/bin/pgbouncer-entrypoint.sh:ro
-    entrypoint:
-      ["/usr/local/bin/pgbouncer-entrypoint.sh", "/vault/secrets/pgbouncer.ini"]
-    environment:
-      WAIT_FOR_SECRET_FILE: /vault/secrets/pgbouncer.ini
-    networks:
-      - phyt
-    profiles: ["dev", "staging", "prod"]
-    restart: ${RESTART_POLICY:-unless-stopped}
-
   redis:
     image: redis:7-alpine
     container_name: ${COMPOSE_PROJECT_NAME:-phyt}-redis
@@ -108,7 +87,6 @@ services:
     # docker compose up -d --scale hono-api=2 nginx
     depends_on:
       vault-agent: { condition: service_started }
-      pgbouncer: { condition: service_started }
       postgres: { condition: service_started }
       redis: { condition: service_started }
     volumes:
@@ -139,8 +117,6 @@ services:
     container_name: ${COMPOSE_PROJECT_NAME:-phyt}-workers
     depends_on:
       vault-agent:
-        condition: service_started
-      pgbouncer:
         condition: service_started
       postgres:
         condition: service_healthy
@@ -198,7 +174,6 @@ volumes:
   postgres-data:
 
   vault-secrets-postgres: {}
-  vault-secrets-pgbouncer: {}
   vault-secrets-hono: {}
   vault-secrets-workers: {}
 

@@ -36,7 +36,7 @@ chmod 0600 /vault/credentials/role_id /vault/credentials/secret_id
 
 # Verify template files exist
 log "Checking template files"
-for template in hono-api postgres workers pgbouncer; do
+for template in hono-api postgres workers; do
   if [ ! -f "/vault/templates/${template}.ctmpl" ]; then
     error "Template file /vault/templates/${template}.ctmpl not found"
   fi
