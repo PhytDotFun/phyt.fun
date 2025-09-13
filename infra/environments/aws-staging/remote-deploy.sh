@@ -16,6 +16,7 @@ req COMPOSE_PROFILES
 req VAULT_ADDR
 req VAULT_ROLE_ID
 req VAULT_SECRET_ID
+req VAULT_ENV
 
 # If a token is provided but no user, default to GitHub App's username convention.
 GHCR_TOKEN="${GHCR_TOKEN:-${GHCR_RO_TOKEN:-}}"
@@ -56,6 +57,7 @@ export IMAGE_TAG
 export VAULT_ADDR
 export VAULT_ROLE_ID
 export VAULT_SECRET_ID
+export VAULT_ENV
 
 log "Rendering compose config…"
 # Prefer v2 output flag if available
