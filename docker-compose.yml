@@ -28,10 +28,11 @@ services:
       - vault-secrets-hono:/secrets/hono:rw
       - vault-secrets-workers:/secrets/workers:rw
     healthcheck:
-      test:
-        [
+      test: [
           "CMD-SHELL",
-          "test -s /vault/secrets/postgres/postgres.env && test -s /vault/secrets/hono-api/hono-api.env && test -s /vault/secrets/workers/workers.env",
+          "test -s /secrets/postgres/postgres.env && \
+          test -s /secrets/hono-api/hono-api.env && \
+          test -s /secrets/workers/workers.env",
         ]
       interval: 30s
       timeout: 5s
@@ -59,7 +60,7 @@ services:
         "postgres",
       ]
     environment:
-      WAIT_FOR_SECRET_FILE: /vault/secrets/postgres/postgres.env
+      WAIT_FOR_SECRET_FILE: /secrets/postgres/postgres.env
       WAIT_FOR_SECRET_TIMEOUT: "180"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -h 127.0.0.1"]
@@ -99,7 +100,7 @@ services:
     entrypoint:
       ["/usr/local/bin/wait-for-secrets.sh", "node", "/app/dist/server.js"]
     environment:
-      WAIT_FOR_SECRET_FILE: /vault/secrets/hono-api/hono-api.env
+      WAIT_FOR_SECRET_FILE: /secrets/hono-api/hono-api.env
       WAIT_FOR_SECRET_TIMEOUT: "180"
     healthcheck:
       test:
@@ -133,7 +134,7 @@ services:
     entrypoint:
       ["/usr/local/bin/wait-for-secrets.sh", "node", "/app/dist/index.js"]
     environment:
-      WAIT_FOR_SECRET_FILE: /vault/secrets/workers/workers.env
+      WAIT_FOR_SECRET_FILE: /secrets/workers/workers.env
       WAIT_FOR_SECRET_TIMEOUT: "180"
     init: true
     stop_grace_period: 15s
