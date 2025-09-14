@@ -4,7 +4,7 @@ services:
     container_name: ${COMPOSE_PROJECT_NAME:-phyt}-vault-agent
     entrypoint: ["/usr/local/bin/agent-entrypoint.sh"]
     environment:
-      VAULT_ENV: ${VAULT_ENV:}
+      VAULT_ENV: ${VAULT_ENV:-}
       VAULT_ADDR: ${VAULT_ADDR:-}
       VAULT_ROLE_ID: ${VAULT_ROLE_ID}
       VAULT_SECRET_ID: ${VAULT_SECRET_ID}
