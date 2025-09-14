@@ -1,7 +1,6 @@
 # Read Cloudflare + Tailscale for Terraform/UD
 path "secret/data/staging/cloudflare" { capabilities = ["read"] }
 path "secret/data/staging/tailscale" { capabilities = ["read"] }
-path "secret/data/staging/gh-app" { capabilities = ["read"] }
 
 # (Optional) CI can list under staging/ for basic discovery
 path "secret/metadata/staging" { capabilities = ["list"] }
