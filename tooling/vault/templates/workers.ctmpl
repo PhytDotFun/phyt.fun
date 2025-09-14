@@ -1,5 +1,5 @@
 {{- with secret (env "WORKERS_SECRET_PATH") -}}
 {{- range $k, $v := .Data.data -}}
-{{ $k }}={{ $v }}
+{{- printf "%s=%v\n" $k $v -}}
 {{- end -}}
 {{- end -}}
