@@ -4,9 +4,8 @@ services:
     container_name: ${COMPOSE_PROJECT_NAME:-phyt}-vault-agent
     entrypoint: ["/usr/local/bin/agent-entrypoint.sh"]
     environment:
-      VAULT_ENV: ${VAULT_ENV:-staging}
+      VAULT_ENV: ${VAULT_ENV:}
       VAULT_ADDR: ${VAULT_ADDR:-}
-      VAULT_PATH_PREFIX: ${VAULT_PATH_PREFIX:-phyt}
       VAULT_ROLE_ID: ${VAULT_ROLE_ID}
       VAULT_SECRET_ID: ${VAULT_SECRET_ID}
 
@@ -25,18 +24,18 @@ services:
 
       # Container secrets
       - vault-secrets-postgres:/secrets/postgres:rw
-      - vault-secrets-hono:/secrets/hono:rw
+      - vault-secrets-hono-api:/secrets/hono-api:rw
       - vault-secrets-workers:/secrets/workers:rw
     healthcheck:
-      test: [
+      test:
+        [
           "CMD-SHELL",
-          "test -s /secrets/postgres/postgres.env && \
-          test -s /secrets/hono-api/hono-api.env && \
-          test -s /secrets/workers/workers.env",
+          "[ -s /secrets/postgres/postgres.env ] && [ -s /secrets/hono-api/hono-api.env ] && [ -s /secrets/workers/workers.env ] || exit 1",
         ]
-      interval: 30s
-      timeout: 5s
-      retries: 3
+      interval: 5s
+      timeout: 3s
+      retries: 30
+      start_period: 10s
     networks:
       - phyt
     dns:
@@ -63,10 +62,11 @@ services:
       WAIT_FOR_SECRET_FILE: /secrets/postgres/postgres.env
       WAIT_FOR_SECRET_TIMEOUT: "180"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -h 127.0.0.1"]
-      interval: 10s
-      timeout: 5s
-      retries: 10
+        test: ["CMD-SHELL", "pg_isready -q -d postgres || exit 1"]
+        interval: 10s
+        timeout: 5s
+        retries: 10
+        start_period: 10s
     networks:
       - phyt
     profiles: ["dev", "staging", "prod"]
@@ -95,7 +95,7 @@ services:
       postgres: { condition: service_started }
       redis: { condition: service_started }
     volumes:
-      - vault-secrets-hono:/secrets/hono:ro
+      - vault-secrets-hono-api:/secrets/hono-api:ro
       - ./tooling/ops/wait-for-secrets.sh:/usr/local/bin/wait-for-secrets.sh:ro
     entrypoint:
       ["/usr/local/bin/wait-for-secrets.sh", "node", "/app/dist/server.js"]
@@ -115,7 +115,7 @@ services:
     stop_grace_period: 15s
     networks:
       - phyt
-    profiles: ["staging", "prod"]
+    profiles: ["dev", "staging", "prod"]
     restart: ${RESTART_POLICY:-always}
 
   workers:
@@ -181,7 +181,7 @@ volumes:
   postgres-data:
 
   vault-secrets-postgres: {}
-  vault-secrets-hono: {}
+  vault-secrets-hono-api: {}
   vault-secrets-workers: {}
 
   vault-credentials:
