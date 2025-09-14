@@ -97,8 +97,7 @@ services:
     volumes:
       - vault-secrets-hono-api:/secrets/hono-api:ro
       - ./tooling/ops/wait-for-secrets.sh:/usr/local/bin/wait-for-secrets.sh:ro
-    entrypoint:
-      ["/usr/local/bin/wait-for-secrets.sh", "node", "/app/dist/server.js"]
+    entrypoint: ["/usr/local/bin/wait-for-secrets.sh"]
     environment:
       WAIT_FOR_SECRET_FILE: /secrets/hono-api/hono-api.env
       WAIT_FOR_SECRET_TIMEOUT: "180"
@@ -131,8 +130,7 @@ services:
     volumes:
       - vault-secrets-workers:/secrets/workers:ro
       - ./tooling/ops/wait-for-secrets.sh:/usr/local/bin/wait-for-secrets.sh:ro
-    entrypoint:
-      ["/usr/local/bin/wait-for-secrets.sh", "node", "/app/dist/index.js"]
+    entrypoint: ["/usr/local/bin/wait-for-secrets.sh"]
     environment:
       WAIT_FOR_SECRET_FILE: /secrets/workers/workers.env
       WAIT_FOR_SECRET_TIMEOUT: "180"
