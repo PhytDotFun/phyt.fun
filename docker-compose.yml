@@ -6,12 +6,12 @@ services:
     environment:
       VAULT_ENV: ${VAULT_ENV:-}
       VAULT_ADDR: ${VAULT_ADDR:-}
-      VAULT_ROLE_ID: ${VAULT_ROLE_ID}
-      VAULT_SECRET_ID: ${VAULT_SECRET_ID}
+      VAULT_ROLE_ID: ${VAULT_ROLE_ID:-}
+      VAULT_SECRET_ID: ${VAULT_SECRET_ID:-}
 
-      POSTGRES_SECRET_PATH: secret/data/${VAULT_ENV}/postgres
-      HONO_API_SECRET_PATH: secret/data/${VAULT_ENV}/hono-api
-      WORKERS_SECRET_PATH: secret/data/${VAULT_ENV}/workers
+      POSTGRES_SECRET_PATH: secret/data/${VAULT_ENV:-staging}/postgres
+      HONO_API_SECRET_PATH: secret/data/${VAULT_ENV:-staging}/hono-api
+      WORKERS_SECRET_PATH: secret/data/${VAULT_ENV:-staging}/workers
     security_opt: ["no-new-privileges:true"]
     volumes:
       # Agent initialization
@@ -91,9 +91,9 @@ services:
     # No container_name -> scale to >= 2 instances
     # docker compose up -d --scale hono-api=2 nginx
     depends_on:
-      vault-agent: { condition: service_started }
-      postgres: { condition: service_started }
-      redis: { condition: service_started }
+      vault-agent: { condition: service_healthy }
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
     volumes:
       - vault-secrets-hono-api:/secrets/hono-api:ro
       - ./tooling/ops/wait-for-secrets.sh:/usr/local/bin/wait-for-secrets.sh:ro
@@ -101,15 +101,15 @@ services:
     environment:
       WAIT_FOR_SECRET_FILE: /secrets/hono-api/hono-api.env
       WAIT_FOR_SECRET_TIMEOUT: "180"
+      HOST: 0.0.0.0
     healthcheck:
       test:
-        [
-          "CMD-SHELL",
-          "curl -fsS http://127.0.0.1:8000/health >/dev/null || exit 1",
-        ]
+        - CMD-SHELL
+        - curl -fsS http://127.0.0.1:$$PORT/health >/dev/null || exit 1
       interval: 15s
       timeout: 5s
       retries: 10
+      start_period: 20s
     init: true
     stop_grace_period: 15s
     networks:
