@@ -115,7 +115,7 @@ services:
     networks:
       - phyt
     profiles: ["dev", "staging", "prod"]
-    restart: ${RESTART_POLICY:-always}
+    restart: ${RESTART_POLICY:-unless-stopped}
 
   workers:
     image: ${IMAGE_REGISTRY:-ghcr.io}/${GITHUB_REPOSITORY}/workers:${IMAGE_TAG:-latest}
