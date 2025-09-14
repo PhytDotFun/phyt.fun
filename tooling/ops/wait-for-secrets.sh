@@ -2,78 +2,70 @@
 set -eu
 
 log() { printf '%s\n' "[wait-for-secrets] $*"; }
-getenv() { eval "printf '%s' \"\${$1-}\""; } # POSIX-safe "indirect"
 mask() {
   n=$(printf '%s' "$1" | wc -c | tr -d ' ')
-  printf '%*s' "$n" '' | tr ' ' '*'
+  [ "$n" -gt 0 ] && printf '%*s' "$n" '' | tr ' ' '*'
 }
+getenv() { eval "printf '%s' \"\${$1-}\""; }
 
-FILE="${WAIT_FOR_SECRET_FILE:-}"
+FILES_RAW="${WAIT_FOR_SECRET_FILE:-}"
 TIMEOUT="${WAIT_FOR_SECRET_TIMEOUT:-180}"
-DEBUG_MASKED="${DEBUG_MASKED:-0}" # set to 1 to print masked vars on success
+DEBUG_MASKED="${DEBUG_MASKED:-0}"
+DEBUG_VARS="${DEBUG_VARS:-}"
 
-[ -n "$FILE" ] || {
+[ -n "$FILES_RAW" ] || {
   log "WAIT_FOR_SECRET_FILE not set"
   exit 1
 }
 
-log "Waiting for ${FILE} to exist and be non-empty (timeout ${TIMEOUT}s)..."
+# colon/comma → space
+FILES=$(printf '%s' "$FILES_RAW" | tr ',:' ' ' | awk 'NF {print}')
+DBG_LIST=$(printf '%s' "$DEBUG_VARS" | tr ',:' ' ' | awk 'NF {print}')
+
+log "Waiting for secret file(s): $FILES (timeout ${TIMEOUT}s)"
 t=0
-while [ ! -s "$FILE" ]; do
+while :; do
+  all_ready=1
+  for f in $FILES; do
+    if [ ! -s "$f" ]; then
+      all_ready=0
+      break
+    fi
+  done
+  [ "$all_ready" -eq 1 ] && break
   if [ "$t" -ge "$TIMEOUT" ]; then
-    log "Timeout; file missing or empty: ${FILE}"
+    log "Timeout; missing or empty: $f"
     exit 1
   fi
   sleep 1
   t=$((t + 1))
 done
-log "Found: ${FILE}"
+log "All secret files present."
 
-# Normalize & sanitize (no content echoed on failure paths)
-tmpfile="$(mktemp)"
-# remove CR, convert NBSP to space, trim trailing spaces, drop comments/blank
-tr -d '\r' <"$FILE" |
-  tr '\302\240' ' ' |
-  sed -e 's/[[:space:]]*$//' |
-  awk 'NF && $0 !~ /^[[:space:]]*#/ { print }' >"$tmpfile"
+# sanitize & source
+sanitize() {
+  tr -d '\r' <"$1" |
+    tr '\302\240' ' ' |
+    sed -e 's/[[:space:]]*$//' |
+    awk 'NF && $0 !~ /^[[:space:]]*#/ { print }'
+}
 
-# Validate KEY names & presence of '=' without echoing values
-if ! awk -F= '{
-  if (NF<2) {bad=1; next}
-  key=$1
-  gsub(/^[[:space:]]+|[[:space:]]+$/, "", key)
-  if (key !~ /^[A-Za-z_][A-Za-z0-9_]*$/) bad=1
-} END {exit bad?1:0}' "$tmpfile"; then
-  log "Invalid env format (must be KEY=VALUE with valid KEY names)."
-  rm -f "$tmpfile"
-  exit 1
-fi
-
-# Export variables
 set -a
-# shellcheck disable=SC1090
-. "$tmpfile"
-set +a
-rm -f "$tmpfile"
-
-# Required vars (no content printed on failure)
-for k in POSTGRES_PASSWORD; do
-  v="$(getenv "$k")"
-  [ -n "$v" ] || {
-    log "Required var $k is empty or unset."
-    exit 1
-  }
+for f in $FILES; do
+  tmpf="$(mktemp)"
+  sanitize "$f" >"$tmpf"
+  # shellcheck disable=SC1090
+  . "$tmpf"
+  rm -f "$tmpf"
 done
+set +a
 
-# Optional masked debug (only on success, only if enabled)
-if [ "$DEBUG_MASKED" = "1" ]; then
-  u="$(getenv POSTGRES_USER)"
-  [ -n "$u" ] && log "POSTGRES_USER=$(mask "$u")"
-  d="$(getenv POSTGRES_DB)"
-  [ -n "$d" ] && log "POSTGRES_DB=$(mask "$d")"
-  p="$(getenv POSTGRES_PASSWORD)"
-  [ -n "$p" ] && log "POSTGRES_PASSWORD=$(mask "$p")"
+# optional masked debug
+if [ "$DEBUG_MASKED" = "1" ] && [ -n "$DBG_LIST" ]; then
+  for k in $DBG_LIST; do
+    v="$(getenv "$k")"
+    [ -n "$v" ] && log "$k=$(mask "$v")"
+  done
 fi
 
-# Hand off to Postgres entrypoint
 exec "$@"
