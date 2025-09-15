@@ -62,11 +62,19 @@ services:
       WAIT_FOR_SECRET_FILE: /secrets/postgres/postgres.env
       WAIT_FOR_SECRET_TIMEOUT: "180"
     healthcheck:
-        test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -p 5432 -d \"$${POSTGRES_DB:-postgres}\" -U \"$${POSTGRES_USER:-postgres}\" -q || exit 1"]
-        interval: 10s
-        timeout: 5s
-        retries: 10
-        start_period: 10s
+      test:
+        - CMD-SHELL
+        - |
+          if [ -f /secrets/postgres/postgres.env ]; then
+            set -a; . /secrets/postgres/postgres.env; set +a
+          fi
+          u="${POSTGRES_USER:-postgres}"
+          d="${POSTGRES_DB:-postgres}"
+          pg_isready -q -h 127.0.0.1 -p 5432 -U "$u" -d "$d" || exit 1
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
     networks:
       - phyt
     profiles: ["dev", "staging", "prod"]
@@ -97,7 +105,7 @@ services:
     volumes:
       - vault-secrets-hono-api:/secrets/hono-api:ro
       - ./tooling/ops/wait-for-secrets.sh:/usr/local/bin/wait-for-secrets.sh:ro
-    entrypoint: ["/usr/local/bin/wait-for-secrets.sh"]
+    entrypoint: ["/usr/local/bin/wait-for-secrets.sh", "node", "dist/index.js"]
     environment:
       WAIT_FOR_SECRET_FILE: /secrets/hono-api/hono-api.env
       WAIT_FOR_SECRET_TIMEOUT: "180"
@@ -121,7 +129,7 @@ services:
     container_name: ${COMPOSE_PROJECT_NAME:-phyt}-workers
     depends_on:
       vault-agent:
-        condition: service_started
+        condition: service_healthy
       postgres:
         condition: service_healthy
       redis:
@@ -129,7 +137,7 @@ services:
     volumes:
       - vault-secrets-workers:/secrets/workers:ro
       - ./tooling/ops/wait-for-secrets.sh:/usr/local/bin/wait-for-secrets.sh:ro
-    entrypoint: ["/usr/local/bin/wait-for-secrets.sh"]
+    entrypoint: ["/usr/local/bin/wait-for-secrets.sh", "node", "dist/index.js"]
     environment:
       WAIT_FOR_SECRET_FILE: /secrets/workers/workers.env
       WAIT_FOR_SECRET_TIMEOUT: "180"
