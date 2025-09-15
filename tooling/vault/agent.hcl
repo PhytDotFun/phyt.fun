@@ -34,7 +34,7 @@ auto_auth {
 
 cache {
   use_auto_auth_token = "force"
-  enforce_consistency  = "always"
+  enforce_consistency = "always"
 }
 
 template {
