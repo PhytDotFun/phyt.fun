@@ -3,7 +3,6 @@ set -eu
 
 log() { printf '%s\n' "[wait-for-secrets] $*"; }
 
-# --- capture original CMD/args so we can restore them safely later
 ORIG_ARGS="$@"
 
 FILES_RAW="${WAIT_FOR_SECRET_FILE:-}"
@@ -37,24 +36,26 @@ while :; do
 done
 log "All secret files present."
 
-# --- strict sanitize: only accept KEY=VAL (with optional 'export' and whitespace)
+# strict sanitize
 sanitize() {
   tr -d '\r' <"$1" |
-    tr '\302\240' ' ' |
-    sed -e 's/[[:space:]]*$//' |
+    tr '\302\240' ' ' |          # NBSP → space
+    sed -e 's/[[:space:]]*$//' | # trim right
     awk '
-      /^[[:space:]]*#/ {next}
-      /^[[:space:]]*$/ {next}
-      /^[[:space:]]*(export[[:space:]]+)?[A-Za-z_][A-Za-z0-9_]*[[:space:]]*=/ {
-        sub(/^[[:space:]]*export[[:space:]]+/, "", $0);
-        sub(/[[:space:]]*=[[:space:]]*/, "=", $0);
-        print; next
+      /^[[:space:]]*#/ { next }            # skip comments
+      /^[[:space:]]*$/ { next }            # skip blank
+      {
+        line = $0
+        sub(/^[[:space:]]*export[[:space:]]+/, "", line)
+        gsub(/[[:space:]]*=[[:space:]]*/, "=", line)
+        if (line ~ /^[A-Za-z_][A-Za-z0-9_]*=/) {
+          print line
+        }
+        # else: ignore junk lines
       }
-      { /* ignore junk lines like README.md */ }
     '
 }
 
-# source *.env files *after* sanitizing
 set -a
 for f in $FILES; do
   tmpf="$(mktemp)"
@@ -65,7 +66,7 @@ for f in $FILES; do
 done
 set +a
 
-# --- never clobber CMD: restore original args; fallback if empty
+# never clobber CMD: restore original args; fallback if empty
 if [ -z "$ORIG_ARGS" ]; then
   set -- node dist/index.js
 else
