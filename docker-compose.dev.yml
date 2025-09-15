@@ -1,0 +1,58 @@
+services:
+  vault-agent:
+    image: hashicorp/vault:latest
+    container_name: ${COMPOSE_PROJECT_NAME:-phyt}-vault-agent
+    entrypoint: ["/usr/local/bin/agent-entrypoint.sh"]
+    environment:
+      VAULT_ENV: dev
+      VAULT_ADDR: https://vault.tailea8363.ts.net
+      VAULT_ROLE_ID: c20fe997-ae7c-8f16-dbad-6fad52e4a102
+      VAULT_SECRET_ID: 57aefc0b-ca10-fec9-9c1b-d34815012d65
+
+      POSTGRES_SECRET_PATH: secret/data/dev/postgres
+    security_opt: ["no-new-privileges:true"]
+    volumes:
+      - ./tooling/vault:/vault/config:ro
+      - ./tooling/vault/templates:/vault/templates:ro
+      - ./tooling/ops/dev-agent-entrypoint.sh:/usr/local/bin/agent-entrypoint.sh:ro
+      - vault-secrets-postgres:/secrets/postgres:rw
+    healthcheck:
+      test: ["CMD-SHELL", "[ -s /secrets/postgres/postgres.env ] || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 5s
+    dns:
+      - 100.100.100.100
+    restart: ${RESTART_POLICY:-unless-stopped}
+
+  postgres:
+    image: postgres:17
+    container_name: ${COMPOSE_PROJECT_NAME:-phyt}-postgres
+    depends_on:
+      vault-agent: { condition: service_healthy }
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - vault-secrets-postgres:/secrets/postgres:ro
+      - ./tooling/ops/dev-wait-for-secrets.sh:/usr/local/bin/wait-for-secrets.sh:ro
+    entrypoint:
+      [
+        "/usr/local/bin/wait-for-secrets.sh",
+        "/usr/local/bin/docker-entrypoint.sh",
+        "postgres",
+      ]
+    environment:
+      WAIT_FOR_SECRET_FILE: /secrets/postgres/postgres.env
+      WAIT_FOR_SECRET_TIMEOUT: "180"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -q -d postgres || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    restart: ${RESTART_POLICY:-unless-stopped}
+
+volumes:
+  postgres-data:
+
+  vault-secrets-postgres: {}
