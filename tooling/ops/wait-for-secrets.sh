@@ -10,8 +10,6 @@ getenv() { eval "printf '%s' \"\${$1-}\""; }
 
 FILES_RAW="${WAIT_FOR_SECRET_FILE:-}"
 TIMEOUT="${WAIT_FOR_SECRET_TIMEOUT:-180}"
-DEBUG_MASKED="${DEBUG_MASKED:-0}"
-DEBUG_VARS="${DEBUG_VARS:-}"
 
 [ -n "$FILES_RAW" ] || {
   log "WAIT_FOR_SECRET_FILE not set"
@@ -20,7 +18,6 @@ DEBUG_VARS="${DEBUG_VARS:-}"
 
 # colon/comma → space
 FILES=$(printf '%s' "$FILES_RAW" | tr ',:' ' ' | awk 'NF {print}')
-DBG_LIST=$(printf '%s' "$DEBUG_VARS" | tr ',:' ' ' | awk 'NF {print}')
 
 log "Waiting for secret file(s): $FILES (timeout ${TIMEOUT}s)"
 t=0
@@ -59,13 +56,5 @@ for f in $FILES; do
   rm -f "$tmpf"
 done
 set +a
-
-# optional masked debug
-if [ "$DEBUG_MASKED" = "1" ] && [ -n "$DBG_LIST" ]; then
-  for k in $DBG_LIST; do
-    v="$(getenv "$k")"
-    [ -n "$v" ] && log "$k=$(mask "$v")"
-  done
-fi
 
 exec "$@"
