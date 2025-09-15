@@ -177,6 +177,7 @@ services:
 
 networks:
   phyt:
+    name: phyt
     driver: bridge
     ipam:
       config:
