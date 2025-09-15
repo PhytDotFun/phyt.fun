@@ -68,9 +68,7 @@ services:
           if [ -f /secrets/postgres/postgres.env ]; then
             set -a; . /secrets/postgres/postgres.env; set +a
           fi
-          u="${POSTGRES_USER:-postgres}"
-          d="${POSTGRES_DB:-postgres}"
-          pg_isready -q -h 127.0.0.1 -p 5432 -U "$u" -d "$d" || exit 1
+          pg_isready -q -h 127.0.0.1 -p 5432 || exit 1
       interval: 10s
       timeout: 5s
       retries: 10
