@@ -22,9 +22,9 @@ permissions:
 jobs:
   build-images:
     runs-on: ubuntu-latest
-  concurrency:
-    group: staging-build
-    cancel-in-progress: true
+    concurrency:
+      group: staging-build
+      cancel-in-progress: true
     strategy:
       matrix:
         service:
