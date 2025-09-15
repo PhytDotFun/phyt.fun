@@ -102,9 +102,9 @@ services:
       WAIT_FOR_SECRET_FILE: /secrets/hono-api/hono-api.env
       WAIT_FOR_SECRET_TIMEOUT: "180"
       HOST: 0.0.0.0
-      PORT: "8080"
+      PORT: "3000"
     healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:8080/health >/dev/null || exit 1"]
+      test: ["CMD-SHELL","wget -qO- http://127.0.0.1:3000/health >/dev/null || exit 1"]
       interval: 15s
       timeout: 5s
       retries: 10
