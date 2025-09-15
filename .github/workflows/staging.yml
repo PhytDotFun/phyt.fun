@@ -98,6 +98,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     needs: build-images
+    if: ${{ needs.build-images.result == 'success' || needs.build-images.result == 'skipped' }}
     environment: staging
     concurrency:
       group: staging-deploy
@@ -126,7 +127,7 @@ jobs:
       - name: Connect to Tailscale
         uses: tailscale/github-action@v2
         with:
-          version: "1.86.2" # pin a stable version you’ve tested
+          version: "1.86.2" # pin to a tested version
           oauth-client-id: ${{ secrets.TAILSCALE_OAUTH_CLIENT_ID }}
           oauth-secret: ${{ secrets.TAILSCALE_OAUTH_SECRET }}
           tags: tag:ci
@@ -187,7 +188,6 @@ jobs:
           terraform plan  -input=false -lock-timeout="${TF_LOCK_TIMEOUT}" -out=plan.tfplan
           terraform apply -input=false -lock-timeout="${TF_LOCK_TIMEOUT}" -auto-approve plan.tfplan
 
-      # Reduce race with cloud-init/tsd joining
       - name: Wait for instance status checks
         run: |
           set -euo pipefail
