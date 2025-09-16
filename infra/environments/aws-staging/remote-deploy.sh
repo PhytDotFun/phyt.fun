@@ -75,7 +75,7 @@ log "Starting services…"
 $COMPOSE up -d --remove-orphans
 
 # Clean up GHCR login
-if [[ -n "${GHCR_TOKEN}" ]]; then
+if [[ -n "${GHCR_TOKEN-}" ]]; then
   docker logout ghcr.io >/dev/null 2>&1 || true
 fi
 
