@@ -61,6 +61,8 @@ services:
     environment:
       WAIT_FOR_SECRET_FILE: /secrets/postgres/postgres.env
       WAIT_FOR_SECRET_TIMEOUT: "180"
+      PGUSER: "${POSTGRES_USER:-postgres}"
+      PGDATABASE: "${POSTGRES_DB:-postgres}"
     healthcheck:
       test:
         - CMD-SHELL
@@ -68,7 +70,8 @@ services:
           if [ -f /secrets/postgres/postgres.env ]; then
             set -a; . /secrets/postgres/postgres.env; set +a
           fi
-          pg_isready -q -h 127.0.0.1 -p 5432 || exit 1
+          pg_isready -q -h 127.0.0.1 -p "${POSTGRES_PORT:-5432}" \
+            -U "${POSTGRES_USER:-postgres}" -d "${POSTGRES_DB:-postgres}" || exit 1
       interval: 10s
       timeout: 5s
       retries: 10
