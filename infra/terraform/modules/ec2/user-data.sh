@@ -93,7 +93,7 @@ unset tailscale_auth_key
 
 # Detect architecture and download appropriate cloudflared binary
 log "Installing Cloudflared..."
-arch="$$(uname -m)"
+arch="$(uname -m)"
 case "$arch" in
 aarch64 | arm64)
   cfd_arch="arm64"
