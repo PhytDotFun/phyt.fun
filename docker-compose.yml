@@ -9,7 +9,6 @@ services:
       VAULT_ROLE_ID: ${VAULT_ROLE_ID:-}
       VAULT_SECRET_ID: ${VAULT_SECRET_ID:-}
 
-      POSTGRES_SECRET_PATH: secret/data/${VAULT_ENV:-staging}/postgres
       HONO_API_SECRET_PATH: secret/data/${VAULT_ENV:-staging}/hono-api
       WORKERS_SECRET_PATH: secret/data/${VAULT_ENV:-staging}/workers
     security_opt: ["no-new-privileges:true"]
@@ -23,14 +22,13 @@ services:
       - vault-credentials:/vault/credentials:rw
 
       # Container secrets
-      - vault-secrets-postgres:/secrets/postgres:rw
       - vault-secrets-hono-api:/secrets/hono-api:rw
       - vault-secrets-workers:/secrets/workers:rw
     healthcheck:
       test:
         [
           "CMD-SHELL",
-          "[ -s /secrets/postgres/postgres.env ] && [ -s /secrets/hono-api/hono-api.env ] && [ -s /secrets/workers/workers.env ] || exit 1",
+          "[ -s /secrets/hono-api/hono-api.env ] && [ -s /secrets/workers/workers.env ] || exit 1",
         ]
       interval: 5s
       timeout: 3s
@@ -40,44 +38,6 @@ services:
       - phyt
     dns:
       - 100.100.100.100
-    profiles: ["dev", "staging", "prod"]
-    restart: ${RESTART_POLICY:-unless-stopped}
-
-  postgres:
-    image: postgres:17
-    container_name: ${COMPOSE_PROJECT_NAME:-phyt}-postgres
-    depends_on:
-      vault-agent: { condition: service_healthy }
-    volumes:
-      - postgres-data:/var/lib/postgresql/data
-      - vault-secrets-postgres:/secrets/postgres:ro
-      - ./tooling/ops/wait-for-secrets.sh:/usr/local/bin/wait-for-secrets.sh:ro
-    entrypoint:
-      [
-        "/usr/local/bin/wait-for-secrets.sh",
-        "/usr/local/bin/docker-entrypoint.sh",
-        "postgres",
-      ]
-    environment:
-      WAIT_FOR_SECRET_FILE: /secrets/postgres/postgres.env
-      WAIT_FOR_SECRET_TIMEOUT: "180"
-      PGUSER: "${POSTGRES_USER:-postgres}"
-      PGDATABASE: "${POSTGRES_DB:-postgres}"
-    healthcheck:
-      test:
-        - CMD-SHELL
-        - |
-          if [ -f /secrets/postgres/postgres.env ]; then
-            set -a; . /secrets/postgres/postgres.env; set +a
-          fi
-          pg_isready -q -h 127.0.0.1 -p "${POSTGRES_PORT:-5432}" \
-            -U "${POSTGRES_USER:-postgres}" -d "${POSTGRES_DB:-postgres}" || exit 1
-      interval: 10s
-      timeout: 5s
-      retries: 10
-      start_period: 10s
-    networks:
-      - phyt
     profiles: ["dev", "staging", "prod"]
     restart: ${RESTART_POLICY:-unless-stopped}
 
@@ -101,7 +61,6 @@ services:
     # docker compose up -d --scale hono-api=2 nginx
     depends_on:
       vault-agent: { condition: service_healthy }
-      postgres: { condition: service_healthy }
       redis: { condition: service_healthy }
     volumes:
       - vault-secrets-hono-api:/secrets/hono-api:ro
@@ -130,8 +89,6 @@ services:
     container_name: ${COMPOSE_PROJECT_NAME:-phyt}-workers
     depends_on:
       vault-agent:
-        condition: service_healthy
-      postgres:
         condition: service_healthy
       redis:
         condition: service_healthy
@@ -185,9 +142,6 @@ networks:
         - subnet: 172.20.0.0/16
 
 volumes:
-  postgres-data:
-
-  vault-secrets-postgres: {}
   vault-secrets-hono-api: {}
   vault-secrets-workers: {}
 
