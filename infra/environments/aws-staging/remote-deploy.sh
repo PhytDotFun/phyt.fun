@@ -1,8 +1,14 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-log() { printf "[%s] %s\n" "$(date -u +'%Y-%m-%dT%H:%M:%SZ')" "$*"; }
-err() { printf "[%s] ERROR: %s\n" "$(date -u +'%Y-%m-%dT%H:%M:%SZ')" "$*" >&2; }
+LOG_DIR=/var/log/phyt
+LOGFILE=$LOG_DIR/remote-deploy.log
+mkdir -p "$LOG_DIR"
+chmod 755 "$LOG_DIR"
+exec > >(tee -a "$LOGFILE") 2>&1
+
+log() { printf "[REMOTE-DEPLOY] [%s] %s\n" "$(date -u +'%Y-%m-%dT%H:%M:%SZ')" "$*"; }
+err() { printf "[REMOTE-DEPLOY] [%s] ERROR: %s\n" "$(date -u +'%Y-%m-%dT%H:%M:%SZ')" "$*" >&2; }
 die() {
   err "$*"
   exit 1
@@ -51,30 +57,24 @@ log "Profiles: ${COMPOSE_PROFILES}"
 log "Repo: ${GITHUB_REPOSITORY}"
 log "Tag: ${IMAGE_TAG}"
 
-# Validate environment
 [ -d "$ROOT" ] || die "Directory ${ROOT} not found"
 cd "$ROOT"
 
 command -v docker >/dev/null 2>&1 || die "docker not installed"
 docker version >/dev/null 2>&1 || die "docker daemon not responding"
 
-# Validate compose configuration
 log "Rendering compose config…"
 $COMPOSE config -o /tmp/compose.yml >/dev/null || die "Failed to render docker config"
 
-# Pull latest images
 log "Pulling images…"
 $COMPOSE pull
 
-# Stop existing services cleanly
 log "Stopping existing services…"
 $COMPOSE down --remove-orphans
 
-# Start services
 log "Starting services…"
 $COMPOSE up -d --remove-orphans
 
-# Clean up GHCR login
 if [[ -n "${GHCR_TOKEN-}" ]]; then
   docker logout ghcr.io >/dev/null 2>&1 || true
 fi
