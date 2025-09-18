@@ -1,22 +1,31 @@
 #!/bin/bash
-set -e
+set -euo pipefail
 
-# Log all output
-exec >/var/log/user-data.log 2>&1
+LOG_DIR=/var/log
+LOGFILE=$LOG_DIR/user-data.log
+mkdir -p "$LOG_DIR"
+exec > >(tee -a "$LOGFILE") 2>&1
 
-echo "======================================"
-echo "Starting user-data script"
+log() { printf "[USER-DATA] [%s] %s\n" "$(date -u +'%Y-%m-%dT%H:%M:%SZ')" "$*"; }
+err() { printf "[USER-DATA] [%s] ERROR: %s\n" "$(date -u +'%Y-%m-%dT%H:%M:%SZ')" "$*" >&2; }
+die() {
+  err "$*"
+  exit 1
+}
+
+log "======================================"
+log "Starting user-data script"
 # shellcheck disable=SC2154 # TF will validate and render this
-echo "Deployment ID: ${deployment_id}"
-echo "Date: $$(date)"
-echo "======================================"
+log "Deployment ID: ${deployment_id}"
+log "====================================="
 
-# Update system
 export DEBIAN_FRONTEND=noninteractive
+log "Updating package lists..."
 apt-get update
+log "Upgrading packages..."
 apt-get upgrade -y
 
-# Install essential packages
+log "Installing required packages..."
 apt-get install -y \
   curl \
   wget \
@@ -29,14 +38,17 @@ apt-get install -y \
   jq \
   git \
   unzip
+log "Package installation completed"
 
-# Install Docker
+log "Installing Docker..."
 curl -fsSL https://get.docker.com -o get-docker.sh
-sh get-docker.sh
+sh get-docker.sh || die "Docker installation failed"
+log "Docker installation completed"
+log "Adding ubuntu user to docker group..."
 usermod -aG docker ubuntu
 rm get-docker.sh
 
-# Configure Docker daemon
+log "Configuring Docker daemon..."
 cat >/etc/docker/daemon.json <<'EOF'
 {
   "log-driver": "json-file",
@@ -50,14 +62,16 @@ cat >/etc/docker/daemon.json <<'EOF'
 }
 EOF
 
+log "Starting Docker service..."
 systemctl restart docker
 systemctl enable docker
+log "Docker service configured"
 
-# Install Tailscale with ephemeral auth key
+log "Installing Tailscale..."
 curl -fsSL https://tailscale.com/install.sh | sh
 systemctl enable --now tailscaled
 attempts=0
-# Auth key is single-use and expires after use
+# Auth key is single-use
 # shellcheck disable=SC2154 # TF will validate and render this
 until tailscale up --auth-key="${tailscale_auth_key}" \
   --hostname="staging-${deployment_id}" \
@@ -67,23 +81,18 @@ until tailscale up --auth-key="${tailscale_auth_key}" \
   --advertise-tags=tag:staging; do
   attempts=$((attempts + 1))
   if [ "$attempts" -ge 5 ]; then
-    echo "Tailscale join failed after $attempts attempts"
-    exit 1
+    die "Tailscale join failed after $attempts attempts"
   fi
-  echo "tailscale up failed (attempt $attempts), retrying in 5s..."
+  log "tailscale up failed (attempt $attempts), retrying in 5s..."
   sleep 5
 done
 # Verify we’re actually in the tailnet
-tailscale status || {
-  echo "Tailscale status check failed"
-  exit 1
-}
+tailscale status || die "Tailscale status check failed"
 
-# Clear the auth key from memory
 unset tailscale_auth_key
 
-# Install Cloudflare Tunnel
 # Detect architecture and download appropriate cloudflared binary
+log "Installing Cloudflared..."
 arch="$$(uname -m)"
 case "$arch" in
 aarch64 | arm64)
@@ -94,24 +103,24 @@ x86_64 | amd64)
   cfd_arch="amd64"
   ;;
 *)
-  echo "Unsupported architecture: $arch"
-  exit 1
+  die "Unsupported architecture: $arch"
   ;;
 esac
 wget -q "https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-$${cfd_arch}.deb"
 dpkg -i "cloudflared-linux-$${cfd_arch}.deb"
 rm "cloudflared-linux-$${cfd_arch}.deb"
 
-# Cloudflared: use token install and DO NOT write creds.json
+# Cloudflare token install
+log "Configuring Cloudflared service..."
 # shellcheck disable=SC2154 # TF will validate and render this
 cloudflared service install --token "${cloudflare_tunnel_token}"
 systemctl enable --now cloudflared
 unset cloudflare_tunnel_token
 
 # Configure Vault Agent with ephemeral credentials
+log "Configuring Vault..."
 mkdir -p /etc/vault
 
-# Write Vault address (not sensitive)
 # shellcheck disable=SC2154 # TF will validate and render this
 echo "export VAULT_ADDR=${vault_addr}" >>/etc/environment
 
@@ -157,14 +166,10 @@ echo "export VAULT_ADDR=${vault_addr}" >>/etc/environment
 # systemctl enable spot-handler
 # systemctl start spot-handler
 
-# Clear all sensitive variables from environment
 unset cloudflare_tunnel_token tailscale_auth_key
 
-# Signal completion
 touch /var/lib/cloud/instance/boot-finished
-echo "======================================"
-echo "User-data script completed successfully"
-echo "All ephemeral credentials have been used and cleared"
-echo "Deployment ID: ${deployment_id}"
-echo "Date: $$(date)"
-echo "======================================"
+log "======================================"
+log "User-data script completed successfully"
+log "Deployment ID: ${deployment_id}"
+log "======================================"
