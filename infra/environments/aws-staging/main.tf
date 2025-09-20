@@ -390,4 +390,5 @@ module "postgresql" {
   security_group_id = aws_security_group.postgresql.id
   postgres_password = data.vault_kv_secret_v2.postgresql.data["POSTGRES_PASSWORD"]
   volume_size       = 20
+  vault_addr        = var.vault_addr
 }
