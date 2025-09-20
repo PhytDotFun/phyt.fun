@@ -9,12 +9,12 @@ exec > >(tee -a "$LOGFILE") 2>&1
 log() { printf "[USER-DATA] [%s] %s\n" "$(date -u +'%Y-%m-%dT%H:%M:%SZ')" "$*"; }
 err() { printf "[USER-DATA] [%s] ERROR: %s\n" "$(date -u +'%Y-%m-%dT%H:%M:%SZ')" "$*" >&2; }
 die() {
-  err "$*"
-  exit 1
+	err "$*"
+	exit 1
 }
 
 log "======================================"
-log "Starting user-data script"
+log "Starting staging user-data script"
 # shellcheck disable=SC2154 # TF will validate and render this
 log "Deployment ID: ${deployment_id}"
 log "====================================="
@@ -27,17 +27,17 @@ apt-get upgrade -y
 
 log "Installing required packages..."
 apt-get install -y \
-  curl \
-  wget \
-  gnupg \
-  lsb-release \
-  ca-certificates \
-  software-properties-common \
-  htop \
-  net-tools \
-  jq \
-  git \
-  unzip
+	curl \
+	wget \
+	gnupg \
+	lsb-release \
+	ca-certificates \
+	software-properties-common \
+	htop \
+	net-tools \
+	jq \
+	git \
+	unzip
 log "Package installation completed"
 
 log "Installing Docker..."
@@ -74,17 +74,17 @@ attempts=0
 # Auth key is single-use
 # shellcheck disable=SC2154 # TF will validate and render this
 until tailscale up --auth-key="${tailscale_auth_key}" \
-  --hostname="staging-${deployment_id}" \
-  --accept-routes \
-  --accept-dns=false \
-  --ssh \
-  --advertise-tags=tag:staging; do
-  attempts=$((attempts + 1))
-  if [ "$attempts" -ge 5 ]; then
-    die "Tailscale join failed after $attempts attempts"
-  fi
-  log "tailscale up failed (attempt $attempts), retrying in 5s..."
-  sleep 5
+	--hostname="staging-${deployment_id}" \
+	--accept-routes \
+	--accept-dns=false \
+	--ssh \
+	--advertise-tags=tag:staging; do
+	attempts=$((attempts + 1))
+	if [ "$attempts" -ge 5 ]; then
+		die "Tailscale join failed after $attempts attempts"
+	fi
+	log "tailscale up failed (attempt $attempts), retrying in 5s..."
+	sleep 5
 done
 # Verify we’re actually in the tailnet
 tailscale status || die "Tailscale status check failed"
@@ -96,15 +96,15 @@ log "Installing Cloudflared..."
 arch="$(uname -m)"
 case "$arch" in
 aarch64 | arm64)
-  cfd_arch="arm64"
-  ;;
+	cfd_arch="arm64"
+	;;
 x86_64 | amd64)
-  # shellcheck disable=SC2034 # TF will validate and render this
-  cfd_arch="amd64"
-  ;;
+	# shellcheck disable=SC2034 # TF will validate and render this
+	cfd_arch="amd64"
+	;;
 *)
-  die "Unsupported architecture: $arch"
-  ;;
+	die "Unsupported architecture: $arch"
+	;;
 esac
 wget -q "https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-$${cfd_arch}.deb"
 dpkg -i "cloudflared-linux-$${cfd_arch}.deb"
@@ -170,6 +170,6 @@ unset cloudflare_tunnel_token tailscale_auth_key
 
 touch /var/lib/cloud/instance/boot-finished
 log "======================================"
-log "User-data script completed successfully"
+log "Staging user-data script completed successfully"
 log "Deployment ID: ${deployment_id}"
 log "======================================"

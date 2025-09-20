@@ -1,23 +1,37 @@
 #!/bin/bash
 set -euo pipefail
 
-# Variables from Terraform
+LOG_DIR=/var/log
+LOGFILE=$LOG_DIR/user-data-db.log
+mkdir -p "$LOG_DIR"
+exec > >(tee -a "$LOGFILE") 2>&1
+
+log() { printf "[USER-DATA-DB] [%s] %s\n" "$(date -u +'%Y-%m-%dT%H:%M:%SZ')" "$*"; }
+err() { printf "[USER-DATA-DB] [%s] ERROR: %s\n" "$(date -u +'%Y-%m-%dT%H:%M:%SZ')" "$*" >&2; }
+die() {
+	err "$*"
+	exit 1
+}
+
+log "======================================"
+log "Starting Postgres user-data script"
+# shellcheck disable=SC2154 # TF will validate and render this
+log "Deployment ID: ${deployment_id}"
+log "====================================="
+
+# shellcheck disable=SC2154 # TF will validate and render this
 POSTGRES_DB_NAME="${postgres_db_name}"
 POSTGRES_USERNAME="${postgres_username}"
 POSTGRES_PASSWORD="${postgres_password}"
 
-# Update system
 apt-get update -y
 
-# Install PostgreSQL
 apt-get install -y postgresql postgresql-contrib
 
-# Start and enable PostgreSQL
 systemctl start postgresql
 systemctl enable postgresql
 
-# Configure PostgreSQL
-sudo -u postgres psql << EOF
+sudo -u postgres psql <<EOF
 -- Create database
 CREATE DATABASE ${POSTGRES_DB_NAME};
 
@@ -38,7 +52,7 @@ EOF
 sed -i "s/#listen_addresses = 'localhost'/listen_addresses = '*'/" /etc/postgresql/*/main/postgresql.conf
 
 # Configure authentication for the application user
-cat >> /etc/postgresql/*/main/pg_hba.conf << EOF
+cat >>/etc/postgresql/*/main/pg_hba.conf <<EOF
 
 # Allow application user from VPC
 host    ${POSTGRES_DB_NAME}    ${POSTGRES_USERNAME}    10.100.0.0/16    md5
@@ -47,5 +61,8 @@ EOF
 # Restart PostgreSQL to apply configuration changes
 systemctl restart postgresql
 
-# Log completion
-echo "PostgreSQL installation and configuration completed" >> /var/log/user-data.log
+touch /var/lib/cloud/instance/boot-finished
+log "======================================"
+log "Postgres user-data script completed successfully"
+log "Deployment ID: ${deployment_id}"
+log "======================================"
