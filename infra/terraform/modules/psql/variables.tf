@@ -6,7 +6,7 @@ variable "deployment_id" {
 variable "instance_type" {
   description = "EC2 instance type for PostgreSQL"
   type        = string
-  default     = "t4g.micro"
+  default     = "t4g.nano"
 }
 
 variable "ami_id" {
@@ -46,4 +46,9 @@ variable "volume_size" {
   description = "Root volume size in GB"
   type        = number
   default     = 20
+}
+
+variable "vault_addr" {
+  description = "Vault server address"
+  type        = string
 }
