@@ -15,6 +15,7 @@ locals {
     postgres_db_name  = var.postgres_db_name
     postgres_username = var.postgres_username
     postgres_password = var.postgres_password
+    vault_addr        = var.vault_addr
   })
 }
 
@@ -26,12 +27,6 @@ resource "aws_instance" "postgresql" {
   vpc_security_group_ids      = [var.security_group_id]
   user_data                   = local.user_data
   user_data_replace_on_change = true
-
-  metadata_options {
-    http_endpoint               = "enabled"  # keep reachable
-    http_tokens                 = "required" # enforce IMDSv2
-    http_put_response_hop_limit = 1
-  }
 
   root_block_device {
     volume_type = "gp3"
