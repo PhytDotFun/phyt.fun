@@ -25,7 +25,7 @@ resource "aws_instance" "postgresql" {
   instance_type               = var.instance_type
   subnet_id                   = var.subnet_id
   vpc_security_group_ids      = [var.security_group_id]
-  user_data                   = local.user_data
+  user_data                   = locals.user_data
   user_data_replace_on_change = true
 
   root_block_device {
