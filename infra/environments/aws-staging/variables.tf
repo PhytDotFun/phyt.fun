@@ -21,7 +21,7 @@ variable "postgres_instance_type" {
   default     = "t4g.nano"
 }
 
-variable "fck_nat_instance_type"
+variable "fck_nat_instance_type" {
   description = "EC2 instance for fck_nat NAT"
   type        = string
   default     = "t4g.nano"
