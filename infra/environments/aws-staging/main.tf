@@ -353,7 +353,7 @@ data "aws_ami" "fck_nat" {
 # fck-nat instance for cost-effective NAT
 resource "aws_instance" "fck_nat" {
   ami                    = data.aws_ami.fck_nat.id
-  instance_type          = "t4g.nano"
+  instance_type          = fck_nat_instance_type
   subnet_id              = aws_subnet.public.id
   vpc_security_group_ids = [aws_security_group.fck_nat.id]
   source_dest_check      = false
@@ -382,6 +382,7 @@ module "postgresql" {
   source = "../../terraform/modules/psql"
 
   deployment_id     = var.deployment_id
+  instance_type     = var.postgres_instance_type
   ami_id            = data.aws_ami.ubuntu.id
   subnet_id         = aws_subnet.private.id
   security_group_id = aws_security_group.postgresql.id
