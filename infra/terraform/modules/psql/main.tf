@@ -11,28 +11,42 @@ terraform {
 
 # User data script for PostgreSQL installation
 locals {
-  user_data = base64encode(templatefile("${path.module}/user-data.sh", {
+  user_data = templatefile("${path.module}/user-data.sh", {
     postgres_db_name  = var.postgres_db_name
     postgres_username = var.postgres_username
     postgres_password = var.postgres_password
-  }))
+  })
 }
 
 # PostgreSQL EC2 instance
 resource "aws_instance" "postgresql" {
-  ami                    = var.ami_id
-  instance_type          = var.instance_type
-  subnet_id              = var.subnet_id
-  vpc_security_group_ids = [var.security_group_id]
-  user_data_base64       = local.user_data
+  ami                         = var.ami_id
+  instance_type               = var.instance_type
+  subnet_id                   = var.subnet_id
+  vpc_security_group_ids      = [var.security_group_id]
+  user_data                   = local.user_data
+  user_data_replace_on_change = true
+
+  metadata_options {
+    http_endpoint               = "enabled"  # keep reachable
+    http_tokens                 = "required" # enforce IMDSv2
+    http_put_response_hop_limit = 1
+  }
 
   root_block_device {
-    volume_size = var.volume_size
     volume_type = "gp3"
+    volume_size = var.volume_size
     encrypted   = true
+    iops        = 3000
+    throughput  = 125
+
+    tags = {
+      Name = "staging-db-volume-${var.deployment_id}"
+    }
   }
 
   tags = {
     Name = "staging-postgresql-${var.deployment_id}"
+    Type = "ephemeral-staging"
   }
 }

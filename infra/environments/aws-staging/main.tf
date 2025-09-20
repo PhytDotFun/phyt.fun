@@ -1,3 +1,5 @@
+# TODO: Need to create VPC and NAT modules
+
 terraform {
   required_version = ">= 1.0"
 
@@ -353,7 +355,7 @@ data "aws_ami" "fck_nat" {
 # fck-nat instance for cost-effective NAT
 resource "aws_instance" "fck_nat" {
   ami                    = data.aws_ami.fck_nat.id
-  instance_type          = fck_nat_instance_type
+  instance_type          = var.fck_nat_instance_type
   subnet_id              = aws_subnet.public.id
   vpc_security_group_ids = [aws_security_group.fck_nat.id]
   source_dest_check      = false

@@ -6,27 +6,15 @@ terraform {
       source  = "hashicorp/aws"
       version = "~> 6.0"
     }
-    null = {
-      source  = "hashicorp/null"
-      version = "~> 3.0"
+    time = {
+      source  = "hashicorp/time"
+      version = "~> 0.9"
     }
   }
 }
 
-resource "aws_instance" "staging" {
-  ami                         = var.ami_id
-  instance_type               = var.instance_type
-  subnet_id                   = var.subnet_id
-  vpc_security_group_ids      = [var.security_group_id]
-  iam_instance_profile        = var.iam_instance_profile
-  user_data_replace_on_change = true
-
-  metadata_options {
-    http_endpoint               = "enabled"  # keep reachable
-    http_tokens                 = "required" # enforce IMDSv2
-    http_put_response_hop_limit = 1
-  }
-
+# User data script for staging
+locals {
   user_data = templatefile("${path.module}/user-data.sh", {
     deployment_id           = var.deployment_id
     cloudflare_tunnel_token = var.cloudflare_tunnel_token
@@ -35,6 +23,22 @@ resource "aws_instance" "staging" {
     tailscale_auth_key      = var.tailscale_auth_key
     vault_addr              = var.vault_addr
   })
+}
+
+resource "aws_instance" "staging" {
+  ami                         = var.ami_id
+  instance_type               = var.instance_type
+  subnet_id                   = var.subnet_id
+  vpc_security_group_ids      = [var.security_group_id]
+  iam_instance_profile        = var.iam_instance_profile
+  user_data                   = locals.user_data
+  user_data_replace_on_change = true
+
+  metadata_options {
+    http_endpoint               = "enabled"  # keep reachable
+    http_tokens                 = "required" # enforce IMDSv2
+    http_put_response_hop_limit = 1
+  }
 
   root_block_device {
     volume_type = "gp3"
@@ -55,7 +59,7 @@ resource "aws_instance" "staging" {
   }
 }
 
-
+# Deprecated spot instance for staging (will revisit)
 # resource "aws_spot_instance_request" "staging" {
 #   ami                            = var.ami_id
 #   instance_type                  = var.instance_type
@@ -120,18 +124,15 @@ resource "aws_eip" "staging" {
   }
 }
 
-resource "null_resource" "wait_for_instance" {
-  depends_on = [aws_instance.staging]
-
-  provisioner "local-exec" {
-    command = "sleep 60"
-  }
+resource "time_sleep" "after_instance_ready" {
+  create_duration = "15s"
+  depends_on      = [aws_instance.staging]
 }
 
 resource "aws_eip_association" "staging" {
   instance_id   = aws_instance.staging.id
   allocation_id = aws_eip.staging.id
-  depends_on    = [null_resource.wait_for_instance]
+  depends_on    = [time_sleep.after_instance_ready]
 }
 
 # CloudWatch alarm for spot instance termination
