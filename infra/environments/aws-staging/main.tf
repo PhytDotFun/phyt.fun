@@ -65,6 +65,12 @@ data "vault_kv_secret_v2" "tailscale" {
   name  = "staging/tailscale"
 }
 
+# PostgreSQL database credentials
+data "vault_kv_secret_v2" "postgresql" {
+  mount = "secret"
+  name  = "staging/postgresql"
+}
+
 ########################
 # AMI / AZs
 ########################
@@ -152,6 +158,36 @@ resource "aws_route_table_association" "public" {
   route_table_id = aws_route_table.public.id
 }
 
+# Private subnet for database
+resource "aws_subnet" "private" {
+  vpc_id            = aws_vpc.staging.id
+  cidr_block        = "10.100.2.0/24"
+  availability_zone_id = data.aws_availability_zones.available.zone_ids[1]
+
+  tags = {
+    Name = "staging-private-subnet-${var.deployment_id}"
+  }
+}
+
+# Private route table (will route through fck-nat)
+resource "aws_route_table" "private" {
+  vpc_id = aws_vpc.staging.id
+
+  route {
+    cidr_block  = "0.0.0.0/0"
+    instance_id = aws_instance.fck_nat.id
+  }
+
+  tags = {
+    Name = "staging-private-rt-${var.deployment_id}"
+  }
+}
+
+resource "aws_route_table_association" "private" {
+  subnet_id      = aws_subnet.private.id
+  route_table_id = aws_route_table.private.id
+}
+
 ########################
 # Security & IAM
 ########################
@@ -171,6 +207,58 @@ resource "aws_security_group" "staging" {
 
   tags = {
     Name = "staging-sg-${var.deployment_id}"
+  }
+}
+
+# Security group for fck-nat instance
+resource "aws_security_group" "fck_nat" {
+  name_prefix = "staging-fck-nat-sg-"
+  vpc_id      = aws_vpc.staging.id
+
+  # Allow all traffic from private subnet
+  ingress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = [aws_subnet.private.cidr_block]
+  }
+
+  # Allow all outbound traffic
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "staging-fck-nat-sg-${var.deployment_id}"
+  }
+}
+
+# Security group for PostgreSQL instance
+resource "aws_security_group" "postgresql" {
+  name_prefix = "staging-postgresql-sg-"
+  vpc_id      = aws_vpc.staging.id
+
+  # Allow PostgreSQL access from main instance
+  ingress {
+    from_port       = 5432
+    to_port         = 5432
+    protocol        = "tcp"
+    security_groups = [aws_security_group.staging.id]
+  }
+
+  # Allow all outbound traffic (for updates)
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "staging-postgresql-sg-${var.deployment_id}"
   }
 }
 
@@ -244,6 +332,38 @@ module "staging_instance" {
 }
 
 ########################
+# fck-nat instance
+########################
+
+# Get latest fck-nat AMI
+data "aws_ami" "fck_nat" {
+  most_recent = true
+  owners      = ["568608671756"] # fck-nat project
+
+  filter {
+    name   = "name"
+    values = ["fck-nat-al2023-*"]
+  }
+  filter {
+    name   = "architecture"
+    values = ["arm64"]
+  }
+}
+
+# fck-nat instance for cost-effective NAT
+resource "aws_instance" "fck_nat" {
+  ami                    = data.aws_ami.fck_nat.id
+  instance_type          = "t4g.nano"
+  subnet_id              = aws_subnet.public.id
+  vpc_security_group_ids = [aws_security_group.fck_nat.id]
+  source_dest_check      = false
+
+  tags = {
+    Name = "staging-fck-nat-${var.deployment_id}"
+  }
+}
+
+########################
 # Cloudflare tunnel module
 ########################
 
@@ -252,4 +372,19 @@ module "cloudflare" {
   zone_id       = data.vault_kv_secret_v2.cloudflare.data["ZONE_ID"]
   account_id    = data.vault_kv_secret_v2.cloudflare.data["ACCOUNT_ID"]
   deployment_id = var.deployment_id
+}
+
+########################
+# PostgreSQL module
+########################
+
+module "postgresql" {
+  source = "../../terraform/modules/psql"
+
+  deployment_id       = var.deployment_id
+  ami_id              = data.aws_ami.ubuntu.id
+  subnet_id           = aws_subnet.private.id
+  security_group_id   = aws_security_group.postgresql.id
+  postgres_password   = data.vault_kv_secret_v2.postgresql.data["POSTGRES_PASSWORD"]
+  volume_size         = 20
 }
