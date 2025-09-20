@@ -6,11 +6,11 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 6.0"
+      version = "6.13.0"
     }
     cloudflare = {
       source  = "cloudflare/cloudflare"
-      version = "~> 5.8.4"
+      version = "5.8.4"
     }
     vault = {
       source  = "hashicorp/vault"
