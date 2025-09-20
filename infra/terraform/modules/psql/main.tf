@@ -16,6 +16,7 @@ locals {
     postgres_username = var.postgres_username
     postgres_password = var.postgres_password
     vault_addr        = var.vault_addr
+    deployment_id     = var.deployment_id
   })
 }
 
