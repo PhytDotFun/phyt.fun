@@ -12,8 +12,8 @@ terraform {
 # User data script for PostgreSQL installation
 locals {
   user_data = templatefile("${path.module}/user-data.sh", {
-    postgres_db_name  = var.postgres_db_name
-    postgres_username = var.postgres_username
+    postgres_db_name  = var.postgres_db
+    postgres_username = var.postgres_user
     postgres_password = var.postgres_password
     vault_addr        = var.vault_addr
     deployment_id     = var.deployment_id

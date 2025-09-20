@@ -388,6 +388,8 @@ module "postgresql" {
   ami_id            = data.aws_ami.ubuntu.id
   subnet_id         = aws_subnet.private.id
   security_group_id = aws_security_group.postgresql.id
+  postgres_user     = data.vault_kv_secret_v2.postgresql.data["POSTGRES_USER"]
+  postgres_db       = data.vault_kv_secret_v2.postgresql.data["POSTGRES_DB"]
   postgres_password = data.vault_kv_secret_v2.postgresql.data["POSTGRES_PASSWORD"]
   volume_size       = 20
   vault_addr        = var.vault_addr
