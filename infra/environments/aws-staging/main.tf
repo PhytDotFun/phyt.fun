@@ -160,8 +160,8 @@ resource "aws_route_table_association" "public" {
 
 # Private subnet for database
 resource "aws_subnet" "private" {
-  vpc_id            = aws_vpc.staging.id
-  cidr_block        = "10.100.2.0/24"
+  vpc_id               = aws_vpc.staging.id
+  cidr_block           = "10.100.2.0/24"
   availability_zone_id = data.aws_availability_zones.available.zone_ids[1]
 
   tags = {
@@ -381,10 +381,10 @@ module "cloudflare" {
 module "postgresql" {
   source = "../../terraform/modules/psql"
 
-  deployment_id       = var.deployment_id
-  ami_id              = data.aws_ami.ubuntu.id
-  subnet_id           = aws_subnet.private.id
-  security_group_id   = aws_security_group.postgresql.id
-  postgres_password   = data.vault_kv_secret_v2.postgresql.data["POSTGRES_PASSWORD"]
-  volume_size         = 20
+  deployment_id     = var.deployment_id
+  ami_id            = data.aws_ami.ubuntu.id
+  subnet_id         = aws_subnet.private.id
+  security_group_id = aws_security_group.postgresql.id
+  postgres_password = data.vault_kv_secret_v2.postgresql.data["POSTGRES_PASSWORD"]
+  volume_size       = 20
 }
