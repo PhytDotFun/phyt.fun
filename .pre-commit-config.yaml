@@ -48,6 +48,12 @@ repos:
           - id: terraform_fmt
           - id: terraform_tflint
             exclude: '^infra/terraform/modules/'
+          - id: terraform_validate
+            exclude: '^infra/terraform/modules/'
+            args:
+                - --hook-config=-retry-once-with-clean=true
+                - --tf-init-args=-backend=false
+                - --tf-init-args=-upgrade
 
     # Packer
     - repo: https://github.com/cisagov/pre-commit-packer
