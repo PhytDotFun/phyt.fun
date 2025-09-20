@@ -1,0 +1,49 @@
+variable "deployment_id" {
+  description = "Unique deployment identifier"
+  type        = string
+}
+
+variable "instance_type" {
+  description = "EC2 instance type for PostgreSQL"
+  type        = string
+  default     = "t4g.micro"
+}
+
+variable "ami_id" {
+  description = "AMI ID for the PostgreSQL instance"
+  type        = string
+}
+
+variable "subnet_id" {
+  description = "Subnet ID for the PostgreSQL instance"
+  type        = string
+}
+
+variable "security_group_id" {
+  description = "Security group ID for PostgreSQL"
+  type        = string
+}
+
+variable "postgres_db_name" {
+  description = "PostgreSQL database name"
+  type        = string
+  default     = "phyt_staging"
+}
+
+variable "postgres_username" {
+  description = "PostgreSQL username"
+  type        = string
+  default     = "phyt_user"
+}
+
+variable "postgres_password" {
+  description = "PostgreSQL password"
+  type        = string
+  sensitive   = true
+}
+
+variable "volume_size" {
+  description = "Root volume size in GB"
+  type        = number
+  default     = 20
+}
