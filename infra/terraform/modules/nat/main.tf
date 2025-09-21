@@ -63,4 +63,3 @@ resource "aws_instance" "fck_nat" {
     Name = "${var.deployment_id}-fck-nat"
   }
 }
-
