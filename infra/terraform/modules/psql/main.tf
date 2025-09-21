@@ -4,30 +4,27 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "6.13.0"
+      version = "6.12.0"
     }
   }
 }
 
-# User data script for PostgreSQL installation
-locals {
-  user_data = templatefile("${path.module}/user-data.sh", {
-    postgres_db_name  = var.postgres_db
-    postgres_username = var.postgres_user
-    postgres_password = var.postgres_password
-    vault_addr        = var.vault_addr
-    deployment_id     = var.deployment_id
-  })
-}
 
 # PostgreSQL EC2 instance
 resource "aws_instance" "postgresql" {
-  ami                         = var.ami_id
-  instance_type               = var.instance_type
-  subnet_id                   = var.subnet_id
-  vpc_security_group_ids      = [var.security_group_id]
-  user_data                   = locals.user_data
-  user_data_replace_on_change = true
+  ami                    = var.ami_id
+  instance_type          = var.instance_type
+  subnet_id              = var.subnet_id
+  vpc_security_group_ids = [var.security_group_id]
+  iam_instance_profile   = var.iam_instance_profile
+
+  user_data = templatefile("${path.module}/user-data.sh", {
+    deployment_id     = var.deployment_id
+    postgres_db       = var.postgres_db
+    postgres_user     = var.postgres_user
+    postgres_password = var.postgres_password
+    vault_addr        = var.vault_addr
+  })
 
   root_block_device {
     volume_type = "gp3"

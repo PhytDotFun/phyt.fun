@@ -10,12 +10,12 @@ output "private_ip" {
 
 output "database_name" {
   description = "Name of the PostgreSQL database"
-  value       = var.postgres_db_name
+  value       = var.postgres_db
 }
 
-output "database_username" {
+output "database_user" {
   description = "PostgreSQL username"
-  value       = var.postgres_username
+  value       = var.postgres_user
 }
 
 output "database_port" {
@@ -25,6 +25,6 @@ output "database_port" {
 
 output "connection_string" {
   description = "PostgreSQL connection string"
-  value       = "postgresql://${var.postgres_username}:${var.postgres_password}@${aws_instance.postgresql.private_ip}:5432/${var.postgres_db_name}"
+  value       = "postgresql://${var.postgres_user}:${var.postgres_password}@${aws_instance.postgresql.private_ip}:5432/${var.postgres_db}"
   sensitive   = true
 }
