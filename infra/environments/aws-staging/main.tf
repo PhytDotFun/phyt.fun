@@ -6,7 +6,7 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "6.13.0"
+      version = "6.12.0"
     }
     cloudflare = {
       source  = "cloudflare/cloudflare"
@@ -177,7 +177,7 @@ resource "aws_route_table" "private" {
 
   route {
     cidr_block           = "0.0.0.0/0"
-    network_interface_id = aws_instance.fck_nat.primary_network_interface_id
+    network_interface_id = module.nat_gateway.primary_network_interface_id
   }
 
   tags = {
@@ -212,31 +212,6 @@ resource "aws_security_group" "staging" {
   }
 }
 
-# Security group for fck-nat instance
-resource "aws_security_group" "fck_nat" {
-  name_prefix = "staging-fck-nat-sg-"
-  vpc_id      = aws_vpc.staging.id
-
-  # Allow all traffic from private subnet
-  ingress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = [aws_subnet.private.cidr_block]
-  }
-
-  # Allow all outbound traffic
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  tags = {
-    Name = "staging-fck-nat-sg-${var.deployment_id}"
-  }
-}
 
 # Security group for PostgreSQL instance
 resource "aws_security_group" "postgresql" {
@@ -337,32 +312,19 @@ module "staging_instance" {
 # fck-nat instance
 ########################
 
-# Get latest fck-nat AMI
-data "aws_ami" "fck_nat" {
-  most_recent = true
-  owners      = ["568608671756"] # fck-nat project
+########################
+# NAT Gateway module
+########################
 
-  filter {
-    name   = "name"
-    values = ["fck-nat-al2023-*"]
-  }
-  filter {
-    name   = "architecture"
-    values = ["arm64"]
-  }
-}
+module "nat_gateway" {
+  source = "../../terraform/modules/nat"
 
-# fck-nat instance for cost-effective NAT
-resource "aws_instance" "fck_nat" {
-  ami                    = data.aws_ami.fck_nat.id
-  instance_type          = var.fck_nat_instance_type
-  subnet_id              = aws_subnet.public.id
-  vpc_security_group_ids = [aws_security_group.fck_nat.id]
-  source_dest_check      = false
-
-  tags = {
-    Name = "staging-fck-nat-${var.deployment_id}"
-  }
+  deployment_id        = var.deployment_id
+  instance_type        = var.fck_nat_instance_type
+  subnet_id            = aws_subnet.public.id
+  vpc_id               = aws_vpc.staging.id
+  private_subnet_cidr  = aws_subnet.private.cidr_block
+  iam_instance_profile = aws_iam_instance_profile.staging.name
 }
 
 ########################
@@ -383,14 +345,17 @@ module "cloudflare" {
 module "postgresql" {
   source = "../../terraform/modules/psql"
 
-  deployment_id     = var.deployment_id
-  instance_type     = var.postgres_instance_type
-  ami_id            = data.aws_ami.ubuntu.id
-  subnet_id         = aws_subnet.private.id
-  security_group_id = aws_security_group.postgresql.id
+  deployment_id        = var.deployment_id
+  instance_type        = var.postgres_instance_type
+  ami_id               = data.aws_ami.ubuntu.id
+  subnet_id            = aws_subnet.private.id
+  security_group_id    = aws_security_group.postgresql.id
+  iam_instance_profile = aws_iam_instance_profile.staging.name
+  vault_addr           = var.vault_addr
+
   postgres_user     = data.vault_kv_secret_v2.postgresql.data["POSTGRES_USER"]
   postgres_db       = data.vault_kv_secret_v2.postgresql.data["POSTGRES_DB"]
   postgres_password = data.vault_kv_secret_v2.postgresql.data["POSTGRES_PASSWORD"]
-  volume_size       = 20
-  vault_addr        = var.vault_addr
+
+  volume_size = var.volume_size
 }

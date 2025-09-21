@@ -44,8 +44,8 @@ output "database_name" {
   description = "PostgreSQL database name"
 }
 
-output "database_username" {
-  value       = module.postgresql.database_username
+output "database_user" {
+  value       = module.postgresql.database_user
   description = "PostgreSQL username"
 }
 
@@ -62,11 +62,11 @@ output "database_connection_string" {
 
 # fck-nat instance info
 output "fck_nat_instance_id" {
-  value       = aws_instance.fck_nat.id
+  value       = module.nat_gateway.instance_id
   description = "fck-nat instance ID"
 }
 
 output "fck_nat_public_ip" {
-  value       = aws_instance.fck_nat.public_ip
+  value       = module.nat_gateway.public_ip
   description = "fck-nat instance public IP"
 }
