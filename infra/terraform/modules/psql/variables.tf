@@ -3,6 +3,11 @@ variable "deployment_id" {
   type        = string
 }
 
+variable "iam_instance_profile" {
+  description = "IAM instance profile name"
+  type        = string
+}
+
 variable "instance_type" {
   description = "EC2 instance type for PostgreSQL"
   type        = string
