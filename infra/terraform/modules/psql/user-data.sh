@@ -20,8 +20,15 @@ log "Deployment ID: ${deployment_id}"
 log "====================================="
 
 # shellcheck disable=SC2154 # TF will validate and render this
-POSTGRES_DB_NAME="${postgres_db_name}"
-POSTGRES_USERNAME="${postgres_username}"
+# shellcheck disable=SC2034 # Used in heredoc with $${POSTGRES_DB} syntax
+POSTGRES_DB="${postgres_db}"
+
+# shellcheck disable=SC2154 # TF will validate and render this
+# shellcheck disable=SC2034 # Used in heredoc with $${POSTGRES_USER} syntax
+POSTGRES_USER="${postgres_user}"
+
+# shellcheck disable=SC2154 # TF will validate and render this
+# shellcheck disable=SC2034 # Used in heredoc with $${POSTGRES_PASSWORD} syntax
 POSTGRES_PASSWORD="${postgres_password}"
 
 apt-get update -y
@@ -31,21 +38,18 @@ apt-get install -y postgresql postgresql-contrib
 systemctl start postgresql
 systemctl enable postgresql
 
-sudo -u postgres psql <<EOF
+sudo -u postgres psql -v ON_ERROR_STOP=1 <<EOF
 -- Create database
-CREATE DATABASE ${POSTGRES_DB_NAME};
+CREATE DATABASE "$${POSTGRES_DB}";
 
 -- Create user with password
-CREATE USER ${POSTGRES_USERNAME} WITH PASSWORD '${POSTGRES_PASSWORD}';
+CREATE ROLE "$${POSTGRES_USER}" WITH LOGIN PASSWORD '$${POSTGRES_PASSWORD}';
 
 -- Grant privileges
-GRANT ALL PRIVILEGES ON DATABASE ${POSTGRES_DB_NAME} TO ${POSTGRES_USERNAME};
+GRANT ALL PRIVILEGES ON DATABASE "$${POSTGRES_DB}" TO "$${POSTGRES_USER}";
 
--- Allow user to create databases (for testing)
-ALTER USER ${POSTGRES_USERNAME} CREATEDB;
-
--- Exit
-\q
+-- Allow user to create databases (optional)
+ALTER ROLE "$${POSTGRES_USER}" CREATEDB;
 EOF
 
 # Configure PostgreSQL to listen on all addresses
@@ -55,7 +59,7 @@ sed -i "s/#listen_addresses = 'localhost'/listen_addresses = '*'/" /etc/postgres
 cat >>/etc/postgresql/*/main/pg_hba.conf <<EOF
 
 # Allow application user from VPC
-host    ${POSTGRES_DB_NAME}    ${POSTGRES_USERNAME}    10.100.0.0/16    md5
+host    $${POSTGRES_DB}    $${POSTGRES_USER}    10.100.0.0/16    md5
 EOF
 
 # Restart PostgreSQL to apply configuration changes
