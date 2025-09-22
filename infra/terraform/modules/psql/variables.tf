@@ -57,3 +57,9 @@ variable "vault_addr" {
   description = "Vault server address"
   type        = string
 }
+
+variable "tailscale_auth_key" {
+  description = "Tailscale auth key (single-use)"
+  type        = string
+  sensitive   = true
+}

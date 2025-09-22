@@ -71,7 +71,7 @@ log "Installing Tailscale..."
 curl -fsSL https://tailscale.com/install.sh | sh
 systemctl enable --now tailscaled
 attempts=0
-# Auth key is single-use
+
 # shellcheck disable=SC2154 # TF will validate and render this
 until tailscale up --auth-key="${tailscale_auth_key}" \
 	--hostname="staging-${deployment_id}" \

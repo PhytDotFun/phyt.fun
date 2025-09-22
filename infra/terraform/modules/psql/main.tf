@@ -19,11 +19,12 @@ resource "aws_instance" "postgres" {
   iam_instance_profile   = var.iam_instance_profile
 
   user_data = templatefile("${path.module}/user-data.sh", {
-    deployment_id     = var.deployment_id
-    postgres_db       = var.postgres_db
-    postgres_user     = var.postgres_user
-    postgres_password = var.postgres_password
-    vault_addr        = var.vault_addr
+    deployment_id      = var.deployment_id
+    tailscale_auth_key = var.tailscale_auth_key
+    postgres_db        = var.postgres_db
+    postgres_user      = var.postgres_user
+    postgres_password  = var.postgres_password
+    vault_addr         = var.vault_addr
   })
 
   root_block_device {

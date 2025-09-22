@@ -19,6 +19,29 @@ log "Starting Postgres user-data script"
 log "Deployment ID: ${deployment_id}"
 log "====================================="
 
+log "Installing Tailscale..."
+curl -fsSL https://tailscale.com/install.sh | sh
+systemctl enable --now tailscaled
+
+# shellcheck disable=SC2154 # TF will validate and render this
+until tailscale up --auth-key="${tailscale_auth_key}" \
+	--hostname="staging-db-${deployment_id}" \
+	--accept-routes \
+	--accept-dns=false \
+	--ssh \
+	--advertise-tags=tag:staging; do
+	attempts=$((attempts + 1))
+	if [ "$attempts" -ge 5 ]; then
+		die "Tailscale join failed after $attempts attempts"
+	fi
+	log "tailscale up failed (attempt $attempts), retrying in 5s..."
+	sleep 5
+done
+# Verify we’re actually in the tailnet
+tailscale status || die "Tailscale status check failed"
+
+unset tailscale_auth_key
+
 # shellcheck disable=SC2154 # TF will validate and render this
 # shellcheck disable=SC2034 # Used in heredoc with $${POSTGRES_DB} syntax
 POSTGRES_DB="${postgres_db}"
