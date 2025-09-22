@@ -51,7 +51,7 @@ variable "cloudflare_tunnel_id" {
 }
 
 variable "tailscale_auth_key" {
-  description = "Tailscale auth key (single-use)"
+  description = "Tailscale auth key"
   type        = string
   sensitive   = true
 }

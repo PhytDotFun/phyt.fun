@@ -325,6 +325,8 @@ module "nat_gateway" {
   vpc_id               = aws_vpc.staging.id
   private_subnet_cidr  = aws_subnet.private.cidr_block
   iam_instance_profile = aws_iam_instance_profile.staging.name
+
+  tailscale_auth_key = data.vault_kv_secret_v2.tailscale.data["AUTH_KEY"]
 }
 
 ########################
@@ -356,6 +358,8 @@ module "postgres" {
   postgres_user     = data.vault_kv_secret_v2.postgres.data["POSTGRES_USER"]
   postgres_db       = data.vault_kv_secret_v2.postgres.data["POSTGRES_DB"]
   postgres_password = data.vault_kv_secret_v2.postgres.data["POSTGRES_PASSWORD"]
+
+  tailscale_auth_key = data.vault_kv_secret_v2.tailscale.data["AUTH_KEY"]
 
   volume_size = var.volume_size
 }
