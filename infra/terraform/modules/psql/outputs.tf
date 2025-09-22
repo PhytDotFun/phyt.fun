@@ -11,16 +11,19 @@ output "private_ip" {
 output "database_name" {
   description = "Name of the PostgreSQL database"
   value       = var.postgres_db
+  sensitive   = true
 }
 
 output "database_user" {
   description = "PostgreSQL username"
   value       = var.postgres_user
+  sensitive   = true
 }
 
 output "database_port" {
   description = "PostgreSQL port"
   value       = "5432"
+  sensitive   = true
 }
 
 output "connection_string" {
