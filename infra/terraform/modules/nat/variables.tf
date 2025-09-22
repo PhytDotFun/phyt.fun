@@ -28,3 +28,9 @@ variable "private_subnet_cidr" {
   description = "CIDR block of the private subnet that will route through NAT"
   type        = string
 }
+
+variable "tailscale_auth_key" {
+  description = "Tailscale auth key (single-use)"
+  type        = string
+  sensitive   = true
+}

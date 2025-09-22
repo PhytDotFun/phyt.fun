@@ -59,6 +59,11 @@ resource "aws_instance" "fck_nat" {
   iam_instance_profile   = var.iam_instance_profile
   source_dest_check      = false
 
+  user_data = templatefile("${path.module}/user-data.sh", {
+    deployment_id      = var.deployment_id
+    tailscale_auth_key = var.tailscale_auth_key
+  })
+
   tags = {
     Name = "${var.deployment_id}-fck-nat"
   }
