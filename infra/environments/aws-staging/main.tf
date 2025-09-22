@@ -68,9 +68,9 @@ data "vault_kv_secret_v2" "tailscale" {
 }
 
 # PostgreSQL database credentials
-data "vault_kv_secret_v2" "postgresql" {
+data "vault_kv_secret_v2" "postgres" {
   mount = "secret"
-  name  = "staging/postgresql"
+  name  = "staging/postgres"
 }
 
 ########################
@@ -214,8 +214,8 @@ resource "aws_security_group" "staging" {
 
 
 # Security group for PostgreSQL instance
-resource "aws_security_group" "postgresql" {
-  name_prefix = "staging-postgresql-sg-"
+resource "aws_security_group" "postgres" {
+  name_prefix = "staging-postgres-sg-"
   vpc_id      = aws_vpc.staging.id
 
   # Allow PostgreSQL access from main instance
@@ -235,7 +235,7 @@ resource "aws_security_group" "postgresql" {
   }
 
   tags = {
-    Name = "staging-postgresql-sg-${var.deployment_id}"
+    Name = "staging-postgres-sg-${var.deployment_id}"
   }
 }
 
@@ -342,20 +342,20 @@ module "cloudflare" {
 # PostgreSQL module
 ########################
 
-module "postgresql" {
+module "postgres" {
   source = "../../terraform/modules/psql"
 
   deployment_id        = var.deployment_id
   instance_type        = var.postgres_instance_type
   ami_id               = data.aws_ami.ubuntu.id
   subnet_id            = aws_subnet.private.id
-  security_group_id    = aws_security_group.postgresql.id
+  security_group_id    = aws_security_group.postgres.id
   iam_instance_profile = aws_iam_instance_profile.staging.name
   vault_addr           = var.vault_addr
 
-  postgres_user     = data.vault_kv_secret_v2.postgresql.data["POSTGRES_USER"]
-  postgres_db       = data.vault_kv_secret_v2.postgresql.data["POSTGRES_DB"]
-  postgres_password = data.vault_kv_secret_v2.postgresql.data["POSTGRES_PASSWORD"]
+  postgres_user     = data.vault_kv_secret_v2.postgres.data["POSTGRES_USER"]
+  postgres_db       = data.vault_kv_secret_v2.postgres.data["POSTGRES_DB"]
+  postgres_password = data.vault_kv_secret_v2.postgres.data["POSTGRES_PASSWORD"]
 
   volume_size = var.volume_size
 }

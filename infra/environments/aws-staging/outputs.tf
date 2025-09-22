@@ -28,34 +28,33 @@ output "ssh_command" {
   description = "SSH command to access the instance (Tailscale SSH)"
 }
 
-# PostgreSQL database outputs
 output "database_instance_id" {
-  value       = module.postgresql.instance_id
+  value       = module.postgres.instance_id
   description = "PostgreSQL instance ID"
 }
 
 output "database_private_ip" {
-  value       = module.postgresql.private_ip
+  value       = module.postgres.private_ip
   description = "PostgreSQL instance private IP"
 }
 
 output "database_name" {
-  value       = module.postgresql.database_name
+  value       = module.postgres.database_name
   description = "PostgreSQL database name"
 }
 
 output "database_user" {
-  value       = module.postgresql.database_user
+  value       = module.postgres.database_user
   description = "PostgreSQL username"
 }
 
 output "database_port" {
-  value       = module.postgresql.database_port
+  value       = module.postgres.database_port
   description = "PostgreSQL port"
 }
 
 output "database_connection_string" {
-  value       = module.postgresql.connection_string
+  value       = module.postgres.connection_string
   description = "PostgreSQL connection string"
   sensitive   = true
 }

@@ -32,13 +32,13 @@ variable "security_group_id" {
 variable "postgres_db" {
   description = "PostgreSQL database name"
   type        = string
-  default     = "phyt_staging"
+  default     = "primary_staging"
 }
 
 variable "postgres_user" {
   description = "PostgreSQL username"
   type        = string
-  default     = "phyt_user"
+  default     = "phyt"
 }
 
 variable "postgres_password" {

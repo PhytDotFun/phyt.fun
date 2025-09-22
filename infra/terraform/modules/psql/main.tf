@@ -11,7 +11,7 @@ terraform {
 
 
 # PostgreSQL EC2 instance
-resource "aws_instance" "postgresql" {
+resource "aws_instance" "postgres" {
   ami                    = var.ami_id
   instance_type          = var.instance_type
   subnet_id              = var.subnet_id
@@ -39,7 +39,7 @@ resource "aws_instance" "postgresql" {
   }
 
   tags = {
-    Name = "staging-postgresql-${var.deployment_id}"
+    Name = "staging-postgres-${var.deployment_id}"
     Type = "ephemeral-staging"
   }
 }

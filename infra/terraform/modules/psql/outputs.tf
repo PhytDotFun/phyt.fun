@@ -1,11 +1,11 @@
 output "instance_id" {
   description = "ID of the PostgreSQL instance"
-  value       = aws_instance.postgresql.id
+  value       = aws_instance.postgres.id
 }
 
 output "private_ip" {
   description = "Private IP address of the PostgreSQL instance"
-  value       = aws_instance.postgresql.private_ip
+  value       = aws_instance.postgres.private_ip
 }
 
 output "database_name" {
@@ -25,6 +25,6 @@ output "database_port" {
 
 output "connection_string" {
   description = "PostgreSQL connection string"
-  value       = "postgresql://${var.postgres_user}:${var.postgres_password}@${aws_instance.postgresql.private_ip}:5432/${var.postgres_db}"
+  value       = "postgresql://${var.postgres_user}:${var.postgres_password}@${aws_instance.postgres.private_ip}:5432/${var.postgres_db}"
   sensitive   = true
 }
