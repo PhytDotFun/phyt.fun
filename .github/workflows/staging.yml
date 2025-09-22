@@ -1,309 +1,336 @@
 name: Staging CI
 
 on:
-  push:
-    branches: [staging, "ci/**"]
-  workflow_dispatch: {}
+    push:
+        branches: [staging, 'ci/**']
+    workflow_dispatch: {}
 
 concurrency:
-  group: staging-ci
-  cancel-in-progress: true
+    group: staging-ci
+    cancel-in-progress: true
 
 env:
-  REGISTRY: ghcr.io
-  AWS_REGION: us-east-1
-  VAULT_ADDR: ${{ vars.VAULT_ADDR }}
+    REGISTRY: ghcr.io
+    AWS_REGION: us-east-1
+    VAULT_ADDR: ${{ vars.VAULT_ADDR }}
 
 permissions:
-  contents: read
-  packages: write
-  id-token: write
+    contents: read
+    packages: write
+    id-token: write
 
 jobs:
-  build-images:
-    runs-on: ubuntu-latest
-    concurrency:
-      group: staging-build
-      cancel-in-progress: true
-    strategy:
-      matrix:
-        service:
-          - name: hono-api
-            dockerfile: Dockerfile
-            context: .
-            buildargs: |
-              PROJECT=hono-api
-          - name: workers
-            dockerfile: Dockerfile
-            context: .
-            buildargs: |
-              PROJECT=workers
-    outputs:
-      skipped: ${{ steps.check_skip.outputs.skipped }}
-      image_tag: ${{ steps.meta.outputs.image_tag }}
-      short_sha: ${{ steps.meta.outputs.short_sha }}
-      repo_lc: ${{ steps.meta.outputs.repo_lc }}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+    build-images:
+        runs-on: ubuntu-latest
+        concurrency:
+            group: staging-build
+            cancel-in-progress: true
+        strategy:
+            matrix:
+                service:
+                    - name: hono-api
+                      dockerfile: Dockerfile
+                      context: .
+                      buildargs: |
+                          PROJECT=hono-api
+                    - name: workers
+                      dockerfile: Dockerfile
+                      context: .
+                      buildargs: |
+                          PROJECT=workers
+        outputs:
+            skipped: ${{ steps.check_skip.outputs.skipped }}
+            image_tag: ${{ steps.meta.outputs.image_tag }}
+            short_sha: ${{ steps.meta.outputs.short_sha }}
+            repo_lc: ${{ steps.meta.outputs.repo_lc }}
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
 
-      - name: Check for [skip build]
-        id: check_skip
-        run: |
-          if [[ "${{ github.event.head_commit.message }}" == *"[skip build]"* ]]; then
-            echo "skipped=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "skipped=false" >> "$GITHUB_OUTPUT"
-          fi
+            - name: Check for [skip build]
+              id: check_skip
+              run: |
+                  if [[ "${{ github.event.head_commit.message }}" == *"[skip build]"* ]]; then
+                    echo "skipped=true" >> "$GITHUB_OUTPUT"
+                  else
+                    echo "skipped=false" >> "$GITHUB_OUTPUT"
+                  fi
 
-      - name: Compute metadata
-        id: meta
-        run: |
-          SHORT_SHA=${GITHUB_SHA::7}
-          echo "short_sha=${SHORT_SHA}" >> "$GITHUB_OUTPUT"
-          if [[ '${{ steps.check_skip.outputs.skipped }}' == 'true' ]]; then
-            echo "image_tag=staging" >> "$GITHUB_OUTPUT"
-          else
-            echo "image_tag=staging-${SHORT_SHA}" >> "$GITHUB_OUTPUT"
-          fi
-          echo "repo_lc=$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> "$GITHUB_OUTPUT"
+            - name: Compute metadata
+              id: meta
+              run: |
+                  SHORT_SHA=${GITHUB_SHA::7}
+                  echo "short_sha=${SHORT_SHA}" >> "$GITHUB_OUTPUT"
+                  if [[ '${{ steps.check_skip.outputs.skipped }}' == 'true' ]]; then
+                    echo "image_tag=staging" >> "$GITHUB_OUTPUT"
+                  else
+                    echo "image_tag=staging-${SHORT_SHA}" >> "$GITHUB_OUTPUT"
+                  fi
+                  echo "repo_lc=$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> "$GITHUB_OUTPUT"
 
-      - name: Set up Buildx
-        if: steps.check_skip.outputs.skipped == 'false'
-        uses: docker/setup-buildx-action@v3
+            - name: Set up Buildx
+              if: steps.check_skip.outputs.skipped == 'false'
+              uses: docker/setup-buildx-action@v3
 
-      - name: Log in to GHCR
-        if: steps.check_skip.outputs.skipped == 'false'
-        uses: docker/login-action@v3
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+            - name: Log in to GHCR
+              if: steps.check_skip.outputs.skipped == 'false'
+              uses: docker/login-action@v3
+              with:
+                  registry: ${{ env.REGISTRY }}
+                  username: ${{ github.actor }}
+                  password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build & push ${{ matrix.service.name }}
-        if: steps.check_skip.outputs.skipped == 'false'
-        uses: docker/build-push-action@v6
-        with:
-          context: ${{ matrix.service.context }}
-          file: ${{ matrix.service.dockerfile }}
-          push: true
-          build-args: ${{ matrix.service.buildargs }}
-          platforms: linux/arm64
-          tags: |
-            ${{ env.REGISTRY }}/${{ steps.meta.outputs.repo_lc }}/${{ matrix.service.name }}:${{ steps.meta.outputs.image_tag }}
-            ${{ env.REGISTRY }}/${{ steps.meta.outputs.repo_lc }}/${{ matrix.service.name }}:staging
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+            - name: Build & push ${{ matrix.service.name }}
+              if: steps.check_skip.outputs.skipped == 'false'
+              uses: docker/build-push-action@v6
+              with:
+                  context: ${{ matrix.service.context }}
+                  file: ${{ matrix.service.dockerfile }}
+                  push: true
+                  build-args: ${{ matrix.service.buildargs }}
+                  platforms: linux/arm64
+                  tags: |
+                      ${{ env.REGISTRY }}/${{ steps.meta.outputs.repo_lc }}/${{ matrix.service.name }}:${{ steps.meta.outputs.image_tag }}
+                      ${{ env.REGISTRY }}/${{ steps.meta.outputs.repo_lc }}/${{ matrix.service.name }}:staging
+                  cache-from: type=gha
+                  cache-to: type=gha,mode=max
 
-  deploy:
-    runs-on: ubuntu-latest
-    needs: build-images
-    if: ${{ needs.build-images.result == 'success' || needs.build-images.result == 'skipped' }}
-    environment: staging
-    concurrency:
-      group: staging-deploy
-      cancel-in-progress: false # For safety + lock, don't kill in-flight apply
-    permissions:
-      id-token: write
-      contents: read
-      packages: read
-    env:
-      IMAGE_TAG: ${{ needs.build-images.outputs.image_tag }}
-      SHORT_SHA: ${{ needs.build-images.outputs.short_sha }}
-      REPO_LC: ${{ needs.build-images.outputs.repo_lc }}
-      TS_SSH_DEST: staging-${{ needs.build-images.outputs.short_sha }}
-      TS_SSH_USER: ubuntu
-      TF_LOCK_TIMEOUT: 5m
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
-          aws-region: ${{ env.AWS_REGION }}
-
-      - name: Connect to Tailscale
-        uses: tailscale/github-action@v2
-        with:
-          version: "1.86.2" # pin to a tested version
-          oauth-client-id: ${{ secrets.TAILSCALE_OAUTH_CLIENT_ID }}
-          oauth-secret: ${{ secrets.TAILSCALE_OAUTH_SECRET }}
-          tags: tag:ci
-          args: --ssh
-
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: 1.13.1
-
-      - name: Get GitHub OIDC ID token
-        id: oidc
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const aud = `https://github.com/${{ github.repository }}`;
-            const idt = await core.getIDToken(aud);
-            core.setOutput('jwt', idt);
-
-      - name: Login to Vault via JWT
-        id: vault_login
+    deploy:
+        runs-on: ubuntu-latest
+        needs: build-images
+        if: ${{ needs.build-images.result == 'success' || needs.build-images.result == 'skipped' }}
+        environment: staging
+        concurrency:
+            group: staging-deploy
+            cancel-in-progress: false # For safety + lock, don't kill in-flight apply
+        permissions:
+            id-token: write
+            contents: read
+            packages: read
         env:
-          VAULT_ADDR: ${{ env.VAULT_ADDR }}
-          GITHUB_ID_TOKEN: ${{ steps.oidc.outputs.jwt }}
-        run: |
-          set -euo pipefail
-          VAULT_TOKEN=$(curl -fsS -X POST \
-            -H "Content-Type: application/json" \
-            -d '{"jwt":"'"${GITHUB_ID_TOKEN}"'","role":"gh-staging"}' \
-            "${VAULT_ADDR}/v1/auth/jwt/login" | jq -er '.auth.client_token')
-          echo "::add-mask::${VAULT_TOKEN}"
-          echo "VAULT_TOKEN=${VAULT_TOKEN}" >> "$GITHUB_ENV"
+            IMAGE_TAG: ${{ needs.build-images.outputs.image_tag }}
+            SHORT_SHA: ${{ needs.build-images.outputs.short_sha }}
+            REPO_LC: ${{ needs.build-images.outputs.repo_lc }}
+            TS_SSH_DEST_STAGING: staging-${{ needs.build-images.outputs.short_sha }}
+            TS_SSH_DEST_DB: staging-db-${{ needs.build-images.outputs.short_sha }}
+            TS_SSH_DEST_NAT: staging-nat-${{ needs.build-images.outputs.short_sha }}
+            TS_SSH_USER: ubuntu
+            TF_LOCK_TIMEOUT: 5m
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
 
-      - name: Export Cloudflare token from Vault
-        env:
-          VAULT_ADDR: ${{ env.VAULT_ADDR }}
-          VAULT_TOKEN: ${{ env.VAULT_TOKEN }}
-        run: |
-          set -euo pipefail
-          cf_json=$(curl -fsS -H "X-Vault-Token: ${VAULT_TOKEN}" \
-            "${VAULT_ADDR}/v1/secret/data/staging/cloudflare")
-          CF_TOKEN=$(echo "$cf_json" | jq -er '.data.data.API_TOKEN')
-          echo "::add-mask::${CF_TOKEN}"
-          echo "TF_VAR_cloudflare_api_token=${CF_TOKEN}" >> "$GITHUB_ENV"
-          echo "CLOUDFLARE_API_TOKEN=${CF_TOKEN}" >> "$GITHUB_ENV"
+            - name: Configure AWS credentials
+              uses: aws-actions/configure-aws-credentials@v4
+              with:
+                  role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+                  aws-region: ${{ env.AWS_REGION }}
 
-      - name: Terraform init/plan/apply
-        working-directory: infra/environments/aws-staging
-        env:
-          TF_VAR_github_repo: ${{ github.repository }}
-          TF_VAR_deployment_id: ${{ env.SHORT_SHA }}
-          TF_VAR_vault_addr: ${{ env.VAULT_ADDR }}
-          VAULT_ADDR: ${{ env.VAULT_ADDR }}
-          VAULT_TOKEN: ${{ env.VAULT_TOKEN }}
-        run: |
-          set -euo pipefail
-          terraform init  -input=false -lock-timeout="${TF_LOCK_TIMEOUT}"
-          terraform plan  -input=false -lock-timeout="${TF_LOCK_TIMEOUT}" -out=plan.tfplan
-          terraform apply -input=false -lock-timeout="${TF_LOCK_TIMEOUT}" -auto-approve plan.tfplan
+            - name: Connect to Tailscale
+              uses: tailscale/github-action@v2
+              with:
+                  version: '1.86.2' # pin to a tested version
+                  oauth-client-id: ${{ secrets.TAILSCALE_OAUTH_CLIENT_ID }}
+                  oauth-secret: ${{ secrets.TAILSCALE_OAUTH_SECRET }}
+                  tags: tag:ci
+                  args: --ssh
 
-      - name: Wait for instance status checks
-        run: |
-          set -euo pipefail
-          NAME="staging-${SHORT_SHA}"
-          INSTANCE_ID=$(aws ec2 describe-instances \
-            --filters "Name=tag:Name,Values=${NAME}" "Name=instance-state-name,Values=pending,running" \
-            --query 'Reservations[].Instances[?State.Name==`running`].InstanceId' \
-            --output text | head -n1 || true)
-          if [[ -z "${INSTANCE_ID}" ]]; then
-            echo "Could not find running instance for ${NAME}; continuing anyway."
-          else
-            echo "Waiting for EC2 status checks to pass on ${INSTANCE_ID}…"
-            aws ec2 wait instance-status-ok --instance-ids "${INSTANCE_ID}"
-          fi
+            - name: Setup Terraform
+              uses: hashicorp/setup-terraform@v3
+              with:
+                  terraform_version: 1.13.1
 
-      - name: Mint approle credentials
-        id: approle
-        env:
-          VAULT_ADDR: ${{ env.VAULT_ADDR }}
-          VAULT_TOKEN: ${{ env.VAULT_TOKEN }}
-        run: |
-          set -euo pipefail
-          ROLE="staging-app"
-          HDRS=(-H "X-Vault-Token: ${VAULT_TOKEN}")
-          ROLE_ID=$(curl -fsS "${HDRS[@]}" \
-            "${VAULT_ADDR}/v1/auth/approle/role/${ROLE}/role-id" | jq -er '.data.role_id')
-          SECRET_ID=$(curl -fsS -X POST "${HDRS[@]}" \
-            -H "Content-Type: application/json" \
-            -d '{"num_uses":5,"ttl":"30m"}' \
-            "${VAULT_ADDR}/v1/auth/approle/role/${ROLE}/secret-id" | jq -er '.data.secret_id')
-          echo "::add-mask::${ROLE_ID}"
-          echo "::add-mask::${SECRET_ID}"
-          { echo "ROLE_ID=${ROLE_ID}"; echo "SECRET_ID=${SECRET_ID}"; } >> "$GITHUB_ENV"
+            - name: Get GitHub OIDC ID token
+              id: oidc
+              uses: actions/github-script@v7
+              with:
+                  script: |
+                      const aud = `https://github.com/${{ github.repository }}`;
+                      const idt = await core.getIDToken(aud);
+                      core.setOutput('jwt', idt);
 
-      - name: Wait for Tailscale node to be ready
-        env:
-          TS_SSH_DEST: ${{ env.TS_SSH_DEST }}
-          TS_SSH_USER: ${{ env.TS_SSH_USER }}
-        run: |
-          set -euo pipefail
-          echo "Waiting for ${TS_SSH_DEST} to appear in Tailscale network..."
+            - name: Login to Vault via JWT
+              id: vault_login
+              env:
+                  VAULT_ADDR: ${{ env.VAULT_ADDR }}
+                  GITHUB_ID_TOKEN: ${{ steps.oidc.outputs.jwt }}
+              run: |
+                  set -euo pipefail
+                  VAULT_TOKEN=$(curl -fsS -X POST \
+                    -H "Content-Type: application/json" \
+                    -d '{"jwt":"'"${GITHUB_ID_TOKEN}"'","role":"gh-staging"}' \
+                    "${VAULT_ADDR}/v1/auth/jwt/login" | jq -er '.auth.client_token')
+                  echo "::add-mask::${VAULT_TOKEN}"
+                  echo "VAULT_TOKEN=${VAULT_TOKEN}" >> "$GITHUB_ENV"
 
-          # Wait up to 8 minutes for the peer to appear in status
-          for i in $(seq 1 48); do
-            if tailscale status --json | jq -e --arg h "${TS_SSH_DEST}" '
-                .Peer | to_entries[].value
-                | select(.HostName == $h or (.DNSName|startswith($h + ".")))
-              ' >/dev/null; then
-              echo "Found ${TS_SSH_DEST} in Tailscale network"
-              break
-            fi
-            echo "Attempt $i/48: ${TS_SSH_DEST} not found, waiting 10s..."
-            sleep 10
-          done
+            - name: Export Cloudflare token from Vault
+              env:
+                  VAULT_ADDR: ${{ env.VAULT_ADDR }}
+                  VAULT_TOKEN: ${{ env.VAULT_TOKEN }}
+              run: |
+                  set -euo pipefail
+                  cf_json=$(curl -fsS -H "X-Vault-Token: ${VAULT_TOKEN}" \
+                    "${VAULT_ADDR}/v1/secret/data/staging/cloudflare")
+                  CF_TOKEN=$(echo "$cf_json" | jq -er '.data.data.API_TOKEN')
+                  echo "::add-mask::${CF_TOKEN}"
+                  echo "TF_VAR_cloudflare_api_token=${CF_TOKEN}" >> "$GITHUB_ENV"
+                  echo "CLOUDFLARE_API_TOKEN=${CF_TOKEN}" >> "$GITHUB_ENV"
 
-          TARGET=$(
-            tailscale status --json | jq -r --arg h "${TS_SSH_DEST}" '
-              .Peer | to_entries[].value
-              | select(.HostName == $h or (.DNSName|startswith($h + ".")))
-              | (.DNSName // (.TailscaleIPs[0] // ""))
-            ' | head -n1
-          )
+            - name: Terraform init/plan/apply
+              working-directory: infra/environments/aws-staging
+              env:
+                  TF_VAR_github_repo: ${{ github.repository }}
+                  TF_VAR_deployment_id: ${{ env.SHORT_SHA }}
+                  TF_VAR_vault_addr: ${{ env.VAULT_ADDR }}
+                  VAULT_ADDR: ${{ env.VAULT_ADDR }}
+                  VAULT_TOKEN: ${{ env.VAULT_TOKEN }}
+              run: |
+                  set -euo pipefail
+                  terraform init  -input=false -lock-timeout="${TF_LOCK_TIMEOUT}"
+                  terraform plan  -input=false -lock-timeout="${TF_LOCK_TIMEOUT}" -out=plan.tfplan
+                  terraform apply -input=false -lock-timeout="${TF_LOCK_TIMEOUT}" -auto-approve plan.tfplan
 
-          if [[ -z "${TARGET}" ]]; then
-            echo "ERROR: Could not resolve a canonical target for ${TS_SSH_DEST}"
-            tailscale status
-            exit 1
-          fi
-          echo "Using target: ${TARGET}"
-          echo "TS_TARGET=${TARGET}" >> "$GITHUB_ENV"
+            - name: Wait for staging instances status checks
+              run: |
+                  set -euo pipefail
+                  STAGING_NAME="staging-${SHORT_SHA}"
+                  STAGING_NAT_NAME="staging-nat-${SHORT_SHA}"
+                  STAGING_DB_NAME="staging-db-${SHORT_SHA}"
 
-          # Prefer a direct path (gives control-plane/MagicDNS time to settle)
-          if ! tailscale ping --until-direct --timeout=90s "${TARGET}"; then
-            echo "Direct path not ready; trying normal ping as a fallback…"
-            tailscale ping --timeout=30s "${TARGET}" || true
-          fi
+                  INSTANCE_IDS=$(aws ec2 describe-instances \
+                    --filters "Name=tag:Name,Values=${STAGING_NAT_NAME}, ${STAGING_DB_NAME}, ${STAGING_NAME}" \
+                              "Name=instance-state-name,Values=pending,running" \
+                    --query 'Reservations[].Instances[?State.Name==`running`].InstanceId' \
+                    --output text)
 
-          # Probe Tailscale SSH readiness with retries (sshd may lag)
-          for i in $(seq 1 15); do
-            if tailscale ssh -q "${TS_SSH_USER}@${TARGET}" 'true' 2>/dev/null; then
-              echo "Tailscale SSH is ready (attempt $i)"
-              break
-            fi
-            echo "TS-SSH not ready (attempt $i/15); sleeping 6s…"
-            sleep 6
-          done
+                  if [[ -z "${INSTANCE_IDS}" ]]; then
+                    echo "No running staging instances found; continuing anyway."
+                  else
+                    echo "Waiting for EC2 status checks to pass on ${INSTANCE_IDS}…"
+                    aws ec2 wait instance-status-ok --instance-ids ${INSTANCE_IDS}
+                  fi
 
-          tailscale ssh "${TS_SSH_USER}@${TARGET}" 'echo "SSH connection successful ($(hostname))"'
-          echo "OK: ${TARGET} is ready."
+            - name: Mint approle credentials
+              id: approle
+              env:
+                  VAULT_ADDR: ${{ env.VAULT_ADDR }}
+                  VAULT_TOKEN: ${{ env.VAULT_TOKEN }}
+              run: |
+                  set -euo pipefail
+                  ROLE="staging-app"
+                  HDRS=(-H "X-Vault-Token: ${VAULT_TOKEN}")
+                  ROLE_ID=$(curl -fsS "${HDRS[@]}" \
+                    "${VAULT_ADDR}/v1/auth/approle/role/${ROLE}/role-id" | jq -er '.data.role_id')
+                  SECRET_ID=$(curl -fsS -X POST "${HDRS[@]}" \
+                    -H "Content-Type: application/json" \
+                    -d '{"num_uses":5,"ttl":"30m"}' \
+                    "${VAULT_ADDR}/v1/auth/approle/role/${ROLE}/secret-id" | jq -er '.data.secret_id')
+                  echo "::add-mask::${ROLE_ID}"
+                  echo "::add-mask::${SECRET_ID}"
+                  { echo "ROLE_ID=${ROLE_ID}"; echo "SECRET_ID=${SECRET_ID}"; } >> "$GITHUB_ENV"
 
-      - name: Ensure /opt/phyt exists
-        run: |
-          tailscale ssh "${TS_SSH_USER}@${TS_TARGET}" 'sudo mkdir -p /opt/phyt && sudo chown ubuntu:ubuntu /opt/phyt'
+            - name: Wait for Tailscale nodes to be ready
+              env:
+                  TS_SSH_DEST_STAGING: ${{ env.TS_SSH_DEST_STAGING }}
+                  TS_SSH_DEST_DB: ${{ env.TS_SSH_DEST_DB }}
+                  TS_SSH_DEST_NAT: ${{ env.TS_SSH_DEST_NAT }}
+                  TS_SSH_USER: ${{ env.TS_SSH_USER }}
+              run: |
+                  set -euo pipefail
+                  wait_ts_node() {
+                    local ROLE="$1" DEST="$2"
+                    echo "=== [$ROLE] Waiting for ${DEST} to appear in Tailscale network…"
 
-      - name: Ship compose bundle to host
-        run: |
-          set -euo pipefail
-          tar -czf - docker-compose.yml tooling \
-            | tailscale ssh "${TS_SSH_USER}@${TS_TARGET}" 'tar -xzf - -C /opt/phyt'
+                    # Wait up to 8 minutes (48 * 10s) for the peer to appear
+                    for i in $(seq 1 48); do
+                      if tailscale status --json | jq -e --arg h "${DEST}" '
+                          .Peer | to_entries[].value
+                          | select(.HostName == $h or (.DNSName|startswith($h + ".")))
+                        ' >/dev/null; then
+                        echo "[$ROLE] Found ${DEST} in Tailscale network"
+                        break
+                      fi
+                      echo "[$ROLE] Attempt $i/48: ${DEST} not found, waiting 10s…"
+                      sleep 10
+                    done
 
-      - name: Remote deploy over Tailscale
-        run: |
-          set -euo pipefail
-          tailscale ssh "${TS_SSH_USER}@${TS_TARGET}" 'sudo mkdir -p /opt/phyt/deploy && sudo chown -R ubuntu:ubuntu /opt/phyt/deploy'
+                    local TARGET
+                    TARGET=$(
+                      tailscale status --json | jq -r --arg h "${DEST}" '
+                        .Peer | to_entries[].value
+                        | select(.HostName == $h or (.DNSName|startswith($h + ".")))
+                        | (.DNSName // (.TailscaleIPs[0] // ""))
+                      ' | head -n1
+                    )
 
-          # Send the script over Tailscale via stdin
-          tailscale ssh "${TS_SSH_USER}@${TS_TARGET}" 'cat > /opt/phyt/deploy/remote-deploy.sh' < infra/environments/aws-staging/remote-deploy.sh
-          tailscale ssh "${TS_SSH_USER}@${TS_TARGET}" 'chmod +x /opt/phyt/deploy/remote-deploy.sh'
+                    if [[ -z "${TARGET}" ]]; then
+                      echo "[$ROLE] ERROR: Could not resolve a canonical target for ${DEST}"
+                      tailscale status || true
+                      return 1
+                    fi
 
-          tailscale ssh "${TS_SSH_USER}@${TS_TARGET}" \
-            IMAGE_REGISTRY="${{ env.REGISTRY }}" \
-            GITHUB_REPOSITORY="${{ env.REPO_LC }}" \
-            IMAGE_TAG="${{ env.IMAGE_TAG }}" \
-            COMPOSE_PROFILES="staging" \
-            VAULT_ENV="staging" \
-            VAULT_ADDR="${{ env.VAULT_ADDR }}" \
-            VAULT_ROLE_ID="${{ env.ROLE_ID }}" \
-            VAULT_SECRET_ID="${{ env.SECRET_ID }}" \
-            'bash -lc "/opt/phyt/deploy/remote-deploy.sh"'
+                    echo "[$ROLE] Using target: ${TARGET}"
+                    # Prefer a direct path (gives control-plane/MagicDNS time to settle)
+                    if ! tailscale ping --until-direct --timeout=90s "${TARGET}"; then
+                      echo "[$ROLE] Direct path not ready; trying normal ping as a fallback…"
+                      tailscale ping --timeout=30s "${TARGET}" || true
+                    fi
+
+                    # Probe Tailscale SSH readiness with retries (sshd may lag)
+                    for i in $(seq 1 15); do
+                      if tailscale ssh -q "${TS_SSH_USER}@${TARGET}" 'true' 2>/dev/null; then
+                        echo "[$ROLE] Tailscale SSH is ready (attempt $i)"
+                        break
+                      fi
+                      echo "[$ROLE] TS-SSH not ready (attempt $i/15); sleeping 6s…"
+                      sleep 6
+                    done
+
+                    tailscale ssh "${TS_SSH_USER}@${TARGET}" 'echo "SSH connection successful ($(hostname))"'
+                    echo "[$ROLE] OK: ${TARGET} is ready."
+
+                    # Export role-specific target to the job environment
+                    echo "TS_TARGET_${ROLE}=${TARGET}" >> "$GITHUB_ENV"
+                  }
+
+                  # Iterate the three roles; each must be defined
+                  for ROLE in STAGING DB NAT; do
+                    VAR="TS_SSH_DEST_${ROLE}"
+                    DEST="${!VAR:-}"
+                    if [[ -z "${DEST}" ]]; then
+                      echo "ERROR: ${VAR} is not set"; exit 1
+                    fi
+                    wait_ts_node "${ROLE}" "${DEST}"
+                  done
+
+                  echo "All Tailscale nodes are ready."
+
+            - name: Ensure /opt/phyt exists
+              run: |
+                  tailscale ssh "${TS_SSH_USER}@${TS_TARGET_STAGING}" 'sudo mkdir -p /opt/phyt && sudo chown ubuntu:ubuntu /opt/phyt'
+
+            - name: Ship compose bundle to host
+              run: |
+                  set -euo pipefail
+                  tar -czf - docker-compose.yml tooling \
+                    | tailscale ssh "${TS_SSH_USER}@${TS_TARGET_STAGING}" 'tar -xzf - -C /opt/phyt'
+
+            - name: Remote deploy over Tailscale
+              run: |
+                  set -euo pipefail
+                  tailscale ssh "${TS_SSH_USER}@${TS_TARGET_STAGING}" 'sudo mkdir -p /opt/phyt/deploy && sudo chown -R ubuntu:ubuntu /opt/phyt/deploy'
+
+                  # Send the script over Tailscale via stdin
+                  tailscale ssh "${TS_SSH_USER}@${TS_TARGET_STAGING}" 'cat > /opt/phyt/deploy/remote-deploy.sh' < infra/environments/aws-staging/remote-deploy.sh
+                  tailscale ssh "${TS_SSH_USER}@${TS_TARGET_STAGING}" 'chmod +x /opt/phyt/deploy/remote-deploy.sh'
+
+                  tailscale ssh "${TS_SSH_USER}@${TS_TARGET_STAGING}" \
+                    IMAGE_REGISTRY="${{ env.REGISTRY }}" \
+                    GITHUB_REPOSITORY="${{ env.REPO_LC }}" \
+                    IMAGE_TAG="${{ env.IMAGE_TAG }}" \
+                    COMPOSE_PROFILES="staging" \
+                    VAULT_ENV="staging" \
+                    VAULT_ADDR="${{ env.VAULT_ADDR }}" \
+                    VAULT_ROLE_ID="${{ env.ROLE_ID }}" \
+                    VAULT_SECRET_ID="${{ env.SECRET_ID }}" \
+                    'bash -lc "/opt/phyt/deploy/remote-deploy.sh"'
