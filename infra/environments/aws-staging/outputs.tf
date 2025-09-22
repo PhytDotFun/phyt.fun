@@ -41,16 +41,19 @@ output "database_private_ip" {
 output "database_name" {
   value       = module.postgres.database_name
   description = "PostgreSQL database name"
+  sensitive   = true
 }
 
 output "database_user" {
   value       = module.postgres.database_user
   description = "PostgreSQL username"
+  sensitive   = true
 }
 
 output "database_port" {
   value       = module.postgres.database_port
   description = "PostgreSQL port"
+  sensitive   = true
 }
 
 output "database_connection_string" {
