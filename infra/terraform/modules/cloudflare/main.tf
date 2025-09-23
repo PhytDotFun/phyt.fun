@@ -94,3 +94,54 @@ resource "cloudflare_ruleset" "staging_cache_rules" {
     }
   ]
 }
+
+# WAF rules for security
+resource "cloudflare_ruleset" "staging_waf" {
+  zone_id = var.zone_id
+  name    = "staging-waf-${var.deployment_id}"
+  kind    = "zone"
+  phase   = "http_request_firewall_custom"
+
+  rules = [
+    # IP allowlist override (configure allowed_ips variable)
+    {
+      enabled     = length(var.allowed_ips) > 0
+      description = "Allow trusted IPs to bypass all rules"
+      expression  = "(http.host eq \"staging.phyt.fun\" and ip.src in {${join(" ", var.allowed_ips)}})"
+      action      = "skip"
+      action_parameters = {
+        ruleset = "current"
+      }
+    },
+
+    # API rate limiting
+    {
+      enabled     = true
+      description = "API rate limiting"
+      expression  = "(http.host eq \"staging.phyt.fun\" and starts_with(http.request.uri.path, \"/api/\"))"
+      action      = "block"
+      ratelimit = {
+        characteristics     = ["ip.src"]
+        period             = 60
+        requests_per_period = 100
+        mitigation_timeout = 3600
+      }
+    },
+
+    # Bot protection
+    {
+      enabled     = true
+      description = "Block low-score bots"
+      expression  = "(http.host eq \"staging.phyt.fun\" and cf.bot_management.score lt 30)"
+      action      = "managed_challenge"
+    },
+
+    # Geographic blocking (if enabled)
+    {
+      enabled     = length(var.blocked_countries) > 0
+      description = "Block specified countries"
+      expression  = "(http.host eq \"staging.phyt.fun\" and ip.geoip.country in {${join(" ", [for country in var.blocked_countries : "\"${country}\""])}})"
+      action      = "block"
+    }
+  ]
+}
