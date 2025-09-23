@@ -220,4 +220,3 @@ resource "aws_network_acl" "private" {
     Security    = "defense-in-depth"
   }
 }
-

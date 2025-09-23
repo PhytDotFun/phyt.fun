@@ -122,9 +122,9 @@ resource "cloudflare_ruleset" "staging_waf" {
       action      = "block"
       ratelimit = {
         characteristics     = ["ip.src"]
-        period             = 60
+        period              = 60
         requests_per_period = 100
-        mitigation_timeout = 3600
+        mitigation_timeout  = 3600
       }
     },
 

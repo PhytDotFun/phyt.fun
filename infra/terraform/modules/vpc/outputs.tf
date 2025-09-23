@@ -175,18 +175,18 @@ output "security_architecture_summary" {
   description = "Summary of the complete security architecture"
   value = {
     public_ingress_protection = {
-      method = "Cloudflare Tunnel + nginx reverse proxy"
+      method                   = "Cloudflare Tunnel + nginx reverse proxy"
       staging_instance_ingress = "NONE - Cloudflare Tunnel only"
-      nginx_binding = "127.0.0.1:8080 (localhost only)"
-      rate_limiting = "nginx (10r/s API, 5r/m auth)"
-      security_headers = "X-Frame-Options, X-Content-Type-Options, etc."
+      nginx_binding            = "127.0.0.1:8080 (localhost only)"
+      rate_limiting            = "nginx (10r/s API, 5r/m auth)"
+      security_headers         = "X-Frame-Options, X-Content-Type-Options, etc."
     }
     database_protection = {
-      method = "Private subnet + NAT gateway"
+      method                 = "Private subnet + NAT gateway"
       direct_internet_access = "NONE"
-      ingress_sources = "staging instance only (port 5432)"
-      egress_control = "essential services via NAT (HTTP/HTTPS/DNS/NTP)"
-      subnet_protection = "Network ACLs + Security Groups"
+      ingress_sources        = "staging instance only (port 5432)"
+      egress_control         = "essential services via NAT (HTTP/HTTPS/DNS/NTP)"
+      subnet_protection      = "Network ACLs + Security Groups"
     }
     defense_layers = [
       "Cloudflare Edge Protection",
