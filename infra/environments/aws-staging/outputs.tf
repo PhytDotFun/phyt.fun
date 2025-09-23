@@ -4,8 +4,8 @@ output "instance_id" {
 }
 
 output "instance_ip" {
-  value       = module.staging_instance.public_ip
-  description = "Public IP address of the instance"
+  value       = module.staging_instance.private_ip
+  description = "Private IP address of the instance"
 }
 
 # output "spot_instance_request_id" {
