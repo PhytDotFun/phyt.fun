@@ -111,23 +111,12 @@ resource "aws_ec2_tag" "staging_instance" {
   value       = each.value
 }
 
-resource "aws_eip" "staging" {
-  domain = "vpc"
-
-  tags = {
-    Name = "staging-eip-${var.deployment_id}"
-  }
-}
+# EIP removed - instance is now in private subnet and should not have public IP
+# Outbound internet access is provided via NAT gateway
 
 resource "time_sleep" "after_instance_ready" {
   create_duration = "15s"
   depends_on      = [aws_instance.staging]
-}
-
-resource "aws_eip_association" "staging" {
-  instance_id   = aws_instance.staging.id
-  allocation_id = aws_eip.staging.id
-  depends_on    = [time_sleep.after_instance_ready]
 }
 
 # CloudWatch alarm for spot instance termination

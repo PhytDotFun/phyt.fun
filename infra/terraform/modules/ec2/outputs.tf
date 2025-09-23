@@ -8,10 +8,8 @@ output "instance_id" {
 #   description = "Spot instance request ID"
 # }
 
-output "public_ip" {
-  value       = aws_eip.staging.public_ip
-  description = "Public IP address"
-}
+# Public IP removed - instance is now in private subnet
+# Access is provided via Cloudflare Tunnel only
 
 output "private_ip" {
   value       = aws_instance.staging.private_ip
