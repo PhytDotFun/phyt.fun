@@ -29,6 +29,11 @@ variable "private_subnet_cidr" {
   type        = string
 }
 
+variable "vpc_cidr" {
+  description = "CIDR block of the VPC for security group rules"
+  type        = string
+}
+
 variable "tailscale_auth_key" {
   description = "Tailscale auth key (single-use)"
   type        = string

@@ -29,12 +29,13 @@ resource "aws_security_group" "fck_nat" {
   name_prefix = "${var.deployment_id}-fck-nat-sg-"
   vpc_id      = var.vpc_id
 
-  # Allow all traffic from private subnet
+  # Allow all traffic from VPC CIDR
   ingress {
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
-    cidr_blocks = [var.private_subnet_cidr]
+    cidr_blocks = [var.vpc_cidr]
+    description = "Allow all traffic from VPC CIDR"
   }
 
   # Allow all outbound traffic
