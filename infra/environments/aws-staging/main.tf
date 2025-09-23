@@ -1,4 +1,4 @@
-# TODO: Need to create VPC and NAT modules
+# TODO: Make modules environment agnostic
 
 terraform {
   required_version = ">= 1.0"
@@ -112,126 +112,137 @@ data "aws_availability_zones" "available" {
 # Networking
 ########################
 
-# VPC Config
-resource "aws_vpc" "staging" {
-  cidr_block           = "10.100.0.0/16"
-  enable_dns_hostnames = true
-  enable_dns_support   = true
+# VPC with security-focused architecture
+module "vpc" {
+  source = "../../terraform/modules/vpc"
 
-  tags = {
-    Name = "staging-vpc-${var.deployment_id}"
-  }
+  deployment_id      = var.deployment_id
+  environment        = "staging"
+  availability_zones = data.aws_availability_zones.available.zone_ids
+
+  # VPC configuration
+  vpc_cidr            = "10.100.0.0/16"
+  public_subnet_cidr  = "10.100.1.0/24"
+  private_subnet_cidr = "10.100.2.0/24"
+
+  # NAT route will be added separately to avoid circular dependency
+  nat_network_interface_id = null
 }
 
-resource "aws_internet_gateway" "staging" {
-  vpc_id = aws_vpc.staging.id
+# Add NAT route to private subnet after both VPC and NAT gateway are created
+resource "aws_route" "private_nat" {
+  route_table_id         = module.vpc.private_route_table_id
+  destination_cidr_block = "0.0.0.0/0"
+  network_interface_id   = module.nat_gateway.primary_network_interface_id
 
-  tags = {
-    Name = "staging-igw-${var.deployment_id}"
-  }
-}
-
-resource "aws_subnet" "public" {
-  vpc_id                  = aws_vpc.staging.id
-  cidr_block              = "10.100.1.0/24"
-  availability_zone_id    = data.aws_availability_zones.available.zone_ids[0]
-  map_public_ip_on_launch = true
-
-  tags = {
-    Name = "staging-public-subnet-${var.deployment_id}"
-  }
-}
-
-resource "aws_route_table" "public" {
-  vpc_id = aws_vpc.staging.id
-
-  route {
-    cidr_block = "0.0.0.0/0"
-    gateway_id = aws_internet_gateway.staging.id
-  }
-
-  tags = {
-    Name = "staging-public-rt-${var.deployment_id}"
-  }
-}
-
-resource "aws_route_table_association" "public" {
-  subnet_id      = aws_subnet.public.id
-  route_table_id = aws_route_table.public.id
-}
-
-# Private subnet for database
-resource "aws_subnet" "private" {
-  vpc_id               = aws_vpc.staging.id
-  cidr_block           = "10.100.2.0/24"
-  availability_zone_id = data.aws_availability_zones.available.zone_ids[1]
-
-  tags = {
-    Name = "staging-private-subnet-${var.deployment_id}"
-  }
-}
-
-# Private route table (will route through fck-nat)
-resource "aws_route_table" "private" {
-  vpc_id = aws_vpc.staging.id
-
-  route {
-    cidr_block           = "0.0.0.0/0"
-    network_interface_id = module.nat_gateway.primary_network_interface_id
-  }
-
-  tags = {
-    Name = "staging-private-rt-${var.deployment_id}"
-  }
-}
-
-resource "aws_route_table_association" "private" {
-  subnet_id      = aws_subnet.private.id
-  route_table_id = aws_route_table.private.id
+  depends_on = [module.vpc, module.nat_gateway]
 }
 
 ########################
 # Security & IAM
 ########################
 
-# Security group
+# Security group for staging instance (Cloudflare Tunnel architecture)
 resource "aws_security_group" "staging" {
   name_prefix = "staging-sg-"
-  vpc_id      = aws_vpc.staging.id
+  vpc_id      = module.vpc.vpc_id
 
-  # No ingress: nginx binds 127.0.0.1 and is exposed via Cloudflare Tunnel.
+  # NO INGRESS: nginx binds 127.0.0.1 and is exposed via Cloudflare Tunnel only
+  # All public traffic comes through Cloudflare's secure tunnel
+
+  # Cloudflare Tunnel UDP port (7844)
   egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
+    from_port   = 7844
+    to_port     = 7844
+    protocol    = "udp"
     cidr_blocks = ["0.0.0.0/0"]
+    description = "Cloudflare Tunnel UDP traffic"
+  }
+
+  # HTTPS for Cloudflare Tunnel and external APIs
+  egress {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+    description = "HTTPS for Cloudflare Tunnel and external APIs"
+  }
+
+  # DNS resolution
+  egress {
+    from_port   = 53
+    to_port     = 53
+    protocol    = "udp"
+    cidr_blocks = ["0.0.0.0/0"]
+    description = "DNS resolution"
   }
 
   tags = {
-    Name = "staging-sg-${var.deployment_id}"
+    Name         = "staging-sg-${var.deployment_id}"
+    Architecture = "cloudflare-tunnel"
+    Security     = "no-direct-ingress"
   }
 }
 
 
-# Security group for PostgreSQL instance
+# Security group for PostgreSQL instance (NAT protected)
 resource "aws_security_group" "postgres" {
   name_prefix = "staging-postgres-sg-"
-  vpc_id      = aws_vpc.staging.id
+  vpc_id      = module.vpc.vpc_id
 
-  # Allow PostgreSQL access from main instance
+  # INGRESS: Only allow PostgreSQL access from staging instance
   ingress {
     from_port       = 5432
     to_port         = 5432
     protocol        = "tcp"
     security_groups = [aws_security_group.staging.id]
+    description     = "PostgreSQL access from staging instance only"
   }
 
-  # Allow all outbound traffic (for updates)
+  # EGRESS: Restricted outbound traffic via NAT for essential services only
+  # HTTP for package updates
   egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
+    description = "HTTP for package updates via NAT"
+  }
+
+  # HTTPS for package updates and external APIs
+  egress {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+    description = "HTTPS for package updates via NAT"
+  }
+
+  # DNS resolution
+  egress {
+    from_port   = 53
+    to_port     = 53
+    protocol    = "udp"
+    cidr_blocks = ["0.0.0.0/0"]
+    description = "DNS resolution"
+  }
+
+  # NTP for time synchronization
+  egress {
+    from_port   = 123
+    to_port     = 123
+    protocol    = "udp"
+    cidr_blocks = ["0.0.0.0/0"]
+    description = "NTP time synchronization"
+  }
+
+  # Communication back to staging instance if needed
+  egress {
+    from_port       = 0
+    to_port         = 0
+    protocol        = "-1"
+    security_groups = [aws_security_group.staging.id]
+    description     = "Communication back to staging instance"
   }
 
   tags = {
@@ -292,7 +303,7 @@ module "staging_instance" {
   instance_type = var.instance_type
   # spot_price           = var.spot_price
   ami_id               = data.aws_ami.ubuntu.id
-  subnet_id            = aws_subnet.public.id
+  subnet_id            = module.vpc.private_subnet_id
   security_group_id    = aws_security_group.staging.id
   iam_instance_profile = aws_iam_instance_profile.staging.name
   vault_addr           = var.vault_addr
@@ -321,9 +332,10 @@ module "nat_gateway" {
 
   deployment_id        = var.deployment_id
   instance_type        = var.fck_nat_instance_type
-  subnet_id            = aws_subnet.public.id
-  vpc_id               = aws_vpc.staging.id
-  private_subnet_cidr  = aws_subnet.private.cidr_block
+  subnet_id            = module.vpc.public_subnet_id
+  vpc_id               = module.vpc.vpc_id
+  vpc_cidr             = module.vpc.vpc_cidr_block
+  private_subnet_cidr  = module.vpc.private_subnet_cidr
   iam_instance_profile = aws_iam_instance_profile.staging.name
 
   tailscale_auth_key = data.vault_kv_secret_v2.tailscale.data["AUTH_KEY"]
@@ -338,6 +350,10 @@ module "cloudflare" {
   zone_id       = data.vault_kv_secret_v2.cloudflare.data["ZONE_ID"]
   account_id    = data.vault_kv_secret_v2.cloudflare.data["ACCOUNT_ID"]
   deployment_id = var.deployment_id
+
+  # Security configuration
+  allowed_ips       = var.cloudflare_allowed_ips
+  blocked_countries = var.cloudflare_blocked_countries
 }
 
 ########################
@@ -350,7 +366,7 @@ module "postgres" {
   deployment_id        = var.deployment_id
   instance_type        = var.postgres_instance_type
   ami_id               = data.aws_ami.ubuntu.id
-  subnet_id            = aws_subnet.private.id
+  subnet_id            = module.vpc.private_subnet_id
   security_group_id    = aws_security_group.postgres.id
   iam_instance_profile = aws_iam_instance_profile.staging.name
   vault_addr           = var.vault_addr

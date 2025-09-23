@@ -44,3 +44,15 @@ variable "vault_addr" {
   description = "Vault server address"
   type        = string
 }
+
+variable "cloudflare_allowed_ips" {
+  description = "List of IP addresses/CIDRs allowed to bypass Cloudflare WAF rules"
+  type        = list(string)
+  default     = []
+}
+
+variable "cloudflare_blocked_countries" {
+  description = "List of country codes to block via Cloudflare (e.g., ['CN', 'RU'])"
+  type        = list(string)
+  default     = []
+}
