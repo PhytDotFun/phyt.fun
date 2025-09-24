@@ -20,7 +20,7 @@ terraform {
 }
 
 ########################
-# Providers (no static creds in code)
+# Providers
 ########################
 
 provider "aws" {
@@ -40,7 +40,6 @@ provider "aws" {
 # Vault use VAULT_ADDR & VAULT_TOKEN from CI
 provider "vault" {}
 
-# Cloudflare provider must NOT read from a data source here.
 # CI sets TF_VAR_cloudflare_api_token (or CLOUDFLARE_API_TOKEN).
 variable "cloudflare_api_token" {
   type      = string
@@ -55,7 +54,7 @@ provider "cloudflare" {
 # Secrets from Vault (data only)
 ########################
 
-# Cloudflare account/zone (values used as plain strings elsewhere)
+# Cloudflare account/zone
 data "vault_kv_secret_v2" "cloudflare" {
   mount = "secret"
   name  = "staging/cloudflare"
@@ -77,7 +76,6 @@ data "vault_kv_secret_v2" "postgres" {
 # AMI / AZs
 ########################
 
-# Get latest Ubuntu AMI
 data "aws_ami" "ubuntu" {
   most_recent = true
   owners      = ["099720109477"] # Canonical
@@ -112,7 +110,6 @@ data "aws_availability_zones" "available" {
 # Networking
 ########################
 
-# VPC with security-focused architecture
 module "vpc" {
   source = "../../terraform/modules/vpc"
 
@@ -120,7 +117,6 @@ module "vpc" {
   environment        = "staging"
   availability_zones = data.aws_availability_zones.available.zone_ids
 
-  # VPC configuration
   vpc_cidr            = "10.100.0.0/16"
   public_subnet_cidr  = "10.100.1.0/24"
   private_subnet_cidr = "10.100.2.0/24"
@@ -190,7 +186,7 @@ resource "aws_security_group" "postgres" {
   name_prefix = "staging-postgres-sg-"
   vpc_id      = module.vpc.vpc_id
 
-  # INGRESS: Only allow PostgreSQL access from staging instance
+  # Only allow PostgreSQL access from staging instance
   ingress {
     from_port       = 5432
     to_port         = 5432
@@ -199,7 +195,7 @@ resource "aws_security_group" "postgres" {
     description     = "PostgreSQL access from staging instance only"
   }
 
-  # EGRESS: Restricted outbound traffic via NAT for essential services only
+  # Restricted outbound traffic via NAT for essential services only
   # HTTP for package updates
   egress {
     from_port   = 80
@@ -320,11 +316,7 @@ module "staging_instance" {
 }
 
 ########################
-# fck-nat instance
-########################
-
-########################
-# NAT Gateway module
+# NAT Gateway module (fck-nat instance)
 ########################
 
 module "nat_gateway" {
