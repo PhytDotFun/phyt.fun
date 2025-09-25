@@ -14,13 +14,13 @@ variable "deployment_id" {
 }
 
 variable "allowed_ips" {
-  description = "List of IP addresses/CIDRs allowed to bypass WAF rules"
+  description = "List of IP addresses/CIDRs allowed to bypass WAF + ratelimit rules"
   type        = list(string)
   default     = []
 }
 
 variable "blocked_countries" {
-  description = "List of country codes to block (e.g., ['CN', 'RU'])"
+  description = "List of country codes to block"
   type        = list(string)
   default     = []
 }

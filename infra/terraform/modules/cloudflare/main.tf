@@ -95,7 +95,40 @@ resource "cloudflare_ruleset" "staging_cache_rules" {
   ]
 }
 
-# WAF rules for security
+resource "cloudflare_ruleset" "staging_ratelimit" {
+  zone_id = var.zone_id
+  name    = "staging-ratelimit-${var.deployment_id}"
+  kind    = "zone"
+  phase   = "http_ratelimit"
+
+  rules = [
+    # Allow trusted IPs to bypass rate limiting
+    {
+      enabled     = length(var.allowed_ips) > 0
+      description = "Allow trusted IPs (ratelimit phase)"
+      expression  = "(http.host eq \"staging.phyt.fun\" and ip.src in {${join(" ", var.allowed_ips)}})"
+      action      = "skip"
+      action_parameters = {
+        ruleset = "current"
+      }
+    },
+
+    # API ratelimit
+    {
+      enabled     = true
+      description = "API rate limiting"
+      expression  = "(http.host eq \"staging.phyt.fun\" and starts_with(http.request.uri.path, \"/api/\"))"
+      action      = "block"
+      ratelimit = {
+        characteristics     = ["ip.src"]
+        period              = 60
+        requests_per_period = 100
+        mitigation_timeout  = 3600
+      }
+    },
+  ]
+}
+
 resource "cloudflare_ruleset" "staging_waf" {
   zone_id = var.zone_id
   name    = "staging-waf-${var.deployment_id}"
@@ -114,20 +147,6 @@ resource "cloudflare_ruleset" "staging_waf" {
       }
     },
 
-    # API rate limiting
-    {
-      enabled     = true
-      description = "API rate limiting"
-      expression  = "(http.host eq \"staging.phyt.fun\" and starts_with(http.request.uri.path, \"/api/\"))"
-      action      = "block"
-      ratelimit = {
-        characteristics     = ["ip.src"]
-        period              = 60
-        requests_per_period = 100
-        mitigation_timeout  = 3600
-      }
-    },
-
     # Bot protection
     {
       enabled     = true
@@ -136,7 +155,7 @@ resource "cloudflare_ruleset" "staging_waf" {
       action      = "managed_challenge"
     },
 
-    # Geographic blocking (if enabled)
+    # Geographic blocking
     {
       enabled     = length(var.blocked_countries) > 0
       description = "Block specified countries"
