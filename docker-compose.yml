@@ -77,7 +77,7 @@ services:
         restart: ${RESTART_POLICY:-unless-stopped}
 
     redis:
-        image: redis:7-alpine
+        image: redis:8-alpine
         container_name: ${COMPOSE_PROJECT_NAME:-phyt}-redis
         command: redis-server --maxmemory ${REDIS_MEMORY:-128mb} --maxmemory-policy allkeys-lru --save ""
         healthcheck:
