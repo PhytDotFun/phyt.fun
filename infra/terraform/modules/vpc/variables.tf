@@ -1,6 +1,7 @@
-variable "deployment_id" {
-  description = "Unique deployment identifier"
+variable "environment" {
+  description = "Environment name (e.g., staging, production)"
   type        = string
+  default     = "staging"
 }
 
 variable "vpc_cidr" {
@@ -22,12 +23,12 @@ variable "private_subnet_cidr" {
 }
 
 variable "availability_zones" {
-  description = "List of availability zone IDs"
+  description = "List of availability zone IDs (at least two)"
   type        = list(string)
 }
 
 variable "nat_network_interface_id" {
-  description = "Network interface ID of the NAT instance (for private route table)"
+  description = "NAT instance primary ENI ID to route 0.0.0.0/0 from the private RT (optional)"
   type        = string
   default     = null
 }
@@ -50,8 +51,3 @@ variable "map_public_ip_on_launch" {
   default     = true
 }
 
-variable "environment" {
-  description = "Environment name (e.g., staging, production)"
-  type        = string
-  default     = "staging"
-}

@@ -9,30 +9,28 @@ terraform {
   }
 }
 
-# VPC
 resource "aws_vpc" "main" {
   cidr_block           = var.vpc_cidr
   enable_dns_hostnames = var.enable_dns_hostnames
   enable_dns_support   = var.enable_dns_support
 
   tags = {
-    Name        = "${var.environment}-vpc-${var.deployment_id}"
+    Name        = "${var.environment}-vpc"
     Environment = var.environment
   }
 }
 
-# Internet Gateway
 resource "aws_internet_gateway" "main" {
   vpc_id = aws_vpc.main.id
 
   tags = {
-    Name        = "${var.environment}-igw-${var.deployment_id}"
+    Name        = "${var.environment}-igw"
     Environment = var.environment
   }
 }
 
 # Subnets
-# Public subnet for staging instance and NAT
+# Public subnet for instance and NAT
 resource "aws_subnet" "public" {
   vpc_id                  = aws_vpc.main.id
   cidr_block              = var.public_subnet_cidr
@@ -40,7 +38,7 @@ resource "aws_subnet" "public" {
   map_public_ip_on_launch = var.map_public_ip_on_launch
 
   tags = {
-    Name        = "${var.environment}-public-subnet-${var.deployment_id}"
+    Name        = "${var.environment}-public-subnet"
     Environment = var.environment
     Type        = "public"
   }
@@ -53,7 +51,7 @@ resource "aws_subnet" "private" {
   availability_zone_id = var.availability_zones[1]
 
   tags = {
-    Name        = "${var.environment}-private-subnet-${var.deployment_id}"
+    Name        = "${var.environment}-private-subnet"
     Environment = var.environment
     Type        = "private"
   }
@@ -70,7 +68,7 @@ resource "aws_route_table" "public" {
   }
 
   tags = {
-    Name        = "${var.environment}-public-rt-${var.deployment_id}"
+    Name        = "${var.environment}-public-rt"
     Environment = var.environment
     Type        = "public"
   }
@@ -85,7 +83,6 @@ resource "aws_route_table_association" "public" {
 resource "aws_route_table" "private" {
   vpc_id = aws_vpc.main.id
 
-  # Only add NAT route if NAT interface is provided
   dynamic "route" {
     for_each = var.nat_network_interface_id != null ? [1] : []
     content {
@@ -95,7 +92,7 @@ resource "aws_route_table" "private" {
   }
 
   tags = {
-    Name        = "${var.environment}-private-rt-${var.deployment_id}"
+    Name        = "${var.environment}-private-rt"
     Environment = var.environment
     Type        = "private"
   }
@@ -193,7 +190,7 @@ resource "aws_network_acl" "private" {
     to_port    = 123
   }
 
-  # Allow communication back to staging instance
+  # Allow communication back to instance
   egress {
     protocol   = "-1"
     rule_no    = 140
@@ -214,7 +211,7 @@ resource "aws_network_acl" "private" {
   }
 
   tags = {
-    Name        = "${var.environment}-private-nacl-${var.deployment_id}"
+    Name        = "${var.environment}-private-nacl"
     Environment = var.environment
     Purpose     = "Database protection - subnet-level firewall"
     Security    = "defense-in-depth"
