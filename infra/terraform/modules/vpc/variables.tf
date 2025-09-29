@@ -1,7 +1,11 @@
 variable "environment" {
-  description = "Environment name (e.g., staging, production)"
+  description = "Environment name (e.g., staging, prod, dev)"
   type        = string
-  default     = "staging"
+}
+
+variable "deployment_id" {
+  description = "Unique deployment identifier (e.g., short git SHA)"
+  type        = string
 }
 
 variable "vpc_cidr" {
@@ -16,21 +20,21 @@ variable "public_subnet_cidr" {
   default     = "10.100.1.0/24"
 }
 
-variable "private_subnet_cidr" {
-  description = "CIDR block for the private subnet"
-  type        = string
-  default     = "10.100.2.0/24"
-}
+# variable "private_subnet_cidr" {
+#   description = "CIDR block for the private subnet"
+#   type        = string
+#   default     = "10.100.2.0/24"
+# }
+#
+# variable "nat_network_interface_id" {
+#   description = "Network interface ID for NAT instance (optional, for future use)"
+#   type        = string
+#   default     = null
+# }
 
-variable "availability_zones" {
-  description = "List of availability zone IDs (at least two)"
-  type        = list(string)
-}
-
-variable "nat_network_interface_id" {
-  description = "NAT instance primary ENI ID to route 0.0.0.0/0 from the private RT (optional)"
+variable "availability_zone_id" {
+  description = "AZ ID for the public subnet (e.g., data.aws_availability_zones.available.zone_ids[0])"
   type        = string
-  default     = null
 }
 
 variable "enable_dns_hostnames" {
@@ -46,8 +50,13 @@ variable "enable_dns_support" {
 }
 
 variable "map_public_ip_on_launch" {
-  description = "Auto-assign public IP on instance launch in public subnet"
+  description = "Auto-assign public IP to instances launched in the public subnet"
   type        = bool
   default     = true
 }
 
+variable "extra_tags" {
+  description = "Additional tags to add to all resources"
+  type        = map(string)
+  default     = {}
+}
