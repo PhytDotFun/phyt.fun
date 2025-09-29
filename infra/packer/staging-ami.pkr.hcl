@@ -9,7 +9,7 @@ packer {
 
 source "amazon-ebs" "staging" {
   ami_name      = "phyt-staging-{{timestamp}}"
-  instance_type = "t4g.medium"
+  instance_type = "t4g.small"
   region        = "us-east-1"
 
   source_ami_filter {
