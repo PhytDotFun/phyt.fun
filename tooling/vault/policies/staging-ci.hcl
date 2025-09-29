@@ -2,10 +2,6 @@
 path "secret/data/staging/cloudflare" { capabilities = ["read"] }
 path "secret/data/staging/tailscale" { capabilities = ["read"] }
 
-# Read Postgres for database provisioning
-path "secret/data/staging/postgres" { capabilities = ["read"] }
-
-# (Optional) CI can list under staging/ for basic discovery
 path "secret/metadata/staging" { capabilities = ["list"] }
 path "secret/metadata/staging/*" { capabilities = ["list"] }
 
