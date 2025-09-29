@@ -1,17 +1,29 @@
 output "instance_id" {
-  value       = aws_instance.staging.id
   description = "EC2 instance ID"
+  value       = aws_instance.app.id
 }
 
-# output "spot_request_id" {
-#   value       = aws_spot_instance_request.staging.id
-#   description = "Spot instance request ID"
-# }
-
-# Public IP removed - instance is now in private subnet
-# Access is provided via Cloudflare Tunnel only
-
 output "private_ip" {
-  value       = aws_instance.staging.private_ip
   description = "Private IP address"
+  value       = aws_instance.app.private_ip
+}
+
+output "public_ip" {
+  description = "Public IP address (if associated)"
+  value       = aws_instance.app.public_ip
+}
+
+output "availability_zone" {
+  description = "Availability zone"
+  value       = aws_instance.app.availability_zone
+}
+
+output "arn" {
+  description = "Instance ARN"
+  value       = aws_instance.app.arn
+}
+
+output "tags" {
+  description = "Tags applied to the instance"
+  value       = aws_instance.app.tags
 }

@@ -6,132 +6,48 @@ terraform {
       source  = "hashicorp/aws"
       version = "6.12.0"
     }
-    time = {
-      source  = "hashicorp/time"
-      version = "~> 0.13"
-    }
   }
 }
 
-resource "aws_instance" "staging" {
-  ami                    = var.ami_id
-  instance_type          = var.instance_type
-  subnet_id              = var.subnet_id
-  vpc_security_group_ids = [var.security_group_id]
-  iam_instance_profile   = var.iam_instance_profile
+locals {
+  base_tags = {
+    Environment  = var.environment
+    ManagedBy    = "terraform"
+    DeploymentId = var.deployment_id
+    Name         = "${var.environment}-app-${var.deployment_id}"
+  }
+  tags = merge(local.base_tags, var.tags)
+}
 
-  user_data = templatefile("${path.module}/user-data.sh", {
-    deployment_id           = var.deployment_id
-    cloudflare_tunnel_token = var.cloudflare_tunnel_token
-    cloudflare_account_id   = var.cloudflare_account_id
-    cloudflare_tunnel_id    = var.cloudflare_tunnel_id
-    tailscale_auth_key      = var.tailscale_auth_key
-    vault_addr              = var.vault_addr
-  })
+resource "aws_instance" "app" {
+  ami                         = var.ami_id
+  instance_type               = var.instance_type
+  subnet_id                   = var.subnet_id
+  vpc_security_group_ids      = var.security_group_ids
+  iam_instance_profile        = var.iam_instance_profile
+  monitoring                  = var.enable_detailed_monitoring
+  associate_public_ip_address = var.associate_public_ip
 
   metadata_options {
-    http_endpoint               = "enabled"  # keep reachable
-    http_tokens                 = "required" # enforce IMDSv2
-    http_put_response_hop_limit = 1
+    http_endpoint               = "enabled"
+    http_tokens                 = "required" # IMDSv2 only
+    http_put_response_hop_limit = 2
   }
 
   root_block_device {
     volume_type = "gp3"
     volume_size = var.volume_size
+    iops        = var.volume_iops
+    throughput  = var.volume_throughput
     encrypted   = true
-    iops        = 3000
-    throughput  = 125
-
-    tags = {
-      Name = "staging-volume-${var.deployment_id}"
-    }
+    tags        = { Name = "${var.environment}-root-${var.deployment_id}" }
   }
 
-  tags = {
-    Name         = "staging-ondemand-${var.deployment_id}"
-    Type         = "ephemeral-staging"
-    SpotInstance = "false"
-  }
-}
+  user_data = var.user_data
 
-# Deprecated spot instance for staging (will revisit)
-# resource "aws_spot_instance_request" "staging" {
-#   ami                            = var.ami_id
-#   instance_type                  = var.instance_type
-#   spot_price                     = var.spot_price
-#   wait_for_fulfillment           = true
-#   spot_type                      = "one-time"
-#   instance_interruption_behavior = "terminate"
-#   subnet_id                      = var.subnet_id
-#   vpc_security_group_ids         = [var.security_group_id]
-#   iam_instance_profile           = var.iam_instance_profile
-#
-#   user_data = templatefile("${path.module}/user-data.sh", {
-#     deployment_id           = var.deployment_id
-#     cloudflare_tunnel_token = var.cloudflare_tunnel_token
-#     cloudflare_account_id   = var.cloudflare_account_id
-#     cloudflare_tunnel_id    = var.cloudflare_tunnel_id
-#     tailscale_auth_key      = var.tailscale_auth_key
-#     vault_addr              = var.vault_addr
-#   })
-#
-#   root_block_device {
-#     volume_type = "gp3"
-#     volume_size = var.volume_size
-#     encrypted   = true
-#     iops        = 3000
-#     throughput  = 125
-#
-#     tags = {
-#       Name = "staging-volume-${var.deployment_id}"
-#     }
-#   }
-#
-#   tags = {
-#     Name         = "staging-spot-${var.deployment_id}"
-#     Type         = "ephemeral-staging"
-#     SpotInstance = "true"
-#   }
-# }
-#
-resource "aws_ec2_tag" "staging_instance" {
-  for_each = {
-    Name         = "staging-${var.deployment_id}"
-    Environment  = "staging"
-    DeploymentId = var.deployment_id
-    SpotInstance = "false"
+  lifecycle {
+    create_before_destroy = true
   }
 
-  # resource_id = aws_spot_instance_request.staging.spot_instance_id
-  # key         = each.key
-  # value       = each.value
-
-  resource_id = aws_instance.staging.id
-  key         = each.key
-  value       = each.value
+  tags = local.tags
 }
-
-# EIP removed - instance is now in private subnet and should not have public IP
-# Outbound internet access is provided via NAT gateway
-
-resource "time_sleep" "after_instance_ready" {
-  create_duration = "15s"
-  depends_on      = [aws_instance.staging]
-}
-
-# CloudWatch alarm for spot instance termination
-# resource "aws_cloudwatch_metric_alarm" "spot_termination" {
-#   alarm_name          = "staging-spot-termination-${var.deployment_id}"
-#   comparison_operator = "GreaterThanThreshold"
-#   evaluation_periods  = "1"
-#   metric_name         = "SpotInstanceTerminationNotice"
-#   namespace           = "AWS/EC2"
-#   period              = "60"
-#   statistic           = "Maximum"
-#   threshold           = "0"
-#   alarm_description   = "Spot instance termination warning"
-#
-#   dimensions = {
-#     InstanceId = aws_spot_instance_request.staging.spot_instance_id
-#   }
-# }

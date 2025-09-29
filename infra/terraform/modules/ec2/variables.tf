@@ -1,68 +1,77 @@
+variable "environment" {
+  description = "Environment name (e.g., staging, prod, dev)"
+  type        = string
+}
+
 variable "deployment_id" {
-  description = "Unique deployment identifier"
+  description = "Unique deployment identifier (e.g., short git SHA) used to force safe rotation"
+  type        = string
+}
+
+variable "ami_id" {
+  description = "AMI ID to launch (e.g., Ubuntu 22.04 arm64)"
   type        = string
 }
 
 variable "instance_type" {
   description = "EC2 instance type"
   type        = string
-}
-
-# variable "spot_price" {
-#   description = "Maximum spot price"
-#   type        = string
-# }
-
-variable "ami_id" {
-  description = "AMI ID for the instance"
-  type        = string
+  default     = "t4g.medium"
 }
 
 variable "subnet_id" {
-  description = "Subnet ID for the instance"
+  description = "Public subnet ID to place the instance in"
   type        = string
 }
 
-variable "security_group_id" {
-  description = "Security group ID"
-  type        = string
+variable "security_group_ids" {
+  description = "List of security group IDs to assign to the instance"
+  type        = list(string)
 }
 
 variable "iam_instance_profile" {
-  description = "IAM instance profile name"
+  description = "IAM instance profile name to attach"
   type        = string
 }
 
-variable "cloudflare_tunnel_token" {
-  description = "Cloudflare tunnel token (ephemeral)"
-  type        = string
-  sensitive   = true
+variable "associate_public_ip" {
+  description = "Associate a public IP (yes for public subnet single-box)"
+  type        = bool
+  default     = true
 }
 
-variable "cloudflare_account_id" {
-  description = "Cloudflare account ID"
-  type        = string
-}
-
-# Tunnel ID used to populate cloudflared creds.json on the instance
-variable "cloudflare_tunnel_id" {
-  description = "Cloudflare tunnel ID"
-  type        = string
-}
-
-variable "tailscale_auth_key" {
-  description = "Tailscale auth key"
-  type        = string
-  sensitive   = true
+variable "enable_detailed_monitoring" {
+  description = "Enable 1-minute CloudWatch metrics"
+  type        = bool
+  default     = false
 }
 
 variable "volume_size" {
-  description = "Root volume size in GB"
+  description = "Root EBS gp3 size (GiB)"
   type        = number
-  default     = 30
+  default     = 40
 }
 
-variable "vault_addr" {
-  description = "Vault server address"
+variable "volume_iops" {
+  description = "gp3 IOPS"
+  type        = number
+  default     = 3000
+}
+
+variable "volume_throughput" {
+  description = "gp3 throughput (MiB/s)"
+  type        = number
+  default     = 125
+}
+
+variable "user_data" {
+  description = "Rendered cloud-init/user-data script content"
   type        = string
+  default     = ""
+}
+
+variable "tags" {
+  description = "Extra tags to apply to the instance"
+  type        = map(string)
+  default     = {}
 }
