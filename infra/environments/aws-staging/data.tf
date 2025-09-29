@@ -45,7 +45,3 @@ data "vault_kv_secret_v2" "tailscale" {
   name  = "${var.environment}/tailscale"
 }
 
-data "vault_kv_secret_v2" "postgres" {
-  mount = "secret"
-  name  = "${var.environment}/postgres"
-}

@@ -48,16 +48,6 @@ template {
   }
 }
 
-template {
-  source               = "/vault/templates/postgres.ctmpl"
-  destination          = "/secrets/postgres/postgres.env"
-  perms                = "0644"
-  error_on_missing_key = true
-  wait {
-    min = "60s"
-    max = "120s"
-  }
-}
 
 template {
   source               = "/vault/templates/workers.ctmpl"

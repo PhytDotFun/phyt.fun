@@ -2,12 +2,12 @@
 set -e
 
 log() {
-  echo "[$(date -u +'%Y-%m-%dT%H:%M:%SZ')] $*"
+	echo "[$(date -u +'%Y-%m-%dT%H:%M:%SZ')] $*"
 }
 
 error() {
-  echo "[$(date -u +'%Y-%m-%dT%H:%M:%SZ')] ERROR: $*" >&2
-  exit 1
+	echo "[$(date -u +'%Y-%m-%dT%H:%M:%SZ')] ERROR: $*" >&2
+	exit 1
 }
 
 log "Starting Vault Agent initialization"
@@ -36,10 +36,10 @@ chmod 0600 /vault/credentials/role_id /vault/credentials/secret_id
 
 # Verify template files exist
 log "Checking template files"
-for template in hono-api postgres workers; do
-  if [ ! -f "/vault/templates/${template}.ctmpl" ]; then
-    error "Template file /vault/templates/${template}.ctmpl not found"
-  fi
+for template in hono-api workers; do
+	if [ ! -f "/vault/templates/${template}.ctmpl" ]; then
+		error "Template file /vault/templates/${template}.ctmpl not found"
+	fi
 done
 log "All template files found"
 
