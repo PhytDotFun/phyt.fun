@@ -1,5 +1,0 @@
-{{- with secret (env "POSTGRES_SECRET_PATH") -}}
-{{- range $k, $v := .Data.data -}}
-{{- printf "%s=%v\n" $k $v -}}
-{{- end -}}
-{{- end -}}

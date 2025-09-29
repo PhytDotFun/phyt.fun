@@ -48,7 +48,6 @@ template {
   }
 }
 
-
 template {
   source               = "/vault/templates/workers.ctmpl"
   destination          = "/secrets/workers/workers.env"
