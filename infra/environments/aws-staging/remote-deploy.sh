@@ -10,8 +10,8 @@ exec > >(tee -a "$LOGFILE") 2>&1
 log() { printf "[REMOTE-DEPLOY] [%s] %s\n" "$(date -u +'%Y-%m-%dT%H:%M:%SZ')" "$*"; }
 err() { printf "[REMOTE-DEPLOY] [%s] ERROR: %s\n" "$(date -u +'%Y-%m-%dT%H:%M:%SZ')" "$*" >&2; }
 die() {
-  err "$*"
-  exit 1
+	err "$*"
+	exit 1
 }
 
 req() { : "${!1:?Environment variable "$1" must be set}"; }
@@ -27,7 +27,7 @@ req VAULT_SECRET_ID
 req VAULT_ENV
 
 ROOT="/opt/phyt"
-COMPOSE="docker compose" # force v2 syntax
+COMPOSE="docker compose"
 
 export COMPOSE_PROFILES
 export IMAGE_REGISTRY
@@ -63,6 +63,108 @@ cd "$ROOT"
 command -v docker >/dev/null 2>&1 || die "docker not installed"
 docker version >/dev/null 2>&1 || die "docker daemon not responding"
 
+log "Authenticating with Vault"
+VAULT_TOKEN=$(curl -fsS -X POST \
+	-d "{\"role_id\":\"${VAULT_ROLE_ID}\",\"secret_id\":\"${VAULT_SECRET_ID}\"}" \
+	"${VAULT_ADDR}/v1/auth/approle/login" | jq -er '.auth.client_token')
+
+log "Configuring Postgres with Vault DB engine..."
+if ! sudo -u postgres psql -tAc "SELECT 1 FROM pg_roles WHERE rolname='vault_admin'" | grep -q 1; then
+	log "Setting up vault_admin..."
+	VAULT_ADMIN_PASSWORD=$(openssl rand -base64 32)
+	# Seed Vault with the vault_admin password
+	curl -fsS -X POST \
+		-H "X-Vault-Token: ${VAULT_TOKEN}" \
+		-d "{\"data\":{\"VAULT_ADMIN_PASSWORD\":\"${VAULT_ADMIN_PASSWORD}\"}}" \
+		"${VAULT_ADDR}/v1/secret/data/staging/postgres" || die "Failed to store admin password in Vault"
+	# Create vault_admin user
+
+	sudo -u postgres psql -c "CREATE USER vault_admin WITH PASSWORD '${VAULT_ADMIN_PASSWORD}' CREATEDB CREATEROLE;" || die "Failed to create vault_admin user"
+
+	# Configure pg_hba.conf for Vault
+	if ! grep -q "vault_admin" /etc/postgresql/*/main/pg_hba.conf; then
+		echo "host all vault_admin 127.0.0.1/32 md5" | sudo tee -a /etc/postgresql/*/main/pg_hba.conf
+		echo "host all all 127.0.0.1/32 md5" | sudo tee -a /etc/postgresql/*/main/pg_hba.conf
+		sudo systemctl reload postgresql || die "Failed to reload PostgreSQL"
+	fi
+
+	log "vault_admin user created and configured"
+
+else
+	log "vault_admin user already exists, retrieving password from Vault..."
+	# Get existing password from Vault
+	VAULT_ADMIN_PASSWORD=$(curl -fsS -H "X-Vault-Token: ${VAULT_TOKEN}" \
+		"${VAULT_ADDR}/v1/secret/data/staging/postgres" | jq -er '.data.data.VAULT_ADMIN_PASSWORD') || die "Failed to retrieve admin password from Vault"
+fi
+
+log "Configuring Vault database secrets engine..."
+DB_MOUNT_CHECK=$(curl -fsS -H "X-Vault-Token: ${VAULT_TOKEN}" \
+	"${VAULT_ADDR}/v1/sys/mounts" | jq -er '.["database/"]' 2>/dev/null || echo "null")
+
+if [[ "$DB_MOUNT_CHECK" == "null" ]]; then
+	log "Enabling database secrets engine..."
+	curl -fsS -X POST \
+		-H "X-Vault-Token: ${VAULT_TOKEN}" \
+		-d '{"type":"database"}' \
+		"${VAULT_ADDR}/v1/sys/mounts/database" || die "Failed to enable database secrets engine"
+else
+	log "Database secrets engine already enabled"
+fi
+
+log "Configuring database connection in Vault..."
+curl -fsS -X POST \
+	-H "X-Vault-Token: ${VAULT_TOKEN}" \
+	-d "{
+    \"plugin_name\": \"postgresql-database-plugin\",
+    \"connection_url\": \"postgresql://vault_admin:${VAULT_ADMIN_PASSWORD}@localhost:5432/postgres?sslmode=disable\",
+    \"allowed_roles\": [\"staging-app\"],
+    \"username\": \"vault_admin\",
+    \"password\": \"${VAULT_ADMIN_PASSWORD}\"
+  }" \
+	"${VAULT_ADDR}/v1/database/config/phyt-postgres" || die "Failed to configure database connection"
+
+log "Configuring database role for application..."
+curl -fsS -X POST \
+	-H "X-Vault-Token: ${VAULT_TOKEN}" \
+	-d '{
+    "db_name": "phyt-postgres",
+    "creation_statements": [
+      "CREATE ROLE \"{{name}}\" WITH LOGIN PASSWORD \"{{password}}\" VALID UNTIL \"{{expiration}}\";",
+      "GRANT CONNECT ON DATABASE phyt_staging TO \"{{name}}\";",
+      "GRANT USAGE ON SCHEMA public TO \"{{name}}\";",
+      "GRANT CREATE ON SCHEMA public TO \"{{name}}\";",
+      "GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO \"{{name}}\";",
+      "GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO \"{{name}}\";",
+      "ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO \"{{name}}\";",
+      "ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO \"{{name}}\";"
+    ],
+    "default_ttl": "1h",
+    "max_ttl": "24h"
+  }' \
+	"${VAULT_ADDR}/v1/database/roles/staging-app" || die "Failed to configure database role"
+
+log "Getting dynamic database credentials..."
+DB_CREDS=$(curl -fsS -H "X-Vault-Token: ${VAULT_TOKEN}" \
+	"${VAULT_ADDR}/v1/database/creds/staging-app") || die "Failed to get database credentials"
+
+DB_USERNAME=$(echo "$DB_CREDS" | jq -er '.data.username')
+DB_PASSWORD=$(echo "$DB_CREDS" | jq -er '.data.password')
+
+cat >>"${ENV_FILE}" <<EOF
+
+# Database configuration (dynamic credentials)
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=phyt_staging
+DB_USERNAME=${DB_USERNAME}
+DB_PASSWORD=${DB_PASSWORD}
+DATABASE_URL=postgresql://${DB_USERNAME}:${DB_PASSWORD}@localhost:5432/phyt_staging
+EOF
+
+log "Database credentials configured"
+
+unset VAULT_TOKEN VAULT_ADMIN_PASSWORD DB_PASSWORD
+
 log "Rendering compose config…"
 $COMPOSE config -o /tmp/compose.yml >/dev/null || die "Failed to render docker config"
 
@@ -76,7 +178,7 @@ log "Starting services…"
 $COMPOSE up -d --remove-orphans
 
 if [[ -n "${GHCR_TOKEN-}" ]]; then
-  docker logout ghcr.io >/dev/null 2>&1 || true
+	docker logout ghcr.io >/dev/null 2>&1 || true
 fi
 
 log "Deploy complete - services started"
