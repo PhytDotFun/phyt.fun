@@ -21,3 +21,9 @@ output "token_client_secret" {
   value       = cloudflare_zero_trust_tunnel_cloudflared_token.this.client_secret
   sensitive   = true
 }
+
+output "tunnel_token" {
+  description = "Tunnel token for cloudflared authentication"
+  value       = cloudflare_zero_trust_tunnel_cloudflared_token.this.value
+  sensitive   = true
+}
