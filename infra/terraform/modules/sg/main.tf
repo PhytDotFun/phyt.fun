@@ -73,27 +73,27 @@ resource "aws_security_group" "app" {
 }
 
 # PostgreSQL security group (for database access)
-resource "aws_security_group" "postgres" {
-  name_prefix = "${var.environment}-postgres-sg-"
-  description = "Security group for PostgreSQL database access"
-  vpc_id      = var.vpc_id
-
-  # PostgreSQL access from app security group
-  ingress {
-    from_port       = 5432
-    to_port         = 5432
-    protocol        = "tcp"
-    security_groups = [aws_security_group.app.id]
-    description     = "PostgreSQL access from app"
-  }
-
-  # No egress rules - PostgreSQL typically doesn't need outbound connections
-
-  lifecycle { create_before_destroy = true }
-  revoke_rules_on_delete = true
-  timeouts { delete = "10m" }
-
-  tags = merge(local.base_tags, {
-    Name = "${var.environment}-postgres-sg"
-  }, var.extra_tags)
-}
+# resource "aws_security_group" "postgres" {
+#   name_prefix = "${var.environment}-postgres-sg-"
+#   description = "Security group for PostgreSQL database access"
+#   vpc_id      = var.vpc_id
+#
+#   # PostgreSQL access from app security group
+#   ingress {
+#     from_port       = 5432
+#     to_port         = 5432
+#     protocol        = "tcp"
+#     security_groups = [aws_security_group.app.id]
+#     description     = "PostgreSQL access from app"
+#   }
+#
+#   # No egress rules - PostgreSQL typically doesn't need outbound connections
+#
+#   lifecycle { create_before_destroy = true }
+#   revoke_rules_on_delete = true
+#   timeouts { delete = "10m" }
+#
+#   tags = merge(local.base_tags, {
+#     Name = "${var.environment}-postgres-sg"
+#   }, var.extra_tags)
+# }
