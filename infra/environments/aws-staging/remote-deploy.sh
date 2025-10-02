@@ -68,7 +68,8 @@ VAULT_TOKEN=$(curl -fsS -X POST \
 	-d "{\"role_id\":\"${VAULT_ROLE_ID}\",\"secret_id\":\"${VAULT_SECRET_ID}\"}" \
 	"${VAULT_ADDR}/v1/auth/approle/login" | jq -er '.auth.client_token')
 
-log "Configuring Postgres with Vault DB engine..."
+log "Configuring Postgres with Vault databsae secrets engine..."
+DB_MOUNT_CHECK=$(curl -fsS -H "X-Vault-Token: ${VAULT_TOKEN}")
 if ! sudo -u postgres psql -tAc "SELECT 1 FROM pg_roles WHERE rolname='vault_admin'" | grep -q 1; then
 	log "Setting up vault_admin..."
 	VAULT_ADMIN_PASSWORD=$(openssl rand -base64 32)

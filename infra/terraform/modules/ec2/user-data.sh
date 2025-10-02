@@ -68,7 +68,7 @@ systemctl enable docker
 log "Docker ready"
 
 log "Installing Postgres..."
-apt-get install postgresql postgresql-contrib
+apt-get install -y postgresql postgresql-contrib
 systemctl enable postgresql
 systemctl start postgresql
 
