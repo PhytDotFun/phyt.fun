@@ -112,8 +112,6 @@ jobs:
             SHORT_SHA: ${{ needs.build-images.outputs.short_sha }}
             REPO_LC: ${{ needs.build-images.outputs.repo_lc }}
             TS_SSH_DEST_STAGING: staging-${{ needs.build-images.outputs.short_sha }}
-            TS_SSH_DEST_DB: staging-db-${{ needs.build-images.outputs.short_sha }}
-            TS_SSH_DEST_NAT: staging-nat-${{ needs.build-images.outputs.short_sha }}
             TS_SSH_USER: ubuntu
             TF_LOCK_TIMEOUT: 5m
         steps:
