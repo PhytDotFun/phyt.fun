@@ -8,7 +8,7 @@ output "staging_sg_id" {
   value       = aws_security_group.app.id
 }
 
-output "postgres_sg_id" {
-  description = "ID of the PostgreSQL security group"
-  value       = aws_security_group.postgres.id
-}
+# output "postgres_sg_id" {
+#   description = "ID of the PostgreSQL security group"
+#   value       = aws_security_group.postgres.id
+# }
