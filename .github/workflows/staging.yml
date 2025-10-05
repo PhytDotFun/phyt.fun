@@ -193,18 +193,16 @@ jobs:
             - name: Wait for staging instances status checks
               run: |
                   set -euo pipefail
-                  STAGING_NAME="staging-${SHORT_SHA}"
-                  STAGING_NAT_NAME="staging-nat-${SHORT_SHA}"
-                  STAGING_DB_NAME="staging-db-${SHORT_SHA}"
+                  STAGING_NAME="staging-app-${SHORT_SHA}"
 
                   INSTANCE_IDS=$(aws ec2 describe-instances \
-                    --filters "Name=tag:Name,Values=${STAGING_NAT_NAME}, ${STAGING_DB_NAME}, ${STAGING_NAME}" \
+                    --filters "Name=tag:Name,Values=${STAGING_NAME}" \
                               "Name=instance-state-name,Values=pending,running" \
                     --query 'Reservations[].Instances[?State.Name==`running`].InstanceId' \
                     --output text)
 
                   if [[ -z "${INSTANCE_IDS}" ]]; then
-                    echo "No running staging instances found; continuing anyway."
+                    echo "No running staging instance found; continuing anyway."
                   else
                     echo "Waiting for EC2 status checks to pass on ${INSTANCE_IDS}…"
                     aws ec2 wait instance-status-ok --instance-ids ${INSTANCE_IDS}
@@ -229,81 +227,61 @@ jobs:
                   echo "::add-mask::${SECRET_ID}"
                   { echo "ROLE_ID=${ROLE_ID}"; echo "SECRET_ID=${SECRET_ID}"; } >> "$GITHUB_ENV"
 
-            - name: Wait for Tailscale nodes to be ready
-              env:
-                  TS_SSH_DEST_STAGING: ${{ env.TS_SSH_DEST_STAGING }}
-                  TS_SSH_DEST_DB: ${{ env.TS_SSH_DEST_DB }}
-                  TS_SSH_DEST_NAT: ${{ env.TS_SSH_DEST_NAT }}
-                  TS_SSH_USER: ${{ env.TS_SSH_USER }}
+            - name: Wait for Tailscale node to be ready
               run: |
                   set -euo pipefail
-                  wait_ts_node() {
-                    local ROLE="$1" DEST="$2"
-                    echo "=== [$ROLE] Waiting for ${DEST} to appear in Tailscale network…"
+                  DEST="${TS_SSH_DEST_STAGING}"
 
-                    # Wait up to 8 minutes (48 * 10s) for the peer to appear
-                    for i in $(seq 1 48); do
-                      if tailscale status --json | jq -e --arg h "${DEST}" '
-                          .Peer | to_entries[].value
-                          | select(.HostName == $h or (.DNSName|startswith($h + ".")))
-                        ' >/dev/null; then
-                        echo "[$ROLE] Found ${DEST} in Tailscale network"
-                        break
-                      fi
-                      echo "[$ROLE] Attempt $i/48: ${DEST} not found, waiting 10s…"
-                      sleep 10
-                    done
+                  echo "Waiting for ${DEST} to appear in Tailscale network…"
 
-                    local TARGET
-                    TARGET=$(
-                      tailscale status --json | jq -r --arg h "${DEST}" '
+                  # Wait up to 8 minutes (48 * 10s) for the peer to appear
+                  for i in $(seq 1 48); do
+                    if tailscale status --json | jq -e --arg h "${DEST}" '
                         .Peer | to_entries[].value
                         | select(.HostName == $h or (.DNSName|startswith($h + ".")))
-                        | (.DNSName // (.TailscaleIPs[0] // ""))
-                      ' | head -n1
-                    )
-
-                    if [[ -z "${TARGET}" ]]; then
-                      echo "[$ROLE] ERROR: Could not resolve a canonical target for ${DEST}"
-                      tailscale status || true
-                      return 1
+                      ' >/dev/null; then
+                      echo "Found ${DEST} in Tailscale network"
+                      break
                     fi
-
-                    echo "[$ROLE] Using target: ${TARGET}"
-                    # Prefer a direct path (gives control-plane/MagicDNS time to settle)
-                    if ! tailscale ping --until-direct --timeout=90s "${TARGET}"; then
-                      echo "[$ROLE] Direct path not ready; trying normal ping as a fallback…"
-                      tailscale ping --timeout=30s "${TARGET}" || true
-                    fi
-
-                    # Probe Tailscale SSH readiness with retries (sshd may lag)
-                    for i in $(seq 1 15); do
-                      if tailscale ssh -q "${TS_SSH_USER}@${TARGET}" 'true' 2>/dev/null; then
-                        echo "[$ROLE] Tailscale SSH is ready (attempt $i)"
-                        break
-                      fi
-                      echo "[$ROLE] TS-SSH not ready (attempt $i/15); sleeping 6s…"
-                      sleep 6
-                    done
-
-                    tailscale ssh "${TS_SSH_USER}@${TARGET}" 'echo "SSH connection successful ($(hostname))"'
-                    echo "[$ROLE] OK: ${TARGET} is ready."
-
-                    # Export role-specific target to the job environment
-                    echo "TS_TARGET_${ROLE}=${TARGET}" >> "$GITHUB_ENV"
-                  }
-
-                  # Iterate the three roles; each must be defined
-                  for ROLE in STAGING DB NAT; do
-                    VAR="TS_SSH_DEST_${ROLE}"
-                    DEST="${!VAR:-}"
-                    if [[ -z "${DEST}" ]]; then
-                      echo "ERROR: ${VAR} is not set"; exit 1
-                    fi
-                    wait_ts_node "${ROLE}" "${DEST}"
+                    echo "Attempt $i/48: ${DEST} not found, waiting 10s…"
+                    sleep 10
                   done
 
-                  echo "All Tailscale nodes are ready."
+                  TARGET=$(
+                    tailscale status --json | jq -r --arg h "${DEST}" '
+                      .Peer | to_entries[].value
+                      | select(.HostName == $h or (.DNSName|startswith($h + ".")))
+                      | (.DNSName // (.TailscaleIPs[0] // ""))
+                    ' | head -n1
+                  )
+
+                  if [[ -z "${TARGET}" ]]; then
+                    echo "ERROR: Could not resolve target for ${DEST}"
+                    tailscale status || true
+                    exit 1
+                  fi
+
+                  echo "Using target: ${TARGET}"
+
+                  # Prefer direct path
+                  if ! tailscale ping --until-direct --timeout=90s "${TARGET}"; then
+                    echo "Direct path not ready; trying normal ping as fallback…"
+                    tailscale ping --timeout=30s "${TARGET}" || true
+                  fi
+
+                  # Probe SSH readiness
+                  for i in $(seq 1 15); do
+                    if tailscale ssh -q "${TS_SSH_USER}@${TARGET}" 'true' 2>/dev/null; then
+                      echo "Tailscale SSH is ready (attempt $i)"
+                      break
+                    fi
+                    echo "TS-SSH not ready (attempt $i/15); sleeping 6s…"
+                    sleep 6
+                  done
+
+                  tailscale ssh "${TS_SSH_USER}@${TARGET}" 'echo "SSH connection successful ($(hostname))"'
+                  echo "TS_TARGET_STAGING=${TARGET}" >> "$GITHUB_ENV"
+                  echo "Tailscale node is ready."
 
             - name: Ensure /opt/phyt exists
               run: |
@@ -320,7 +298,6 @@ jobs:
                   set -euo pipefail
                   tailscale ssh "${TS_SSH_USER}@${TS_TARGET_STAGING}" 'sudo mkdir -p /opt/phyt/deploy && sudo chown -R ubuntu:ubuntu /opt/phyt/deploy'
 
-                  # Send the script over Tailscale via stdin
                   tailscale ssh "${TS_SSH_USER}@${TS_TARGET_STAGING}" 'cat > /opt/phyt/deploy/remote-deploy.sh' < infra/environments/aws-staging/remote-deploy.sh
                   tailscale ssh "${TS_SSH_USER}@${TS_TARGET_STAGING}" 'chmod +x /opt/phyt/deploy/remote-deploy.sh'
 
