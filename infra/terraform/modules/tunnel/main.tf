@@ -6,6 +6,10 @@ terraform {
       source  = "cloudflare/cloudflare"
       version = "5.8.4"
     }
+    random = {
+      source  = "hashicorp/random"
+      version = "3.7.2"
+    }
   }
 }
 
@@ -13,16 +17,16 @@ locals {
   tunnel_name = var.tunnel_name != "" ? var.tunnel_name : "${var.environment}-tunnel-${var.deployment_id}"
 }
 
-# Create/own the tunnel (stable per env)
-resource "cloudflare_zero_trust_tunnel_cloudflared" "this" {
-  account_id = var.account_id
-  name       = local.tunnel_name
+resource "random_bytes" "tunnel_secret" {
+  length = 32
 }
 
-# Create a token for the tunnel (used by cloudflared on the EC2 host)
-resource "cloudflare_zero_trust_tunnel_cloudflared_token" "this" {
-  account_id = var.account_id
-  tunnel_id  = cloudflare_zero_trust_tunnel_cloudflared.this.id
+# Create/own the tunnel (stable per env)
+resource "cloudflare_zero_trust_tunnel_cloudflared" "this" {
+  account_id    = var.account_id
+  name          = local.tunnel_name
+  config_src    = "cloudflare"
+  tunnel_secret = random_bytes.tunnel_secret.base64
 }
 
 # Optional config: only if a hostname is provided
@@ -32,12 +36,14 @@ resource "cloudflare_zero_trust_tunnel_cloudflared_config" "this" {
   tunnel_id  = cloudflare_zero_trust_tunnel_cloudflared.this.id
 
   config = {
-    ingress_rule = {
-      hostname = var.hostname
-      service  = var.service_url
-    }
-    ingress_rule = {
-      service = "http_status:404"
-    }
+    ingress_rule = [
+      {
+        hostname = var.hostname
+        service  = var.service_url
+      },
+      {
+        service = "http_status:404"
+      }
+    ]
   }
 }
