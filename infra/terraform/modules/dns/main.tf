@@ -15,7 +15,7 @@ locals {
 }
 
 # Create CNAME record pointing to tunnel
-resource "cloudflare_record" "tunnel" {
+resource "cloudflare_dns_record" "tunnel" {
   zone_id = var.zone_id
   name    = local.record_name
   type    = "CNAME"
