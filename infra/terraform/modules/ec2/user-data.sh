@@ -75,6 +75,15 @@ systemctl start postgresql
 sudo -u postgresql psql -c "CREATE DATABASE phyt_staging;"
 log "Postgres database created (user setup deferred)"
 
+log "Configuring Postgres network access..."
+# Listen on localhost + docker bridge gateway
+sudo sed -i "s/#listen_addresses = 'localhost'/listen_addresses = 'localhost,172.20.0.1'/" /etc/postgresql/*/main/postgresql.conf
+
+echo "host all all 172.20.0.0/16 md5" | sudo tee -a /etc/postgresql/*/main/pg_hba.conf
+
+sudo systemctl reload postgresql
+log "PostgreSQL network configuration complete"
+
 log "Installing Tailscale..."
 curl -fsSL https://tailscale.com/install.sh | sh
 systemctl enable --now tailscaled

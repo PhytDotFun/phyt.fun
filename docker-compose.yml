@@ -1,153 +1,165 @@
 services:
-  vault-agent:
-    image: hashicorp/vault:latest
-    container_name: ${COMPOSE_PROJECT_NAME:-phyt}-vault-agent
-    entrypoint: ["/usr/local/bin/agent-entrypoint.sh"]
-    environment:
-      VAULT_ENV: ${VAULT_ENV:-}
-      VAULT_ADDR: ${VAULT_ADDR:-}
-      VAULT_ROLE_ID: ${VAULT_ROLE_ID:-}
-      VAULT_SECRET_ID: ${VAULT_SECRET_ID:-}
+    vault-agent:
+        image: hashicorp/vault:latest
+        container_name: ${COMPOSE_PROJECT_NAME:-phyt}-vault-agent
+        entrypoint: ['/usr/local/bin/agent-entrypoint.sh']
+        environment:
+            VAULT_ENV: ${VAULT_ENV:-}
+            VAULT_ADDR: ${VAULT_ADDR:-}
+            VAULT_ROLE_ID: ${VAULT_ROLE_ID:-}
+            VAULT_SECRET_ID: ${VAULT_SECRET_ID:-}
 
-      HONO_API_SECRET_PATH: secret/data/${VAULT_ENV:-staging}/hono-api
-      WORKERS_SECRET_PATH: secret/data/${VAULT_ENV:-staging}/workers
-    security_opt: ["no-new-privileges:true"]
-    volumes:
-      # Agent initialization
-      - ./tooling/vault:/vault/config:ro
-      - ./tooling/vault/templates:/vault/templates:ro
-      - ./tooling/ops/agent-entrypoint.sh:/usr/local/bin/agent-entrypoint.sh:ro
+            HONO_API_SECRET_PATH: secret/data/${VAULT_ENV:-staging}/hono-api
+            WORKERS_SECRET_PATH: secret/data/${VAULT_ENV:-staging}/workers
+        security_opt: ['no-new-privileges:true']
+        volumes:
+            # Agent initialization
+            - ./tooling/vault:/vault/config:ro
+            - ./tooling/vault/templates:/vault/templates:ro
+            - ./tooling/ops/agent-entrypoint.sh:/usr/local/bin/agent-entrypoint.sh:ro
 
-      # Agent creds (tokens)
-      - vault-credentials:/vault/credentials:rw
+            # Agent creds (tokens)
+            - vault-credentials:/vault/credentials:rw
 
-      # Container secrets
-      - vault-secrets-hono-api:/secrets/hono-api:rw
-      - vault-secrets-workers:/secrets/workers:rw
-    healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "[ -s /secrets/hono-api/hono-api.env ] && [ -s /secrets/workers/workers.env ] || exit 1",
-        ]
-      interval: 5s
-      timeout: 3s
-      retries: 30
-      start_period: 10s
-    networks:
-      - phyt
-    dns:
-      - 100.100.100.100
-    profiles: ["dev", "staging", "prod"]
-    restart: ${RESTART_POLICY:-unless-stopped}
+            # Container secrets
+            - vault-secrets-hono-api:/secrets/hono-api:rw
+            - vault-secrets-workers:/secrets/workers:rw
+        healthcheck:
+            test:
+                [
+                    'CMD-SHELL',
+                    '[ -s /secrets/hono-api/hono-api.env ] && [ -s /secrets/workers/workers.env ] || exit 1'
+                ]
+            interval: 5s
+            timeout: 3s
+            retries: 30
+            start_period: 10s
+        networks:
+            - phyt
+        extra_hosts:
+            - 'host.docker.internal:host-gateway'
+        dns:
+            - 100.100.100.100
+        profiles: ['dev', 'staging', 'prod']
+        restart: ${RESTART_POLICY:-unless-stopped}
 
-  redis:
-    image: redis:7-alpine
-    container_name: ${COMPOSE_PROJECT_NAME:-phyt}-redis
-    command: redis-server --maxmemory ${REDIS_MEMORY:-128mb} --maxmemory-policy allkeys-lru --save ""
-    healthcheck:
-      test: ["CMD-SHELL", "redis-cli -h 127.0.0.1 ping | grep PONG"]
-      interval: 5s
-      timeout: 3s
-      retries: 5
-    networks:
-      - phyt
-    profiles: ["dev", "staging", "prod"]
-    restart: ${RESTART_POLICY:-unless-stopped}
+    redis:
+        image: redis:7-alpine
+        container_name: ${COMPOSE_PROJECT_NAME:-phyt}-redis
+        command: redis-server --maxmemory ${REDIS_MEMORY:-128mb} --maxmemory-policy allkeys-lru --save ""
+        healthcheck:
+            test: ['CMD-SHELL', 'redis-cli -h 127.0.0.1 ping | grep PONG']
+            interval: 5s
+            timeout: 3s
+            retries: 5
+        networks:
+            - phyt
+        profiles: ['dev', 'staging', 'prod']
+        restart: ${RESTART_POLICY:-unless-stopped}
 
-  hono-api:
-    image: ${IMAGE_REGISTRY:-ghcr.io}/${GITHUB_REPOSITORY}/hono-api:${IMAGE_TAG:-latest}
-    # No container_name -> scale to >= 2 instances
-    # docker compose up -d --scale hono-api=2 nginx
-    depends_on:
-      vault-agent: { condition: service_healthy }
-      redis: { condition: service_healthy }
-    volumes:
-      - vault-secrets-hono-api:/secrets/hono-api:ro
-      - ./tooling/ops/wait-for-secrets.sh:/usr/local/bin/wait-for-secrets.sh:ro
-    entrypoint: ["/usr/local/bin/wait-for-secrets.sh", "node", "dist/index.js"]
-    environment:
-      WAIT_FOR_SECRET_FILE: /secrets/hono-api/hono-api.env
-      WAIT_FOR_SECRET_TIMEOUT: "180"
-      HOST: 0.0.0.0
-      PORT: "3000"
-    healthcheck:
-      test: ["CMD-SHELL","wget -qO- http://127.0.0.1:3000/health >/dev/null || exit 1"]
-      interval: 15s
-      timeout: 5s
-      retries: 10
-      start_period: 40s
-    init: true
-    stop_grace_period: 15s
-    networks:
-      - phyt
-    profiles: ["dev", "staging", "prod"]
-    restart: ${RESTART_POLICY:-unless-stopped}
+    hono-api:
+        image: ${IMAGE_REGISTRY:-ghcr.io}/${GITHUB_REPOSITORY}/hono-api:${IMAGE_TAG:-latest}
+        # No container_name -> scale to >= 2 instances
+        # docker compose up -d --scale hono-api=2 nginx
+        depends_on:
+            vault-agent: { condition: service_healthy }
+            redis: { condition: service_healthy }
+        volumes:
+            - vault-secrets-hono-api:/secrets/hono-api:ro
+            - ./tooling/ops/wait-for-secrets.sh:/usr/local/bin/wait-for-secrets.sh:ro
+        entrypoint:
+            ['/usr/local/bin/wait-for-secrets.sh', 'node', 'dist/index.js']
+        environment:
+            WAIT_FOR_SECRET_FILE: /secrets/hono-api/hono-api.env
+            WAIT_FOR_SECRET_TIMEOUT: '180'
+            HOST: 0.0.0.0
+            PORT: '3000'
+        healthcheck:
+            test:
+                [
+                    'CMD-SHELL',
+                    'wget -qO- http://127.0.0.1:3000/health >/dev/null || exit 1'
+                ]
+            interval: 15s
+            timeout: 5s
+            retries: 10
+            start_period: 40s
+        init: true
+        stop_grace_period: 15s
+        networks:
+            - phyt
+        extra_hosts:
+            - 'host.docker.internal:host-gateway'
+        profiles: ['dev', 'staging', 'prod']
+        restart: ${RESTART_POLICY:-unless-stopped}
 
-  workers:
-    image: ${IMAGE_REGISTRY:-ghcr.io}/${GITHUB_REPOSITORY}/workers:${IMAGE_TAG:-latest}
-    container_name: ${COMPOSE_PROJECT_NAME:-phyt}-workers
-    depends_on:
-      vault-agent:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    volumes:
-      - vault-secrets-workers:/secrets/workers:ro
-      - ./tooling/ops/wait-for-secrets.sh:/usr/local/bin/wait-for-secrets.sh:ro
-    entrypoint: ["/usr/local/bin/wait-for-secrets.sh", "node", "dist/index.js"]
-    environment:
-      WAIT_FOR_SECRET_FILE: /secrets/workers/workers.env
-      WAIT_FOR_SECRET_TIMEOUT: "180"
-    init: true
-    stop_grace_period: 15s
-    networks:
-      - phyt
-    profiles: ["dev", "staging", "prod"]
-    restart: ${RESTART_POLICY:-unless-stopped}
+    workers:
+        image: ${IMAGE_REGISTRY:-ghcr.io}/${GITHUB_REPOSITORY}/workers:${IMAGE_TAG:-latest}
+        container_name: ${COMPOSE_PROJECT_NAME:-phyt}-workers
+        depends_on:
+            vault-agent:
+                condition: service_healthy
+            redis:
+                condition: service_healthy
+        volumes:
+            - vault-secrets-workers:/secrets/workers:ro
+            - ./tooling/ops/wait-for-secrets.sh:/usr/local/bin/wait-for-secrets.sh:ro
+        entrypoint:
+            ['/usr/local/bin/wait-for-secrets.sh', 'node', 'dist/index.js']
+        environment:
+            WAIT_FOR_SECRET_FILE: /secrets/workers/workers.env
+            WAIT_FOR_SECRET_TIMEOUT: '180'
+        init: true
+        stop_grace_period: 15s
+        networks:
+            - phyt
+        extra_hosts:
+            - 'host.docker.internal:host-gateway'
+        profiles: ['dev', 'staging', 'prod']
+        restart: ${RESTART_POLICY:-unless-stopped}
 
-  nginx:
-    image: nginx:alpine
-    depends_on:
-      hono-api:
-        condition: service_healthy
-    ports:
-      - "${NGINX_BIND_HOST:-127.0.0.1}:${NGINX_BIND_PORT:-8080}:8080"
-    volumes:
-      - ./tooling/nginx/staging.nginx.conf:/templates/staging.nginx.conf:ro
-      - ./tooling/nginx/prod.nginx.conf:/templates/prod.nginx.conf:ro
-      - ./tooling/ops/nginx-entrypoint.sh:/docker-entrypoint.d/99-nginx-mode.sh:ro
-    environment:
-      NGINX_MODE: ${NGINX_MODE:-staging}
-    healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "wget -qO- http://127.0.0.1:8080/nginx-health >/dev/null || exit 1",
-        ]
-      interval: 10s
-      timeout: 3s
-      retries: 10
-    networks:
-      - phyt
-    profiles: ["staging", "prod"]
-    restart: ${RESTART_POLICY:-unless-stopped}
+    nginx:
+        image: nginx:alpine
+        depends_on:
+            hono-api:
+                condition: service_healthy
+        ports:
+            - '${NGINX_BIND_HOST:-127.0.0.1}:${NGINX_BIND_PORT:-8080}:8080'
+        volumes:
+            - ./tooling/nginx/staging.nginx.conf:/templates/staging.nginx.conf:ro
+            - ./tooling/nginx/prod.nginx.conf:/templates/prod.nginx.conf:ro
+            - ./tooling/ops/nginx-entrypoint.sh:/docker-entrypoint.d/99-nginx-mode.sh:ro
+        environment:
+            NGINX_MODE: ${NGINX_MODE:-staging}
+        healthcheck:
+            test:
+                [
+                    'CMD-SHELL',
+                    'wget -qO- http://127.0.0.1:8080/nginx-health >/dev/null || exit 1'
+                ]
+            interval: 10s
+            timeout: 3s
+            retries: 10
+        networks:
+            - phyt
+        profiles: ['staging', 'prod']
+        restart: ${RESTART_POLICY:-unless-stopped}
 
 networks:
-  phyt:
-    name: phyt
-    driver: bridge
-    ipam:
-      config:
-        - subnet: 172.20.0.0/16
+    phyt:
+        name: phyt
+        driver: bridge
+        ipam:
+            config:
+                - subnet: 172.20.0.0/16
 
 volumes:
-  vault-secrets-hono-api: {}
-  vault-secrets-workers: {}
+    vault-secrets-hono-api: {}
+    vault-secrets-workers: {}
 
-  vault-credentials:
-    driver: local
-    driver_opts:
-      type: tmpfs
-      device: tmpfs
-      o: nodev,nosuid,noexec,size=1m
+    vault-credentials:
+        driver: local
+        driver_opts:
+            type: tmpfs
+            device: tmpfs
+            o: nodev,nosuid,noexec,size=1m

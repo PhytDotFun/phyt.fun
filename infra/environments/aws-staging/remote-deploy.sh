@@ -159,7 +159,7 @@ DB_PORT=5432
 DB_NAME=phyt_staging
 DB_USERNAME=${DB_USERNAME}
 DB_PASSWORD=${DB_PASSWORD}
-DATABASE_URL=postgresql://${DB_USERNAME}:${DB_PASSWORD}@localhost:5432/phyt_staging
+DATABASE_URL=postgresql://${DB_USERNAME}:${DB_PASSWORD}@host.docker.internal:5432/phyt_staging
 EOF
 
 log "Database credentials configured"
