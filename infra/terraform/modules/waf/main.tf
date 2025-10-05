@@ -10,7 +10,7 @@ terraform {
 }
 
 locals {
-  host_expr = trim(var.hostname) != "" ? "(http.host eq \"${var.hostname}\") and " : ""
+  host_expr = trimspace(var.hostname) != "" ? "(http.host eq \"${var.hostname}\") and " : ""
 
   allow_ips_expr = length(var.allowed_ips) > 0 ? "${local.host_expr}ip.src in {${join(" ", var.allowed_ips)}}" : null
 
