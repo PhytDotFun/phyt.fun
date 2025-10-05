@@ -44,4 +44,3 @@ data "vault_kv_secret_v2" "tailscale" {
   mount = "secret"
   name  = "${var.environment}/tailscale"
 }
-
