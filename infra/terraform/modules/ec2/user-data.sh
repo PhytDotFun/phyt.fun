@@ -117,9 +117,9 @@ aarch64 | arm64) cfd_arch="arm64" ;;
 x86_64 | amd64) cfd_arch="amd64" ;;
 *) die "Unsupported architecture: $arch" ;;
 esac
-wget -q "https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-${cfd_arch}.deb"
-dpkg -i "cloudflared-linux-${cfd_arch}.deb" || apt-get -y -f install
-rm -f "cloudflared-linux-${cfd_arch}.deb"
+wget -q "https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-$${cfd_arch}.deb"
+dpkg -i "cloudflared-linux-$${cfd_arch}.deb" || apt-get -y -f install
+rm -f "cloudflared-linux-$${cfd_arch}.deb"
 
 # Cloudflare token install
 log "Configuring Cloudflared service..."
