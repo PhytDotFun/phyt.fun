@@ -86,9 +86,7 @@ module "waf" {
   environment = var.environment
   zone_id     = data.vault_kv_secret_v2.cloudflare.data["ZONE_ID"]
 
-  hostname             = "staging.phyt.fun"
-  allowed_ips          = []
-  blocked_countries    = []
-  enable_bot_challenge = true
-  bot_score_threshold  = 30
+  hostname          = "staging.phyt.fun"
+  allowed_ips       = []
+  blocked_countries = []
 }
