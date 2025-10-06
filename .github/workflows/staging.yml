@@ -23,7 +23,7 @@ jobs:
     build-images:
         runs-on: ubuntu-latest
         concurrency:
-            group: staging-build
+            group: staging-build-${{ github.ref }}
             cancel-in-progress: true
         strategy:
             matrix:
