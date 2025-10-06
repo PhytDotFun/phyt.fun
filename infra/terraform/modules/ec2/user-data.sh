@@ -72,7 +72,7 @@ apt-get install -y postgresql postgresql-contrib
 systemctl enable postgresql
 systemctl start postgresql
 
-sudo -u postgresql psql -c "CREATE DATABASE phyt_staging;"
+sudo -u postgres psql -v ON_ERROR_STOP=1 -c "CREATE DATABASE phyt_staging;"
 log "Postgres database created (user setup deferred)"
 
 log "Configuring Postgres network access..."
