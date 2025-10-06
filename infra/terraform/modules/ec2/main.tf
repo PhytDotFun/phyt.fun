@@ -43,7 +43,7 @@ resource "aws_instance" "app" {
     tags        = { Name = "${var.environment}-root-${var.deployment_id}" }
   }
 
-  user_data = var.user_data
+  user_data_base64 = var.user_data
 
   lifecycle {
     create_before_destroy = true
