@@ -111,7 +111,7 @@ jobs:
             IMAGE_TAG: ${{ needs.build-images.outputs.image_tag }}
             SHORT_SHA: ${{ needs.build-images.outputs.short_sha }}
             REPO_LC: ${{ needs.build-images.outputs.repo_lc }}
-            TS_SSH_DEST_STAGING: staging-${{ needs.build-images.outputs.short_sha }}
+            TS_SSH_DEST_STAGING: staging-app-${{ needs.build-images.outputs.short_sha }}
             TS_SSH_USER: ubuntu
             TF_LOCK_TIMEOUT: 5m
         steps:
@@ -233,7 +233,7 @@ jobs:
                   echo "Waiting for ${DEST} to appear in Tailscale network…"
 
                   # Wait up to 8 minutes (48 * 10s) for the peer to appear
-                  for i in $(seq 1 48); do
+                  for i in $(seq 1 16); do
                     if tailscale status --json | jq -e --arg h "${DEST}" '
                         .Peer | to_entries[].value
                         | select(.HostName == $h or (.DNSName|startswith($h + ".")))
@@ -241,7 +241,7 @@ jobs:
                       echo "Found ${DEST} in Tailscale network"
                       break
                     fi
-                    echo "Attempt $i/48: ${DEST} not found, waiting 10s…"
+                    echo "Attempt $i/16: ${DEST} not found, waiting 10s…"
                     sleep 10
                   done
 
