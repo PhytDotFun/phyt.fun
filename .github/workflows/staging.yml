@@ -6,7 +6,7 @@ on:
     workflow_dispatch: {}
 
 concurrency:
-    group: staging-ci
+    group: staging-ci-${{ github.ref }}
     cancel-in-progress: true
 
 env:
@@ -101,8 +101,8 @@ jobs:
         if: ${{ needs.build-images.result == 'success' || needs.build-images.result == 'skipped' }}
         environment: staging
         concurrency:
-            group: staging-deploy
-            cancel-in-progress: false # For safety + lock, don't kill in-flight apply
+            group: staging-deploy-${{ github.ref }}
+            cancel-in-progress: true
         permissions:
             id-token: write
             contents: read
@@ -113,7 +113,6 @@ jobs:
             REPO_LC: ${{ needs.build-images.outputs.repo_lc }}
             TS_SSH_DEST_STAGING: staging-app-${{ needs.build-images.outputs.short_sha }}
             TS_SSH_USER: ubuntu
-            TF_LOCK_TIMEOUT: 5m
         steps:
             - name: Checkout
               uses: actions/checkout@v4
@@ -180,13 +179,29 @@ jobs:
                   TF_VAR_github_repo: ${{ github.repository }}
                   TF_VAR_deployment_id: ${{ env.SHORT_SHA }}
                   TF_VAR_vault_addr: ${{ env.VAULT_ADDR }}
+                  TF_STATE_KEY: ${{ vars.TF_STATE_KEY }}
+                  TF_STATE_BUCKET: ${{ vars.TF_STATE_BUCKET }}
+                  TF_STATE_LOCK_TABLE: ${{ vars.TF_LOCK_TABLE }}
+                  TF_STATE_LOCK_TIMEOUT: 5m
                   VAULT_ADDR: ${{ env.VAULT_ADDR }}
                   VAULT_TOKEN: ${{ env.VAULT_TOKEN }}
               run: |
                   set -euo pipefail
-                  terraform init  -input=false -lock-timeout="${TF_LOCK_TIMEOUT}"
-                  terraform plan  -input=false -lock-timeout="${TF_LOCK_TIMEOUT}" -out=plan.tfplan
-                  terraform apply -input=false -lock-timeout="${TF_LOCK_TIMEOUT}" -auto-approve plan.tfplan
+
+                  LOCK_KEY="${TF_STATE_BUCKET}/${TF_STATE_KEY}"
+
+                  cancel_cleanup(){
+                    echo "Force cancel"
+                    aws dynamodb delete-item \
+                      --table-name "${TF_STATE_LOCK_TABLE}" \
+                      --key "{\"LockID\":{\"S\":\"${LOCK_KEY}\"}}" || true
+                  }
+
+                  trap cancel_cleanup INT TERM
+
+                  terraform init  -input=false -lock-timeout="${TF_STATE_LOCK_TIMEOUT}"
+                  terraform plan  -input=false -lock-timeout="${TF_STATE_LOCK_TIMEOUT}" -out=plan.tfplan
+                  terraform apply -input=false -lock-timeout="${TF_STATE_LOCK_TIMEOUT}" -auto-approve plan.tfplan
 
             - name: Wait for staging instances status checks
               run: |
@@ -232,7 +247,6 @@ jobs:
 
                   echo "Waiting for ${DEST} to appear in Tailscale network…"
 
-                  # Wait up to 8 minutes (48 * 10s) for the peer to appear
                   for i in $(seq 1 16); do
                     if tailscale status --json | jq -e --arg h "${DEST}" '
                         .Peer | to_entries[].value
