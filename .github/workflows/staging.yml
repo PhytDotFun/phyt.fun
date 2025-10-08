@@ -21,7 +21,7 @@ permissions:
 
 jobs:
     build-images:
-        runs-on: ubuntu-latest
+        runs-on: [self-hosted, linux, x64, hypercluster]
         concurrency:
             group: staging-build-${{ github.ref }}
             cancel-in-progress: true
@@ -88,15 +88,15 @@ jobs:
                   file: ${{ matrix.service.dockerfile }}
                   push: true
                   build-args: ${{ matrix.service.buildargs }}
-                  platforms: linux/arm64
+                  platforms: linux/arm64,linux/amd64
                   tags: |
                       ${{ env.REGISTRY }}/${{ steps.meta.outputs.repo_lc }}/${{ matrix.service.name }}:${{ steps.meta.outputs.image_tag }}
-                      ${{ env.REGISTRY }}/${{ steps.meta.outputs.repo_lc }}/${{ matrix.service.name }}:staging
+                      ${{ env.REGISTRY }}/${{ steps.meta.outputs.repo_lc }}/${{ matrix.service.name }}:latest
                   cache-from: type=gha
                   cache-to: type=gha,mode=max
 
     deploy:
-        runs-on: ubuntu-latest
+        runs-on: [self-hosted, linux, x64, hypercluster]
         needs: build-images
         if: ${{ needs.build-images.result == 'success' || needs.build-images.result == 'skipped' }}
         environment: staging
@@ -127,7 +127,7 @@ jobs:
             - name: Connect to Tailscale
               uses: tailscale/github-action@v2
               with:
-                  version: '1.86.2' # pin to a tested version
+                  version: '1.88.3'
                   oauth-client-id: ${{ secrets.TAILSCALE_OAUTH_CLIENT_ID }}
                   oauth-secret: ${{ secrets.TAILSCALE_OAUTH_SECRET }}
                   tags: tag:ci
@@ -136,7 +136,7 @@ jobs:
             - name: Setup Terraform
               uses: hashicorp/setup-terraform@v3
               with:
-                  terraform_version: 1.13.1
+                  terraform_version: 1.13.3
 
             - name: Get GitHub OIDC ID token
               id: oidc
