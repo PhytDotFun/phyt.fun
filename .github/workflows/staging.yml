@@ -99,16 +99,10 @@ jobs:
                   tags: |
                       ${{ env.REGISTRY }}/${{ steps.meta.outputs.repo_lc }}/${{ matrix.service.name }}:${{ steps.meta.outputs.image_tag }}
                       ${{ env.REGISTRY }}/${{ steps.meta.outputs.repo_lc }}/${{ matrix.service.name }}:staging
-                  cache-from: type=local,src=/var/cache/buildx/${{ matrix.service.name }}
-                  cache-to: type=local,dest=/var/cache/buildx/${{ matrix.service.name }}-new,mode=max
-
-            - name: Rotate buildx cache
-              if: always()
-              run: |
-                  if [ -d /var/cache/buildx/${{ matrix.service.name }}-new ]; then
-                    rm -rf /var/cache/buildx/${{ matrix.service.name }}
-                    mv /var/cache/buildx/${{ matrix.service.name }}-new /var/cache/buildx/${{ matrix.service.name }}
-                  fi
+                  cache-from: |
+                      type=registry,ref=${{ env.REGISTRY }}/${{ steps.meta.outputs.repo_lc }}/${{ matrix.service.name }}:buildcache
+                  cache-to: |
+                      type=registry,ref=${{ env.REGISTRY }}/${{ steps.meta.outputs.repo_lc }}/${{ matrix.service.name }}:buildcache,mode=max
 
     deploy:
         runs-on: [self-hosted, linux, x64, hypercluster]
