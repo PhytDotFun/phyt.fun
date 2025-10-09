@@ -340,6 +340,7 @@ jobs:
             - name: Ensure /opt/phyt exists
               run: |
                   tailscale ssh "${TS_SSH_USER}@${TS_TARGET_STAGING}" 'sudo mkdir -p /opt/phyt && sudo chown ubuntu:ubuntu /opt/phyt'
+                  tailscale ssh "${TS_SSH_USER}@${TS_TARGET_STAGING}" 'sudo mkdir -p /var/log/phyt && sudo chown ubuntu:ubuntu /var/log/phyt'
 
             - name: Ship compose bundle to host
               run: |
