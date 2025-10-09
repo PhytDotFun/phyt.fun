@@ -94,7 +94,7 @@ until tailscale up \
 	--auth-key="${tailscale_auth_key}" \
 	--hostname="${environment}-app-${deployment_id}" \
 	--accept-routes \
-	--accept-dns=false \
+	--accept-dns=true \
 	--ssh \
 	--advertise-tags="tag:${environment}"; do
 	attempts=$((attempts + 1))
