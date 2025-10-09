@@ -122,11 +122,35 @@ dpkg -i "cloudflared-linux-$${cfd_arch}.deb" || apt-get -y -f install
 rm -f "cloudflared-linux-$${cfd_arch}.deb"
 
 # Cloudflare token install
-log "Configuring Cloudflared service..."
-# shellcheck disable=SC2154 # TF will validate and render this
-cloudflared service install --token "${cloudflare_tunnel_token}"
-systemctl enable --now cloudflared
+log "Configuring Cloudflared service (token-run)…"
+# Write token to a root-only env file
+install -d -m 0755 /etc/cloudflared
+install -m 0600 /dev/null /etc/cloudflared/env
+echo "TUNNEL_TOKEN=${cloudflare_tunnel_token}" >/etc/cloudflared/env
 unset cloudflare_tunnel_token
+
+# Create a simple systemd unit that runs the tunnel via token
+cat >/etc/systemd/system/cloudflared.service <<'EOF'
+[Unit]
+Description=Cloudflare Tunnel
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+EnvironmentFile=/etc/cloudflared/env
+ExecStart=/usr/bin/cloudflared --no-autoupdate tunnel run --token $${TUNNEL_TOKEN}
+Restart=on-failure
+RestartSec=5
+User=root
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+systemctl daemon-reload
+systemctl enable --now cloudflared
+log "Cloudflared service started"
 
 # Configure Vault Agent with ephemeral credentials
 log "Configuring Vault..."
