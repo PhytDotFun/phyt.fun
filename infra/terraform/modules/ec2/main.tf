@@ -45,6 +45,8 @@ resource "aws_instance" "app" {
 
   user_data_base64 = var.user_data
 
+  user_data_replace_on_change = true
+
   lifecycle {
     create_before_destroy = true
   }
