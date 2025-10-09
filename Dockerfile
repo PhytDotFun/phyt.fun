@@ -1,11 +1,10 @@
 ARG NODE_VERSION=22
 ARG NODE_ENV=production
-ARG GCOMPAT_VERSION=1.1.0-r4
 
 FROM node:${NODE_VERSION}-alpine AS alpine
 
 RUN apk update
-RUN apk add --no-cache gcompat=${GCOMPAT_VERSION}
+RUN apk add --no-cache gcompat
 
 FROM alpine AS base
 ENV CI=true
