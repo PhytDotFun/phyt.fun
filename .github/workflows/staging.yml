@@ -52,7 +52,12 @@ jobs:
             - name: Check for [skip build]
               id: check_skip
               run: |
-                  if [[ "${{ github.event.head_commit.message }}" == *"[skip build]"* ]]; then
+                  set -euo pipefail
+                  msg=$'${{ github.event.head_commit.message }}'
+                  if [[ -z "${msg// }" ]]; then
+                    msg=$'${{ github.event.pull_request.title || '' }}\n${{ github.event.pull_request.body || '' }}'
+                  fi
+                  if printf '%s' "$msg" | grep -Fqi '[skip build]'; then
                     echo "skipped=true" >> "$GITHUB_OUTPUT"
                   else
                     echo "skipped=false" >> "$GITHUB_OUTPUT"
