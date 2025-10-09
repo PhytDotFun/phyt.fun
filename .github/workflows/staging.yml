@@ -166,6 +166,15 @@ jobs:
                   role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
                   aws-region: ${{ env.AWS_REGION }}
 
+            - name: Get GitHub OIDC ID token
+              id: oidc
+              uses: actions/github-script@v7
+              with:
+                  script: |
+                      const aud = `https://github.com/${{ github.repository }}`;
+                      const idt = await core.getIDToken(aud);
+                      core.setOutput('jwt', idt);
+
             - name: Connect to Tailscale
               uses: tailscale/github-action@v3
               with:
@@ -178,15 +187,6 @@ jobs:
               uses: hashicorp/setup-terraform@v3
               with:
                   terraform_version: 1.13.3
-
-            - name: Get GitHub OIDC ID token
-              id: oidc
-              uses: actions/github-script@v7
-              with:
-                  script: |
-                      const aud = `https://github.com/${{ github.repository }}`;
-                      const idt = await core.getIDToken(aud);
-                      core.setOutput('jwt', idt);
 
             - name: Login to Vault via JWT
               id: vault_login
