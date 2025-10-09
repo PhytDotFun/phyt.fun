@@ -79,7 +79,7 @@ jobs:
               with:
                   registry: ${{ env.REGISTRY }}
                   username: ${{ github.actor }}
-                  password: ${{ secrets.GITHUB_TOKEN }}
+                  password: ${{ secrets.GHCR_ PAT }}
 
             - name: Build & push ${{ matrix.service.name }}
               if: steps.check_skip.outputs.skipped == 'false'
