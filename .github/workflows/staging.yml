@@ -48,6 +48,8 @@ jobs:
         steps:
             - name: Checkout
               uses: actions/checkout@v4
+              with:
+                  clean: true
 
             - name: Check for [skip build]
               id: check_skip
@@ -75,9 +77,19 @@ jobs:
                   fi
                   echo "repo_lc=$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> "$GITHUB_OUTPUT"
 
-            - name: Set up buildx
+            - name: Setup QEMU
+              if: steps.check_skip.outputs.skipped == 'false'
+              uses: docker/setup-qemu-action@v3
+              with:
+                  platforms: arm64
+
+            - name: Setup buildx
               if: steps.check_skip.outputs.skipped == 'false'
               uses: docker/setup-buildx-action@v3
+              with:
+                  driver: docker-container
+                  install: true
+                  use: true
 
             - name: Log in to GHCR
               if: steps.check_skip.outputs.skipped == 'false'
@@ -86,6 +98,13 @@ jobs:
                   registry: ${{ env.REGISTRY }}
                   username: ${{ github.actor }}
                   password: ${{ secrets.GITHUB_TOKEN }}
+
+            - name: Prepare local cache dirs
+              if: steps.check_skip.outputs.skipped == 'false'
+              run: |
+                  sudo mkdir -p /var/actions-cache
+                  sudo chown -R "$USER:$USER" /var/actions-cache
+                  mkdir -p "/var/actions-cache/buildx-cache-${{ matrix.service.name }}"
 
             - name: Build & push ${{ matrix.service.name }}
               if: steps.check_skip.outputs.skipped == 'false'
@@ -100,9 +119,24 @@ jobs:
                       ${{ env.REGISTRY }}/${{ steps.meta.outputs.repo_lc }}/${{ matrix.service.name }}:${{ steps.meta.outputs.image_tag }}
                       ${{ env.REGISTRY }}/${{ steps.meta.outputs.repo_lc }}/${{ matrix.service.name }}:staging
                   cache-from: |
-                      type=registry,ref=${{ env.REGISTRY }}/${{ steps.meta.outputs.repo_lc }}/${{ matrix.service.name }}:buildcache
+                      type=local,src=/var/actions-cache/buildx-cache-${{ matrix.service.name }}
                   cache-to: |
-                      type=registry,ref=${{ env.REGISTRY }}/${{ steps.meta.outputs.repo_lc }}/${{ matrix.service.name }}:buildcache,mode=max
+                      type=local,dest=/var/actions-cache/buildx-cache-${{ matrix.service.name }}-new,mode=max
+                  provenance: false
+                  sbom: false
+
+            - name: Rotate local buildx cache
+              if: steps.check_skip.outputs.skipped == 'false'
+              run: |
+                  set -euo pipefail
+                  src="/var/actions-cache/buildx-cache-${{ matrix.service.name }}-new"
+                  dst="/var/actions-cache/buildx-cache-${{ matrix.service.name }}"
+                  if [ -d "$src" ]; then
+                    rm -rf "$dst"
+                    mv "$src" "$dst"
+                  else
+                    echo "No new cache dir ($src); skipping rotate."
+                  fi
 
     deploy:
         runs-on: [self-hosted, linux, x64, hypercluster]
