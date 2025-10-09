@@ -24,7 +24,7 @@ jobs:
         name: build-images (${{ matrix.service.name }})
         runs-on: [self-hosted, linux, x64, hypercluster]
         concurrency:
-            group: staging-build-${{ github.ref }}-${{ matrix.service-name }}
+            group: staging-build-${{ github.ref }}-${{ matrix.service.name }}
             cancel-in-progress: true
         strategy:
             matrix:
