@@ -21,12 +21,13 @@ permissions:
 
 jobs:
     build-images:
-        name: build-images (${{ matrix.service.name }})
+        name: build ${{ matrix.service.name }} image
         runs-on: [self-hosted, linux, x64, hypercluster]
         concurrency:
             group: staging-build-${{ github.ref }}-${{ matrix.service.name }}
             cancel-in-progress: true
         strategy:
+            max-parallel: 1
             matrix:
                 service:
                     - name: hono-api
@@ -69,7 +70,7 @@ jobs:
                   fi
                   echo "repo_lc=$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> "$GITHUB_OUTPUT"
 
-            - name: Set up Buildx
+            - name: Set up buildx
               if: steps.check_skip.outputs.skipped == 'false'
               uses: docker/setup-buildx-action@v3
 
@@ -92,9 +93,17 @@ jobs:
                   platforms: linux/arm64,linux/amd64
                   tags: |
                       ${{ env.REGISTRY }}/${{ steps.meta.outputs.repo_lc }}/${{ matrix.service.name }}:${{ steps.meta.outputs.image_tag }}
-                      ${{ env.REGISTRY }}/${{ steps.meta.outputs.repo_lc }}/${{ matrix.service.name }}:latest
-                  cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ steps.meta.outputs.repo_lc }}/${{ matrix.service.name }}:buildcache
-                  cache-to: type=registry,ref=${{ env.REGISTRY }}/${{ steps.meta.outputs.repo_lc }}/${{ matrix.service.name }}:buildcache,mode=max
+                      ${{ env.REGISTRY }}/${{ steps.meta.outputs.repo_lc }}/${{ matrix.service.name }}:staging
+                  cache-from: type=local,src=/var/cache/buildx/${{ matrix.service.name }}
+                  cache-to: type=local,dest=/var/cache/buildx/${{ matrix.service.name }}-new,mode=max
+
+            - name: Rotate buildx cache
+              if: always()
+              run: |
+                  if [ -d /var/cache/buildx/${{ matrix.service.name }}-new ]; then
+                    rm -rf /var/cache/buildx/${{ matrix.service.name }}
+                    mv /var/cache/buildx/${{ matrix.service.name }}-new /var/cache/buildx/${{ matrix.service.name }}
+                  fi
 
     deploy:
         runs-on: [self-hosted, linux, x64, hypercluster]
