@@ -27,7 +27,7 @@ jobs:
             group: staging-build-${{ github.ref }}-${{ matrix.service.name }}
             cancel-in-progress: true
         strategy:
-            max-parallel: 1
+            # max-parallel: 1
             matrix:
                 service:
                     - name: hono-api
