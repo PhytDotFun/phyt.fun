@@ -8,9 +8,6 @@ services:
             VAULT_ADDR: ${VAULT_ADDR:-}
             VAULT_ROLE_ID: ${VAULT_ROLE_ID:-}
             VAULT_SECRET_ID: ${VAULT_SECRET_ID:-}
-
-            HONO_API_SECRET_PATH: secret/data/${VAULT_ENV:-staging}/hono-api
-            WORKERS_SECRET_PATH: secret/data/${VAULT_ENV:-staging}/workers
         security_opt: ['no-new-privileges:true']
         volumes:
             # Agent initialization
