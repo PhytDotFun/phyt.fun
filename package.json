@@ -44,6 +44,7 @@
         "concurrently": "catalog:",
         "husky": "catalog:",
         "lint-staged": "catalog:",
+        "neonctl": "catalog:",
         "prettier": "catalog:",
         "rimraf": "catalog:",
         "syncpack": "catalog:",

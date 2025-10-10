@@ -42,6 +42,7 @@
         "test": "vitest run"
     },
     "dependencies": {
+        "@neondatabase/serverless": "catalog:",
         "@t3-oss/env-core": "catalog:",
         "dotenv": "catalog:",
         "drizzle-orm": "catalog:",
