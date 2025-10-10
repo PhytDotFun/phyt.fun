@@ -67,23 +67,6 @@ systemctl restart docker
 systemctl enable docker
 log "Docker ready"
 
-log "Installing Postgres..."
-apt-get install -y postgresql postgresql-contrib
-systemctl enable postgresql
-systemctl start postgresql
-
-sudo -u postgres psql -v ON_ERROR_STOP=1 -c "CREATE DATABASE phyt_staging;"
-log "Postgres database created (user setup deferred)"
-
-log "Configuring Postgres network access..."
-# Listen on localhost + docker bridge gateway
-sudo sed -i "s/#listen_addresses = 'localhost'/listen_addresses = 'localhost,172.20.0.1'/" /etc/postgresql/*/main/postgresql.conf
-
-echo "host all all 172.20.0.0/16 md5" | sudo tee -a /etc/postgresql/*/main/pg_hba.conf
-
-sudo systemctl reload postgresql
-log "PostgreSQL network configuration complete"
-
 log "Installing Tailscale..."
 curl -fsSL https://tailscale.com/install.sh | sh
 systemctl enable --now tailscaled
@@ -162,48 +145,6 @@ mkdir -p /etc/vault
 
 # shellcheck disable=SC2154 # TF will validate and template this
 echo "export VAULT_ADDR=${vault_addr}" >>/etc/environment
-
-# Spot instance termination handler (graceful shutdown only)
-# cat >/usr/local/bin/spot-handler.sh <<'HANDLER_SCRIPT'
-# #!/bin/bash
-# set -euo pipefail
-#
-# while true; do
-#   if curl -s -f http://169.254.169.254/latest/meta-data/spot/termination-time >/dev/null 2>&1; then
-#     echo "$(date): Spot termination notice received!" >> /var/log/spot-handler.log
-#     # Attempt a graceful down with the staging profile
-#     if [ -d /opt/phyt ]; then
-#       cd /opt/phyt
-#       docker compose --profile "$${COMPOSE_PROFILES:-staging}" down || true
-#     fi
-#     break
-#   fi
-#   sleep 5
-# done
-# HANDLER_SCRIPT
-# chmod +x /usr/local/bin/spot-handler.sh
-
-# Create systemd service for spot handler
-# cat >/etc/systemd/system/spot-handler.service <<'EOF'
-# [Unit]
-# Description=Spot Instance Termination Handler
-# After=network.target
-#
-# [Service]
-# Type=simple
-# ExecStart=/usr/local/bin/spot-handler.sh
-# Restart=always
-# RestartSec=5
-# StandardOutput=journal
-# StandardError=journal
-#
-# [Install]
-# WantedBy=multi-user.target
-# EOF
-#
-# systemctl daemon-reload
-# systemctl enable spot-handler
-# systemctl start spot-handler
 
 unset cloudflare_tunnel_token tailscale_auth_key
 
