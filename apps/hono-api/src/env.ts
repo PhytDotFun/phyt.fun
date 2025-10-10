@@ -6,6 +6,9 @@ export const env = createEnv({
     server: {
         NODE_ENV: z.enum(['dev', 'prod', 'test', 'staging']).default('dev'),
         CORS_ORIGIN: z.string(),
+        LOG_LEVEL: z
+            .enum(['trace', 'debug', 'info', 'warn', 'error'])
+            .default('info'),
         PORT: z.coerce.number(),
         PRIVY_APP_ID: z.string(),
         PRIVY_SECRET_KEY: z.string(),
