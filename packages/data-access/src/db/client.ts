@@ -1,10 +1,7 @@
-import { Pool } from 'pg';
-import { drizzle } from 'drizzle-orm/node-postgres';
-
-export function createPgClient(connectionString: string) {
-    return new Pool({ connectionString });
-}
+import { neon } from '@neondatabase/serverless';
+import { drizzle } from 'drizzle-orm/neon-http';
 
 export function createDb(connectionString: string) {
-    return drizzle(connectionString);
+    const sql = neon(connectionString);
+    return drizzle({ client: sql });
 }
