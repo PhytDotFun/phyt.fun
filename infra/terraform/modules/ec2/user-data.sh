@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 
-LOG_DIR=/var/log
+LOG_DIR=/var/log/phyt
 LOGFILE=$LOG_DIR/user-data.log
 mkdir -p "$LOG_DIR"
 exec > >(tee -a "$LOGFILE") 2>&1

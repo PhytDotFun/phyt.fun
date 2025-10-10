@@ -19,8 +19,8 @@ req() { : "${!1:?Environment variable "$1" must be set}"; }
 # Required environment variables
 req IMAGE_REGISTRY
 req GITHUB_REPOSITORY
-req IMAGE_TAG
 req COMPOSE_PROFILES
+req DEPLOYMENT_ID
 req VAULT_ADDR
 req VAULT_ROLE_ID
 req VAULT_SECRET_ID
@@ -32,7 +32,7 @@ COMPOSE="docker compose"
 export COMPOSE_PROFILES
 export IMAGE_REGISTRY
 export GITHUB_REPOSITORY
-export IMAGE_TAG
+export DEPLOYMENT_ID
 export VAULT_ADDR
 export VAULT_ROLE_ID
 export VAULT_SECRET_ID
@@ -45,17 +45,18 @@ cat >"${ENV_FILE}" <<EOF
 # To get Docker to shut the fuck up about GITHUB_REPOSITORY
 GITHUB_REPOSITORY=${GITHUB_REPOSITORY}
 IMAGE_REGISTRY=${IMAGE_REGISTRY}
-IMAGE_TAG=${IMAGE_TAG}
 COMPOSE_PROFILES=${COMPOSE_PROFILES}
 VAULT_ADDR=${VAULT_ADDR}
 VAULT_ENV=${VAULT_ENV}
+DEPLOYMENT_ID=${SHORT_SHA}
 EOF
 
-log "Starting remote deploy"
+log "======================================"
+log "Starting remote-deploy script"
 log "Working dir: ${ROOT}"
 log "Profiles: ${COMPOSE_PROFILES}"
-log "Repo: ${GITHUB_REPOSITORY}"
-log "Tag: ${IMAGE_TAG}"
+log "Deployment ID: ${DEPLOYMENT_ID}"
+log "====================================="
 
 [ -d "$ROOT" ] || die "Directory ${ROOT} not found"
 cd "$ROOT"
