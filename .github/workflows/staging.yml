@@ -27,7 +27,7 @@ jobs:
             group: staging-build-${{ github.ref }}-${{ matrix.service.name }}
             cancel-in-progress: true
         strategy:
-            # max-parallel: 1
+            max-parallel: 1
             matrix:
                 service:
                     - name: hono-api
@@ -100,7 +100,12 @@ jobs:
               run: |
                   sudo mkdir -p /var/actions-cache
                   sudo chown -R "$USER:$USER" /var/actions-cache
-                  mkdir -p "/var/actions-cache/buildx-cache-${{ matrix.service.name }}"
+                  CACHE_DIR="/var/actions-cache/buildx-cache-${{ matrix.service.name }}"
+                  mkdir -p "$CACHE_DIR"
+
+                  if [ ! -f "$CACHE_DIR/index.json" ]; then
+                    echo '{"version":1,"records":[]}' > "$CACHE_DIR/index.json"
+                  fi
 
             - name: Build & push ${{ matrix.service.name }}
               if: steps.check_skip.outputs.skipped == 'false'
