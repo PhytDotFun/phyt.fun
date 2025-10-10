@@ -70,11 +70,7 @@ jobs:
               run: |
                   SHORT_SHA=${GITHUB_SHA::7}
                   echo "short_sha=${SHORT_SHA}" >> "$GITHUB_OUTPUT"
-                  if [[ '${{ steps.check_skip.outputs.skipped }}' == 'true' ]]; then
-                    echo "image_tag=staging" >> "$GITHUB_OUTPUT"
-                  else
-                    echo "image_tag=staging-${SHORT_SHA}" >> "$GITHUB_OUTPUT"
-                  fi
+                  echo "image_tag=staging-${SHORT_SHA}" >> "$GITHUB_OUTPUT"
                   echo "repo_lc=$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> "$GITHUB_OUTPUT"
 
             - name: Setup QEMU
@@ -151,7 +147,6 @@ jobs:
             contents: read
             packages: read
         env:
-            IMAGE_TAG: ${{ needs.build-images.outputs.image_tag }}
             SHORT_SHA: ${{ needs.build-images.outputs.short_sha }}
             REPO_LC: ${{ needs.build-images.outputs.repo_lc }}
             TS_SSH_DEST_STAGING: staging-app-${{ needs.build-images.outputs.short_sha }}
@@ -359,8 +354,8 @@ jobs:
                   tailscale ssh "${TS_SSH_USER}@${TS_TARGET_STAGING}" \
                     IMAGE_REGISTRY="${{ env.REGISTRY }}" \
                     GITHUB_REPOSITORY="${{ env.REPO_LC }}" \
-                    IMAGE_TAG="${{ env.IMAGE_TAG }}" \
                     COMPOSE_PROFILES="staging" \
+                    DEPLOYMENT_ID="${{ env.SHORT_SHA }}" \
                     VAULT_ENV="staging" \
                     VAULT_ADDR="${{ env.VAULT_ADDR }}" \
                     VAULT_ROLE_ID="${{ env.ROLE_ID }}" \
