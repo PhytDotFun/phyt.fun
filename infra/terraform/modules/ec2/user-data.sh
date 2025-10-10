@@ -15,7 +15,7 @@ die() {
 
 log "======================================"
 log "Starting staging user-data script"
-# shellcheck disable=SC2154 # TF will validate and render this
+# shellcheck disable=SC2154 # TF will validate and template this
 log "Deployment ID: ${deployment_id}"
 log "====================================="
 
@@ -89,7 +89,7 @@ curl -fsSL https://tailscale.com/install.sh | sh
 systemctl enable --now tailscaled
 attempts=0
 
-# shellcheck disable=SC2154 # TF will validate and render this
+# shellcheck disable=SC2154 # TF will validate and template this
 until tailscale up \
 	--auth-key="${tailscale_auth_key}" \
 	--hostname="${environment}-app-${deployment_id}" \
@@ -114,7 +114,10 @@ log "Installing cloudflared…"
 arch="$(uname -m)"
 case "$arch" in
 aarch64 | arm64) cfd_arch="arm64" ;;
-x86_64 | amd64) cfd_arch="amd64" ;;
+x86_64 | amd64)
+	# shellcheck disable=SC2034 # TF will validate and template this
+	cfd_arch="amd64"
+	;;
 *) die "Unsupported architecture: $arch" ;;
 esac
 wget -q "https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-$${cfd_arch}.deb"
@@ -126,6 +129,7 @@ log "Configuring Cloudflared service (token-run)…"
 # Write token to a root-only env file
 install -d -m 0755 /etc/cloudflared
 install -m 0600 /dev/null /etc/cloudflared/env
+# shellcheck disable=SC2154 # TF will validate and template this
 echo "TUNNEL_TOKEN=${cloudflare_tunnel_token}" >/etc/cloudflared/env
 unset cloudflare_tunnel_token
 
@@ -156,7 +160,7 @@ log "Cloudflared service started"
 log "Configuring Vault..."
 mkdir -p /etc/vault
 
-# shellcheck disable=SC2154 # TF will validate and render this
+# shellcheck disable=SC2154 # TF will validate and template this
 echo "export VAULT_ADDR=${vault_addr}" >>/etc/environment
 
 # Spot instance termination handler (graceful shutdown only)
