@@ -1,5 +1,11 @@
-{{- with secret (env "WORKERS_SECRET_PATH") -}}
+{{- with secret "secret/staging/workers" -}}
 {{- range $k, $v := .Data.data -}}
 {{- printf "%s=%v\n" $k $v -}}
 {{- end -}}
 {{- end -}}
+{{- with secret "secret/staging/neon" -}}
+{{- range $k, $v := .Data.data -}}
+{{- printf "%s=%v\n" $k $v -}}
+{{- end -}}
+{{- end -}}
+
