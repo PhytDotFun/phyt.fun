@@ -35,11 +35,14 @@ jobs:
                       context: .
                       buildargs: |
                           PROJECT=hono-api
+                          BUILD_TIMESTAMP=${{ github.event.head_commit.timestamp }}
                     - name: workers
                       dockerfile: Dockerfile
                       context: .
                       buildargs: |
                           PROJECT=workers
+                          BUILD_TIMESTAMP=${{ github.event.head_commit.timestamp }}
+
         outputs:
             skipped: ${{ steps.check_skip.outputs.skipped }}
             image_tag: ${{ steps.meta.outputs.image_tag }}

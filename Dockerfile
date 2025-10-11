@@ -13,6 +13,7 @@ RUN pnpm config set store-dir ~/.pnpm-store
 
 FROM base AS pruner
 ARG PROJECT
+ARG BUILD_TIMESTAMP
 
 WORKDIR /app
 COPY . .
@@ -49,7 +50,10 @@ COPY --from=builder --chown=nodejs:nodejs /app .
 WORKDIR /app/apps/${PROJECT}
 
 ARG PORT=8080
-ENV PORT=${PORT}
 EXPOSE ${PORT}
+
+ENV PORT=${PORT}
+ENV BUILD_TIMESTAMP=${BUILD_TIMESTAMP}
+
 
 CMD ["node", "dist/index.js"]
