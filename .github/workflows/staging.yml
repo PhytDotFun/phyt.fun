@@ -368,4 +368,6 @@ jobs:
                     VAULT_ADDR="${{ env.VAULT_ADDR }}" \
                     VAULT_ROLE_ID="${{ env.ROLE_ID }}" \
                     VAULT_SECRET_ID="${{ env.SECRET_ID }}" \
+                    GHCR_TOKEN="${{ secrets.GITHUB_TOKEN }}" \
+                    GHCR_USER="${{ github.actor }}" \
                     'bash -lc "/opt/phyt/deploy/remote-deploy.sh"'

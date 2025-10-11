@@ -55,5 +55,4 @@ EXPOSE ${PORT}
 ENV PORT=${PORT}
 ENV BUILD_TIMESTAMP=${BUILD_TIMESTAMP}
 
-
 CMD ["node", "dist/index.js"]

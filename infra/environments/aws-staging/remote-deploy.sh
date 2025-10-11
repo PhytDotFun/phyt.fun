@@ -25,6 +25,8 @@ req VAULT_ADDR
 req VAULT_ROLE_ID
 req VAULT_SECRET_ID
 req VAULT_ENV
+req GHCR_TOKEN
+req GHCR_USER
 
 ROOT="/opt/phyt"
 COMPOSE="docker compose"
@@ -37,6 +39,8 @@ export VAULT_ADDR
 export VAULT_ROLE_ID
 export VAULT_SECRET_ID
 export VAULT_ENV
+export GHCR_TOKEN
+export GHCR_USER
 
 ENV_FILE="${ROOT}/.env"
 umask 077
@@ -48,6 +52,8 @@ IMAGE_REGISTRY=${IMAGE_REGISTRY}
 COMPOSE_PROFILES=${COMPOSE_PROFILES}
 VAULT_ADDR=${VAULT_ADDR}
 VAULT_ENV=${VAULT_ENV}
+GHCR_TOKEN=${GHCR_TOKEN}
+GHCR_USER=${GHCR_USER}
 EOF
 
 log "======================================"
