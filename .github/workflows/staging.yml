@@ -363,6 +363,7 @@ jobs:
                     IMAGE_REGISTRY="${{ env.REGISTRY }}" \
                     GITHUB_REPOSITORY="${{ env.REPO_LC }}" \
                     COMPOSE_PROFILES="staging" \
+                    IMAGE_TAG="staging-${{ env.SHORT_SHA }}" \
                     DEPLOYMENT_ID="${{ env.SHORT_SHA }}" \
                     VAULT_ENV="staging" \
                     VAULT_ADDR="${{ env.VAULT_ADDR }}" \
