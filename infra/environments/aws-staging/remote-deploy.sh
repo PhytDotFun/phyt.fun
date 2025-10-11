@@ -63,6 +63,11 @@ cd "$ROOT"
 command -v docker >/dev/null 2>&1 || die "docker not installed"
 docker version >/dev/null 2>&1 || die "docker daemon not responding"
 
+if [[ -n "${GHCR_TOKEN-}" ]]; then
+	log "Authenticating to GitHub Container Registry…"
+	echo "${GHCR_TOKEN}" | docker login ghcr.io -u "${GHCR_USER:-github-actions}" --password-stdin >/dev/null 2>&1 || die "Failed to login to GHCR"
+fi
+
 log "Rendering compose config…"
 $COMPOSE config -o /tmp/compose.yml >/dev/null || die "Failed to render docker config"
 
