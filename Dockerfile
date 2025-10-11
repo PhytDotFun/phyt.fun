@@ -13,7 +13,6 @@ RUN pnpm config set store-dir ~/.pnpm-store
 
 FROM base AS pruner
 ARG PROJECT
-ARG BUILD_TIMESTAMP
 
 WORKDIR /app
 COPY . .
@@ -40,6 +39,7 @@ RUN rm -rf ./**/*/src
 
 FROM alpine AS runner
 ARG PROJECT
+ARG BUILD_TIMESTAMP
 
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nodejs
