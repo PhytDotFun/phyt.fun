@@ -47,7 +47,7 @@ resource "aws_iam_role_policy" "cloudwatch_metrics" {
       Effect   = "Allow",
       Action   = ["cloudwatch:PutMetricData"],
       Resource = "*"
-      # Optional namespace guard if you plan to use one namespace per env:
+      # Optional namespace guard if plan to use one namespace per env:
       # ,Condition = { StringEquals = { "cloudwatch:namespace" : var.environment } }
     }]
   })

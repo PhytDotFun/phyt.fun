@@ -13,11 +13,11 @@ variable "vpc_id" {
   type        = string
 }
 
-variable "allow_http_egress" {
-  description = "Allow outbound HTTP (80/tcp) for package mirrors"
-  type        = bool
-  default     = true
-}
+# variable "allow_http_egress" {
+#   description = "Allow outbound HTTP (80/tcp) for package mirrors"
+#   type        = bool
+#   default     = true
+# }
 
 variable "extra_tags" {
   description = "Additional tags to add to the security group"

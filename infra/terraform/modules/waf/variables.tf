@@ -26,17 +26,17 @@ variable "blocked_countries" {
   default     = []
 }
 
-variable "enable_bot_challenge" {
-  description = "Enable managed challenge for low bot scores"
-  type        = bool
-  default     = true
-}
-
-variable "bot_score_threshold" {
-  description = "Threshold for bot challenge (0-100, lower is stricter)"
-  type        = number
-  default     = 30
-}
+# variable "enable_bot_challenge" {
+#   description = "Enable managed challenge for low bot scores"
+#   type        = bool
+#   default     = true
+# }
+#
+# variable "bot_score_threshold" {
+#   description = "Threshold for bot challenge (0-100, lower is stricter)"
+#   type        = number
+#   default     = 30
+# }
 
 variable "name_suffix" {
   description = "Optional suffix for ruleset name"

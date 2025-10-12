@@ -10,7 +10,6 @@ terraform {
 }
 
 locals {
-  # Extract the subdomain from hostname (e.g., "staging" from "staging.phyt.fun")
   record_name = split(".", var.hostname)[0]
 }
 

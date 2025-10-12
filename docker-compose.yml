@@ -56,8 +56,7 @@ services:
 
     hono-api:
         image: ${IMAGE_REGISTRY:-ghcr.io}/${GITHUB_REPOSITORY}/hono-api:${IMAGE_TAG:-latest}
-        # No container_name -> scale to >= 2 instances
-        # docker compose up -d --scale hono-api=2 nginx
+        container_name: ${COMPOSE_PROJECT_NAME:-phyt}-workers
         depends_on:
             vault-agent: { condition: service_healthy }
             redis: { condition: service_healthy }
@@ -113,33 +112,6 @@ services:
         extra_hosts:
             - 'host.docker.internal:host-gateway'
         profiles: ['dev', 'staging', 'prod']
-        restart: ${RESTART_POLICY:-unless-stopped}
-
-    nginx:
-        image: nginx:alpine
-        depends_on:
-            hono-api:
-                condition: service_healthy
-        ports:
-            - '${NGINX_BIND_HOST:-127.0.0.1}:${NGINX_BIND_PORT:-8080}:8080'
-        volumes:
-            - ./tooling/nginx/staging.nginx.conf:/templates/staging.nginx.conf:ro
-            - ./tooling/nginx/prod.nginx.conf:/templates/prod.nginx.conf:ro
-            - ./tooling/ops/nginx-entrypoint.sh:/docker-entrypoint.d/99-nginx-mode.sh:ro
-        environment:
-            NGINX_MODE: ${NGINX_MODE:-staging}
-        healthcheck:
-            test:
-                [
-                    'CMD-SHELL',
-                    'wget -qO- http://127.0.0.1:8080/nginx-health >/dev/null || exit 1'
-                ]
-            interval: 10s
-            timeout: 3s
-            retries: 10
-        networks:
-            - phyt
-        profiles: ['staging', 'prod']
         restart: ${RESTART_POLICY:-unless-stopped}
 
 networks:
