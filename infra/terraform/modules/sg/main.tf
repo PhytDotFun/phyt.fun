@@ -19,48 +19,18 @@ locals {
 
 resource "aws_security_group" "app" {
   name_prefix = "${var.environment}-app-sg-"
-  description = "Egress-only SG for app host behind Cloudflare Tunnel"
+  description = "Security group for staging app EC2 box"
   vpc_id      = var.vpc_id
 
-  # Intentionally no ingress (all access via outbound Cloudflare Tunnel)
+  # no ingress
 
-  # Cloudflare Tunnel QUIC
+  # just allow all outbound (restrict w/ NACL)
   egress {
-    from_port   = 7844
-    to_port     = 7844
-    protocol    = "udp"
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
-    description = "Cloudflare Tunnel (QUIC)"
-  }
-
-  # HTTPS (cloudflared, SaaS APIs, SSM, package repos over TLS)
-  egress {
-    from_port   = 443
-    to_port     = 443
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-    description = "HTTPS"
-  }
-
-  # DNS
-  egress {
-    from_port   = 53
-    to_port     = 53
-    protocol    = "udp"
-    cidr_blocks = ["0.0.0.0/0"]
-    description = "DNS"
-  }
-
-  # Optional: HTTP for package mirrors
-  dynamic "egress" {
-    for_each = var.allow_http_egress ? [1] : []
-    content {
-      from_port   = 80
-      to_port     = 80
-      protocol    = "tcp"
-      cidr_blocks = ["0.0.0.0/0"]
-      description = "HTTP (package mirrors)"
-    }
+    description = "Allow all outbound traffic"
   }
 
   lifecycle { create_before_destroy = true }
