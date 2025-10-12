@@ -16,6 +16,128 @@ module "vpc" {
 }
 
 ########################
+# VPC Network Access List (NACL)
+########################
+module "nacl" {
+  source = "../../terraform/modules/nacl"
+
+  environment   = var.environment
+  deployment_id = var.deployment_id
+  vpc_id        = module.vpc.vpc_id
+  subnet_ids    = [module.vpc.public_subnet_id]
+
+  ingress_rules = [
+    {
+      rule_number = 100
+      protocol    = "tcp"
+      rule_action = "allow"
+      cidr_block  = "0.0.0.0/0"
+      from_port   = 1024
+      to_port     = 65535
+    },
+    {
+      rule_number = 101
+      protocol    = "udp"
+      rule_action = "allow"
+      cidr_block  = "0.0.0.0/0"
+      from_port   = 1024
+      to_port     = 65535
+    },
+    {
+      rule_number = 110
+      protocol    = "tcp"
+      rule_action = "allow"
+      cidr_block  = "0.0.0.0/0"
+      from_port   = 22
+      to_port     = 22
+    },
+    {
+      rule_number = 120
+      protocol    = "udp"
+      rule_action = "allow"
+      cidr_block  = "0.0.0.0/0"
+      from_port   = 53
+      to_port     = 53
+    },
+    {
+      rule_number = 121
+      protocol    = "tcp"
+      rule_action = "allow"
+      cidr_block  = "0.0.0.0/0"
+      from_port   = 53
+      to_port     = 53
+    }
+  ]
+
+  egress_rules = [
+    {
+      rule_number = 100
+      protocol    = "tcp"
+      rule_action = "allow"
+      cidr_block  = "0.0.0.0/0"
+      from_port   = 443
+      to_port     = 443
+    },
+    {
+      rule_number = 101
+      protocol    = "tcp"
+      rule_action = "allow"
+      cidr_block  = "0.0.0.0/0"
+      from_port   = 80
+      to_port     = 80
+    },
+    {
+      rule_number = 110
+      protocol    = "tcp"
+      rule_action = "allow"
+      cidr_block  = "0.0.0.0/0"
+      from_port   = 7844
+      to_port     = 7844
+    },
+    {
+      rule_number = 120
+      protocol    = "tcp"
+      rule_action = "allow"
+      cidr_block  = "0.0.0.0/0"
+      from_port   = 1024
+      to_port     = 65535
+    },
+    {
+      rule_number = 121
+      protocol    = "udp"
+      rule_action = "allow"
+      cidr_block  = "0.0.0.0/0"
+      from_port   = 1024
+      to_port     = 65535
+    },
+    {
+      rule_number = 130
+      protocol    = "tcp"
+      rule_action = "allow"
+      cidr_block  = "0.0.0.0/0"
+      from_port   = 53
+      to_port     = 53
+    },
+    {
+      rule_number = 131
+      protocol    = "udp"
+      rule_action = "allow"
+      cidr_block  = "0.0.0.0/0"
+      from_port   = 53
+      to_port     = 53
+    },
+    {
+      rule_number = 140
+      protocol    = "udp"
+      rule_action = "allow"
+      cidr_block  = "0.0.0.0/0"
+      from_port   = 123
+      to_port     = 123
+    }
+  ]
+}
+
+########################
 # Security Groups
 ########################
 module "sg" {
