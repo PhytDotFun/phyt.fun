@@ -33,7 +33,7 @@ resource "cloudflare_zero_trust_tunnel_cloudflared_config" "this" {
   tunnel_id  = cloudflare_zero_trust_tunnel_cloudflared.this.id
 
   config = {
-    ingress_rule = [
+    ingress = [
       {
         hostname = var.hostname
         service  = var.service_url
