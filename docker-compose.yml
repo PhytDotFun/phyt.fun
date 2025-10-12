@@ -56,7 +56,7 @@ services:
 
     hono-api:
         image: ${IMAGE_REGISTRY:-ghcr.io}/${GITHUB_REPOSITORY}/hono-api:${IMAGE_TAG:-latest}
-        container_name: ${COMPOSE_PROJECT_NAME:-phyt}-workers
+        container_name: ${COMPOSE_PROJECT_NAME:-phyt}-hono-api
         depends_on:
             vault-agent: { condition: service_healthy }
             redis: { condition: service_healthy }
