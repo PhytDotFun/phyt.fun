@@ -2,7 +2,12 @@
     "$schema": "https://turborepo.com/schema.json",
     "globalDependencies": ["**/.env.*", "**/.env"],
     "ui": "tui",
-    "globalEnv": ["NODE_ENV", "VITE_PRIVY_CLIENT_ID", "VITE_PRIVY_APP_ID"],
+    "globalEnv": [
+        "NODE_ENV",
+        "VITE_PRIVY_CLIENT_ID",
+        "VITE_PRIVY_APP_ID",
+        "ENV_PATH"
+    ],
     "tasks": {
         "build": {
             "dependsOn": ["^build"],
