@@ -187,13 +187,13 @@ module "staging_instance" {
 # Cloudflare
 ########################
 module "tunnel" {
-  source        = "../../terraform/modules/tunnel"
+  source        = "./modules/cloudflare-tunnel"
+  account_id    = var.account_id
   environment   = var.environment
   deployment_id = var.deployment_id
-  account_id    = data.vault_kv_secret_v2.cloudflare.data["ACCOUNT_ID"]
-  zone_id       = data.vault_kv_secret_v2.cloudflare.data["ZONE_ID"]
-  hostname      = "staging.phyt.fun"
-  service_url   = "http://127.0.0.1:8080"
+
+  hostname    = "staging.phyt.fun"
+  service_url = "http://localhost:8080"
 }
 
 module "dns" {

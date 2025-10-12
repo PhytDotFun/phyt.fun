@@ -29,7 +29,6 @@ resource "cloudflare_zero_trust_tunnel_cloudflared" "this" {
 }
 
 resource "cloudflare_zero_trust_tunnel_cloudflared_config" "this" {
-  count      = var.hostname != "" ? 1 : 0
   account_id = var.account_id
   tunnel_id  = cloudflare_zero_trust_tunnel_cloudflared.this.id
 

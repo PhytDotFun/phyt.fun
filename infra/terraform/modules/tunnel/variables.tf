@@ -25,9 +25,13 @@ variable "zone_id" {
 }
 
 variable "hostname" {
-  description = "Optional hostname to route via this tunnel (e.g., staging.example.com)"
+  description = "FQDN to route via this tunnel (e.g., staging.phyt.fun)"
   type        = string
-  default     = ""
+
+  validation {
+    condition     = can(regex("^([a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,}$", var.hostname))
+    error_message = "Hostname must be a fully-qualified domain name"
+  }
 }
 
 variable "service_url" {
