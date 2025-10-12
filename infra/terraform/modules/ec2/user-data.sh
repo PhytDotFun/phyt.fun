@@ -126,7 +126,7 @@ Wants=network-online.target
 [Service]
 Type=simple
 EnvironmentFile=/etc/cloudflared/env
-ExecStart=/usr/bin/cloudflared --no-autoupdate tunnel run --token $${TUNNEL_TOKEN}
+ExecStart=/usr/bin/cloudflared --no-autoupdate --loglevel debug --protocol http2 tunnel run --token $${TUNNEL_TOKEN}
 Restart=on-failure
 RestartSec=5
 User=root
