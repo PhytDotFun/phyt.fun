@@ -1,4 +1,3 @@
-import 'dotenv/config';
 import chalk from 'chalk';
 import { serve } from '@hono/node-server';
 
