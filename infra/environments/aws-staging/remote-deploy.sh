@@ -90,5 +90,6 @@ if [[ -n "${GHCR_TOKEN-}" ]]; then
 	docker logout ghcr.io >/dev/null 2>&1 || true
 fi
 
-log "Deploy complete - services started"
-log "Use 'docker compose ps' and 'docker compose logs <service>' to monitor health"
+log "======================================"
+log "remote-deploy script completed successfully"
+log "====================================="

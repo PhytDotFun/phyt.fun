@@ -151,5 +151,4 @@ unset cloudflare_tunnel_token tailscale_auth_key
 touch /var/lib/cloud/instance/boot-finished
 log "======================================"
 log "Staging user-data script completed successfully"
-log "Deployment ID: ${deployment_id}"
 log "======================================"
