@@ -27,7 +27,7 @@ COPY --from=pruner /app/out/full/ .
 COPY --from=pruner /app/tooling/tsconfig ./tooling/tsconfig
 RUN turbo build --filter=@phyt/${PROJECT}
 
-RUN pnpm --filter=@phyt/${PROJECT} deploy /app/deploy --prod
+RUN pnpm --filter=@phyt/${PROJECT} deploy /app/deploy --prod --legacy
 
 FROM alpine AS runner
 ARG PROJECT
