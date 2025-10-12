@@ -67,7 +67,7 @@ services:
         entrypoint:
             ['/usr/local/bin/wait-for-secrets.sh', 'node', 'dist/index.js']
         environment:
-            WAIT_FOR_SECRET_FILE: /secrets/hono-api/hono-api.env
+            ENV_PATH: /secrets/hono-api/hono-api.env
             WAIT_FOR_SECRET_TIMEOUT: '180'
             HOST: 0.0.0.0
             PORT: '3000'
@@ -104,7 +104,7 @@ services:
         entrypoint:
             ['/usr/local/bin/wait-for-secrets.sh', 'node', 'dist/index.js']
         environment:
-            WAIT_FOR_SECRET_FILE: /secrets/workers/workers.env
+            ENV_PATH: /secrets/workers/workers.env
             WAIT_FOR_SECRET_TIMEOUT: '180'
         init: true
         stop_grace_period: 15s
