@@ -69,8 +69,9 @@ app.route(env.PRIVY_WEBHOOK_ENDPOINT, privyWebhook);
 
 app.use('*', authMiddleware);
 
+// Serve at api.phyt.fun
 app.use(
-    '/api/*',
+    '*',
     trpcServer({
         router: apiRouter,
         createContext: createContext,
