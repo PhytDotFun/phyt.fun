@@ -25,7 +25,7 @@ variable "zone_id" {
 }
 
 variable "hostname" {
-  description = "FQDN to route via this tunnel (e.g., staging.phyt.fun)"
+  description = "FQDN to route via this tunnel"
   type        = string
 
   validation {

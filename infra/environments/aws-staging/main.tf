@@ -192,7 +192,7 @@ module "tunnel" {
   deployment_id = var.deployment_id
   account_id    = data.vault_kv_secret_v2.cloudflare.data["ACCOUNT_ID"]
   zone_id       = data.vault_kv_secret_v2.cloudflare.data["ZONE_ID"]
-  hostname      = "staging.phyt.fun"
+  hostname      = "staging.api.phyt.fun"
   service_url   = "http://localhost:8080"
 }
 
@@ -200,9 +200,14 @@ module "dns" {
   source        = "../../terraform/modules/dns"
   environment   = var.environment
   deployment_id = var.deployment_id
-  zone_id       = data.vault_kv_secret_v2.cloudflare.data["ZONE_ID"]
-  tunnel_id     = module.tunnel.tunnel_id
-  hostname      = "staging.phyt.fun"
+
+  zone_id   = data.vault_kv_secret_v2.cloudflare.data["ZONE_ID"]
+  tunnel_id = module.tunnel.tunnel_id
+  hostname  = "staging.api.phyt.fun"
+
+  account_id         = data.vault_kv_secret_v2.cloudflare.data["ACCOUNT_ID"]
+  pages_project_name = "phyt-staging-web"
+  pages_domain_name  = "staging.phyt.fun"
 }
 
 module "waf" {
@@ -210,7 +215,7 @@ module "waf" {
   environment = var.environment
   zone_id     = data.vault_kv_secret_v2.cloudflare.data["ZONE_ID"]
 
-  hostname          = "staging.phyt.fun"
+  hostname          = "staging.api.phyt.fun"
   allowed_ips       = []
   blocked_countries = []
 }

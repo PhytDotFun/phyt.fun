@@ -19,7 +19,7 @@ variable "tunnel_id" {
 }
 
 variable "hostname" {
-  description = "Full hostname for the DNS record (e.g., staging.phyt.fun)"
+  description = "Full hostname for the DNS record"
   type        = string
 }
 
@@ -33,4 +33,21 @@ variable "ttl" {
   description = "Time to live; 1 means 'auto'"
   type        = number
   default     = 1
+}
+
+variable "account_id" {
+  description = "Cloudflare Account ID"
+  type        = string
+}
+
+variable "pages_project_name" {
+  description = "Cloudflare Pages project name"
+  type        = string
+  default     = ""
+}
+
+variable "pages_domain_name" {
+  description = "Custom domain for Pages"
+  type        = string
+  default     = ""
 }
