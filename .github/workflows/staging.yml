@@ -453,11 +453,10 @@ jobs:
                   corepack prepare pnpm@10.0.0 --activate
 
             - name: Install dependencies
-              run: pnpm -w install --frozen-lockfile
+              run: pnpm install --frozen-lockfile --ignore-scripts
 
             - name: Build web
-              working-directory: web
-              run: pnpm build
+              run: pnpm turbo build --filter=web
 
             - name: Deploy to Cloudflare Pages
               uses: cloudflare/pages-action@v1
