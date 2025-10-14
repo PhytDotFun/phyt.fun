@@ -210,7 +210,7 @@ module "dns" {
   pages_domain_name  = "staging.phyt.fun"
 }
 
-module "waf-api" {
+module "waf_api" {
   source      = "../../terraform/modules/waf"
   environment = var.environment
   zone_id     = data.vault_kv_secret_v2.cloudflare.data["ZONE_ID"]
@@ -224,7 +224,7 @@ module "waf-api" {
   blocked_countries = []
 }
 
-module "waf-web" {
+module "waf_web" {
   source      = "../../terraform/modules/waf"
   environment = var.environment
   zone_id     = data.vault_kv_secret_v2.cloudflare.data["ZONE_ID"]
