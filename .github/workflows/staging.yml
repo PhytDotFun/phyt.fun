@@ -456,7 +456,7 @@ jobs:
               run: pnpm install --frozen-lockfile --ignore-scripts
 
             - name: Build web
-              run: pnpm turbo build --filter=web
+              run: pnpm turbo build --filter=@phyt/web
 
             - name: Deploy to Cloudflare Pages
               uses: cloudflare/pages-action@v1
