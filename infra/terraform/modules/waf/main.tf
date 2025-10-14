@@ -10,13 +10,33 @@ terraform {
 }
 
 locals {
-  host_expr = trimspace(var.hostname) != "" ? "(http.host eq \"${var.hostname}\") and " : ""
+  allow_rules = length(var.allowed_ips) > 0 ? [
+    for hostname in var.hostnames : {
+      description       = "Allow trusted IPs for ${hostname}"
+      expression        = "(http.host eq \"${hostname}\") and ip.src in {${join(" ", var.allowed_ips)}}"
+      action            = "skip"
+      enabled           = true
+      action_parameters = { ruleset = "current" }
+    }
+  ] : []
 
-  allow_ips_expr = length(var.allowed_ips) > 0 ? "${local.host_expr}ip.src in {${join(" ", var.allowed_ips)}}" : null
+  geo_block_rules = length(var.blocked_countries) > 0 ? [
+    for hostname in var.hostnames : {
+      description = "Block specified countries for ${hostname}"
+      expression  = "(http.host eq \"${hostname}\") and ip.geoip.country in {${join(" ", [for c in var.blocked_countries : format("\"%s\"", c)])}}"
+      action      = "block"
+      enabled     = true
+    }
+  ] : []
 
-  geo_block_expr = length(var.blocked_countries) > 0 ? "${local.host_expr}ip.geoip.country in {${join(" ", [for c in var.blocked_countries : format("\"%s\"", c)])}}" : null
-
-  default_block_expr = trimspace(var.hostname) != "" ? "http.host eq \"${var.hostname}\"" : null
+  default_block_rules = length(var.hostnames) > 0 && length(var.allowed_ips) > 0 ? [
+    for hostname in var.hostnames : {
+      description = "Block all non-whitelisted traffic to ${hostname}"
+      expression  = "http.host eq \"${hostname}\""
+      action      = "block"
+      enabled     = true
+    }
+  ] : []
 }
 
 resource "cloudflare_ruleset" "this" {
@@ -26,26 +46,8 @@ resource "cloudflare_ruleset" "this" {
   phase   = "http_request_firewall_custom"
 
   rules = concat(
-    local.allow_ips_expr != null ? [{
-      description       = "Allow trusted IPs"
-      expression        = local.allow_ips_expr
-      action            = "skip"
-      enabled           = true
-      action_parameters = { ruleset = "current" }
-    }] : [],
-
-    local.geo_block_expr != null ? [{
-      description = "Block specified countries"
-      expression  = local.geo_block_expr
-      action      = "block"
-      enabled     = true
-    }] : [],
-
-    local.default_block_expr != null && length(var.allowed_ips) > 0 ? [{
-      description = "Block all non-whitelisted traffic"
-      expression  = local.default_block_expr
-      action      = "block"
-      enabled     = true
-    }] : []
+    local.allow_rules,
+    local.geo_block_rules,
+    local.default_block_rules
   )
 }

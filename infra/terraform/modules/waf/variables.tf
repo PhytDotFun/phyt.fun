@@ -8,11 +8,17 @@ variable "zone_id" {
   type        = string
 }
 
-variable "hostname" {
-  description = "Optional hostname to scope rules to"
-  type        = string
-  default     = ""
+variable "hostnames" {
+  description = "List of hostnames to protect"
+  type        = list(string)
+  default     = []
 }
+
+# variable "hostname" {
+#   description = "Optional hostname to scope rules to"
+#   type        = string
+#   default     = ""
+# }
 
 variable "allowed_ips" {
   description = "List of allowed IPs"
