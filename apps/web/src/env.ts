@@ -9,13 +9,13 @@ export const env = createEnv({
             .default('dev'),
         VITE_PRIVY_CLIENT_ID: z.string(),
         VITE_PRIVY_APP_ID: z.string(),
-        VITE_BASE_URL: z.url()
+        VITE_API_URL: z.url()
     },
     runtimeEnv: {
         VITE_NODE_ENV: import.meta.env.VITE_NODE_ENV,
         VITE_PRIVY_CLIENT_ID: import.meta.env.VITE_PRIVY_CLIENT_ID,
         VITE_PRIVY_APP_ID: import.meta.env.VITE_PRIVY_APP_ID,
-        VITE_BASE_URL: import.meta.env.VITE_BASE_URL
+        VITE_API_URL: import.meta.env.VITE_API_URL
     },
     emptyStringAsUndefined: true,
     onValidationError: (error) => {

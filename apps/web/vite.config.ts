@@ -5,7 +5,7 @@ import tailwindcss from '@tailwindcss/vite';
 
 import { resolve } from 'path';
 
-const API_ORIGIN = process.env.API_ORIGIN ?? 'http://localhost:3000';
+const API_ORIGIN = process.env.VITE_API_URL ?? 'http://localhost:3000';
 
 // https://vitejs.dev/config/
 export default defineConfig({

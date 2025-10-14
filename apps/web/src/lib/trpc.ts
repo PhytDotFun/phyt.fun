@@ -12,7 +12,7 @@ export const queryClient = new QueryClient();
 const trpcClient = createTRPCClient<ApiRouter>({
     links: [
         httpBatchLink({
-            url: env.VITE_BASE_URL,
+            url: env.VITE_API_URL,
             async headers() {
                 const { accessToken, idToken } = await getCachedTokens();
                 const headers: Record<string, string> = {
