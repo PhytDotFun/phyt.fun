@@ -23,7 +23,11 @@ resource "cloudflare_dns_record" "tunnel" {
 
 # pages config
 locals {
-  pages_enabled = (trim(var.pages_project_name) != "" && trim(var.pages_domain_name) != "" && trim(var.account_id) != "")
+  pages_enabled = (
+    trimspace(var.pages_project_name) != "" &&
+    trimspace(var.pages_domain_name) != "" &&
+    trimspace(var.account_id) != ""
+  )
 }
 
 resource "cloudflare_pages_project" "pages" {
