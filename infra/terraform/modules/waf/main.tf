@@ -15,6 +15,8 @@ locals {
   allow_ips_expr = length(var.allowed_ips) > 0 ? "${local.host_expr}ip.src in {${join(" ", var.allowed_ips)}}" : null
 
   geo_block_expr = length(var.blocked_countries) > 0 ? "${local.host_expr}ip.geoip.country in {${join(" ", [for c in var.blocked_countries : format("\"%s\"", c)])}}" : null
+
+  default_block_expr = trimspace(var.hostname) != "" ? "http.host eq \"${var.hostname}\"" : null
 }
 
 resource "cloudflare_ruleset" "this" {
@@ -38,5 +40,12 @@ resource "cloudflare_ruleset" "this" {
       action      = "block"
       enabled     = true
     }] : [],
+
+    local.default_block_expr != null && length(var.allowed_ips) > 0 ? [{
+      description = "Block all non-whitelisted traffic"
+      expression  = local.default_block_expr
+      action      = "block"
+      enabled     = true
+    }] : []
   )
 }
