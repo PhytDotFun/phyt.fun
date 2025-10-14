@@ -388,8 +388,6 @@ jobs:
             id-token: write
         env:
             VAULT_ADDR: ${{ vars.VAULT_ADDR }}
-            CF_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-            VITE_API_BASE: https://api.staging.phyt.fun
         steps:
             - name: Checkout
               uses: actions/checkout@v4
@@ -436,30 +434,27 @@ jobs:
             - name: Export web build env
               run: |
                   set -euo pipefail
-                  : "${{ secrets.VITE_PRIVY_CLIENT_ID }}"; : "${{ secrets.VITE_PRIVY_APP_ID }}";
                   echo "VITE_PRIVY_CLIENT_ID=${{ secrets.VITE_PRIVY_CLIENT_ID }}" >> "$GITHUB_ENV"
                   echo "VITE_PRIVY_APP_ID=${{ secrets.VITE_PRIVY_APP_ID }}" >> "$GITHUB_ENV"
                   echo "VITE_API_URL=https://staging.api.phyt.fun" >> "$GITHUB_ENV"
-
-            - name: Setup pnpm
-              uses: pnpm/action-setup@v3
-              with:
-                  version: 10
 
             - name: Setup Node
               uses: actions/setup-node@v4
               with:
                   node-version: 22
-                  cache: pnpm
+                  cache: 'pnpm'
+
+            - name: Enable Corepack (pnpm)
+              run: |
+                  corepack enable
+                  corepack prepare pnpm@10.0.0 --activate
 
             - name: Install dependencies
-              run: pnpm -w i
+              run: pnpm -w install --frozen-lockfile
 
             - name: Build web
               working-directory: web
-              run: |
-                  echo "VITE_API_BASE=${VITE_API_BASE}" > .env.production
-                  pnpm build
+              run: pnpm build
 
             - name: Deploy to Cloudflare Pages
               uses: cloudflare/pages-action@v1
