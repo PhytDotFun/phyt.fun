@@ -142,13 +142,14 @@ jobs:
                     echo "No new cache dir ($src); skipping rotate."
                   fi
 
-    deploy:
+    deploy-api:
+        name: deploy api
         runs-on: [self-hosted, linux, x64, hypercluster]
         needs: build-images
         if: ${{ needs.build-images.result == 'success' || needs.build-images.result == 'skipped' }}
         environment: staging
         concurrency:
-            group: staging-deploy-${{ github.ref }}
+            group: staging-deploy-api-${{ github.ref }}
             cancel-in-progress: true
         permissions:
             id-token: write
@@ -372,3 +373,99 @@ jobs:
                     GHCR_TOKEN="${{ secrets.GITHUB_TOKEN }}" \
                     GHCR_USER="${{ github.actor }}" \
                     'bash -lc "/opt/phyt/deploy/remote-deploy.sh"'
+
+    deploy-web:
+        name: deploy web
+        runs-on: [self-hosted, linux, x64, hypercluster]
+        needs: deploy-api
+        if: ${{ needs.deploy-api.result == 'success' || needs.deploy-api.result == 'skipped' }}
+        environment: staging
+        concurrency:
+            group: staging-deploy-web-${{ github.ref }}
+            cancel-in-progress: true
+        permissions:
+            contents: read
+            id-token: write
+        env:
+            VAULT_ADDR: ${{ vars.VAULT_ADDR }}
+            CF_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+            VITE_API_BASE: https://api.staging.phyt.fun
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+              with: { clean: true }
+
+            - name: Get GitHub OIDC ID token
+              id: oidc
+              uses: actions/github-script@v7
+              with:
+                  script: |
+                      const aud = `https://github.com/${{ github.repository }}`;
+                      const idt = await core.getIDToken(aud);
+                      core.setOutput('jwt', idt);
+
+            - name: Login to Vault via JWT
+              id: vault_login
+              env:
+                  VAULT_ADDR: ${{ env.VAULT_ADDR }}
+                  GITHUB_ID_TOKEN: ${{ steps.oidc.outputs.jwt }}
+              run: |
+                  set -euo pipefail
+                  VAULT_TOKEN=$(curl -fsS -X POST \
+                    -H "Content-Type: application/json" \
+                    -d '{"jwt":"'"${GITHUB_ID_TOKEN}"'","role":"gh-staging"}' \
+                    "${VAULT_ADDR}/v1/auth/jwt/login" | jq -er '.auth.client_token')
+                  echo "::add-mask::${VAULT_TOKEN}"
+                  echo "VAULT_TOKEN=${VAULT_TOKEN}" >> "$GITHUB_ENV"
+
+            - name: Export Cloudflare credentials from Vault
+              id: cf_creds
+              env:
+                  VAULT_TOKEN: ${{ env.VAULT_TOKEN }}
+              run: |
+                  set -euo pipefail
+                  cf_json=$(curl -fsS -H "X-Vault-Token: ${VAULT_TOKEN}" \
+                    "${VAULT_ADDR}/v1/secret/data/staging/cloudflare")
+                  CF_API_TOKEN=$(echo "$cf_json" | jq -er '.data.data.API_TOKEN')
+                  CF_ACCOUNT_ID=$(echo "$cf_json" | jq -er '.data.data.ACCOUNT_ID')
+                  echo "::add-mask::${CF_API_TOKEN}"
+                  echo "::add-mask::${CF_ACCOUNT_ID}"
+                  echo "CF_API_TOKEN=${CF_API_TOKEN}" >> "$GITHUB_ENV"
+                  echo "CF_ACCOUNT_ID=${CF_ACCOUNT_ID}" >> "$GITHUB_ENV"
+
+            - name: Export web build env
+              run: |
+                  set -euo pipefail
+                  : "${{ secrets.VITE_PRIVY_CLIENT_ID }}"; : "${{ secrets.VITE_PRIVY_APP_ID }}";
+                  echo "VITE_PRIVY_CLIENT_ID=${{ secrets.VITE_PRIVY_CLIENT_ID }}" >> "$GITHUB_ENV"
+                  echo "VITE_PRIVY_APP_ID=${{ secrets.VITE_PRIVY_APP_ID }}" >> "$GITHUB_ENV"
+                  echo "VITE_API_URL=https://staging.api.phyt.fun" >> "$GITHUB_ENV"
+
+            - name: Setup pnpm
+              uses: pnpm/action-setup@v3
+              with:
+                  version: 10
+
+            - name: Setup Node
+              uses: actions/setup-node@v4
+              with:
+                  node-version: 22
+                  cache: pnpm
+
+            - name: Install dependencies
+              run: pnpm -w i
+
+            - name: Build web
+              working-directory: web
+              run: |
+                  echo "VITE_API_BASE=${VITE_API_BASE}" > .env.production
+                  pnpm build
+
+            - name: Deploy to Cloudflare Pages
+              uses: cloudflare/pages-action@v1
+              with:
+                  apiToken: ${{ env.CF_API_TOKEN }}
+                  accountId: ${{ env.CF_ACCOUNT_ID }}
+                  projectName: phyt-staging-web
+                  directory: web/dist
+                  gitHubToken: ${{ secrets.GITHUB_TOKEN }}
