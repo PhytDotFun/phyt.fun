@@ -467,3 +467,4 @@ jobs:
                   projectName: phyt-staging-web
                   directory: apps/web/dist
                   gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+                  branch: 'staging'

@@ -34,7 +34,7 @@ resource "cloudflare_pages_project" "pages" {
   count             = local.pages_enabled ? 1 : 0
   account_id        = var.account_id
   name              = var.pages_project_name
-  production_branch = "main"
+  production_branch = "staging"
 }
 
 resource "cloudflare_pages_domain" "pages_domain" {
