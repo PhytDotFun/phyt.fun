@@ -390,6 +390,7 @@ jobs:
         permissions:
             contents: read
             id-token: write
+            deployments: write
         env:
             VAULT_ADDR: ${{ vars.VAULT_ADDR }}
         steps:
