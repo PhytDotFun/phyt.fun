@@ -465,5 +465,5 @@ jobs:
                   apiToken: ${{ env.CF_API_TOKEN }}
                   accountId: ${{ env.CF_ACCOUNT_ID }}
                   projectName: phyt-staging-web
-                  directory: apps/pweb/dist
+                  directory: apps/web/dist
                   gitHubToken: ${{ secrets.GITHUB_TOKEN }}
