@@ -22,6 +22,7 @@
           go
           go-task
           foundry
+          solc
           git
           jq
           yq
