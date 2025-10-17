@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { createDb, createPgClient } from '../client';
+import { createDb } from '../client';
 import { users, runs } from '../schema';
 // import { users, runs, posts, comments, reactions } from '../schema';
 
@@ -9,7 +9,6 @@ if (!databaseUrl) {
 }
 
 const db = createDb(databaseUrl);
-const pgClient = createPgClient(databaseUrl);
 
 // Sample data
 const sampleUsers = [
@@ -301,8 +300,6 @@ await (async () => {
         console.error('Database seeding failed:', err);
         process.exitCode = 1; // set exit code, defer exit to finally
     } finally {
-        // Always close the pg pool so Node can exit cleanly
-        await pgClient.end();
         process.exit();
     }
 })();

@@ -1,6 +1,6 @@
 import { sql } from 'drizzle-orm';
 
-import { createDb, createPgClient } from '../client';
+import { createDb } from '../client';
 
 const KEEP_TABLES = ['_drizzle_migrations'];
 
@@ -10,7 +10,6 @@ if (!databaseUrl) {
 }
 
 const db = createDb(databaseUrl);
-const pgClient = createPgClient(databaseUrl);
 
 // Wrap the whole task in one async IIFE so ESLint is happy
 await (async () => {
@@ -69,8 +68,6 @@ await (async () => {
         console.error('Database clean failed:', err);
         process.exitCode = 1; // set exit code, defer exit to finally
     } finally {
-        // Always close the pg pool so Node can exit cleanly
-        await pgClient.end();
         process.exit();
     }
 })();
