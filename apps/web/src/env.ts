@@ -5,8 +5,8 @@ export const env = createEnv({
     clientPrefix: 'VITE_',
     client: {
         VITE_NODE_ENV: z
-            .enum(['dev', 'prod', 'test', 'staging'])
-            .default('dev'),
+            .enum(['development', 'production', 'test', 'staging'])
+            .default('development'),
         VITE_PRIVY_CLIENT_ID: z.string(),
         VITE_PRIVY_APP_ID: z.string(),
         VITE_API_URL: z.url()

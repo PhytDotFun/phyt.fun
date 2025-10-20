@@ -6,7 +6,7 @@ dotenv.config({ path: process.env.ENV_PATH || '.env', override: true });
 
 export const env = createEnv({
     server: {
-        NODE_ENV: z.enum(['dev', 'prod', 'test', 'staging']).default('dev'),
+        NODE_ENV: z.enum(['development', 'production', 'test', 'staging']).default('development'),
         CORS_ORIGIN: z.string(),
         LOG_LEVEL: z
             .enum(['trace', 'debug', 'info', 'warn', 'error'])
