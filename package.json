@@ -16,8 +16,8 @@
         "lint:fix": "pnpm syncpack fix --dependency-types prod,dev && turbo run lint:fix",
         "postinstall": "pnpm --filter @phyt/contracts deps:install",
         "prepare": "husky",
-        "redis:down": "docker stop redis-dev && docker rm redis-dev",
-        "redis:up": "docker run --name redis-dev -p 6379:6379 redis:7"
+        "redis:down": "docker stop redis-dev 2>/dev/null || true && docker rm redis-dev 2>/dev/null || true",
+        "redis:up": "docker start redis-dev 2>/dev/null || docker run -d --name redis-dev -p 6379:6379 redis:7-alpine"
     },
     "devDependencies": {
         "@changesets/cli": "catalog:",
