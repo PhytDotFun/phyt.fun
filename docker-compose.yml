@@ -37,7 +37,7 @@ services:
             - 'host.docker.internal:host-gateway'
         dns:
             - 100.100.100.100
-        profiles: ['dev', 'staging', 'prod']
+        profiles: ['staging', 'production']
         restart: ${RESTART_POLICY:-unless-stopped}
 
     redis:
@@ -51,7 +51,7 @@ services:
             retries: 5
         networks:
             - phyt
-        profiles: ['dev', 'staging', 'prod']
+        profiles: ['staging', 'production']
         restart: ${RESTART_POLICY:-unless-stopped}
 
     hono-api:
@@ -88,7 +88,7 @@ services:
             - phyt
         extra_hosts:
             - 'host.docker.internal:host-gateway'
-        profiles: ['dev', 'staging', 'prod']
+        profiles: ['staging', 'production']
         restart: ${RESTART_POLICY:-unless-stopped}
 
     workers:
@@ -113,7 +113,7 @@ services:
             - phyt
         extra_hosts:
             - 'host.docker.internal:host-gateway'
-        profiles: ['dev', 'staging', 'prod']
+        profiles: ['staging', 'production']
         restart: ${RESTART_POLICY:-unless-stopped}
 
 networks:
