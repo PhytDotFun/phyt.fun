@@ -14,10 +14,10 @@
         "flush": "rm -rf node_modules && rm -rf .turbo && pnpm store prune",
         "lint": "pnpm syncpack lint --dependency-types prod,dev && turbo run lint",
         "lint:fix": "pnpm syncpack fix --dependency-types prod,dev && turbo run lint:fix",
-        "redis:up": "docker run --name redis-dev -p 6379:6379 redis:7",
-        "redis:down": "docker stop redis-dev && docker rm redis-dev",
         "postinstall": "pnpm --filter @phyt/contracts deps:install",
-        "prepare": "husky"
+        "prepare": "husky",
+        "redis:down": "docker stop redis-dev && docker rm redis-dev",
+        "redis:up": "docker run --name redis-dev -p 6379:6379 redis:7"
     },
     "devDependencies": {
         "@changesets/cli": "catalog:",
@@ -32,7 +32,7 @@
         "rimraf": "catalog:",
         "syncpack": "catalog:",
         "tsx": "catalog:",
-        "turbo": "^2.5.6"
+        "turbo": "^2.5.8"
     },
     "engines": {
         "node": ">=22"
