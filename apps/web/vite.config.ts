@@ -1,20 +1,24 @@
 import { defineConfig } from 'vite';
 import { tanstackRouter } from '@tanstack/router-plugin/vite';
-import viteReact from '@vitejs/plugin-react';
+import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
-
 import { resolve } from 'path';
 
 const API_ORIGIN = process.env.VITE_API_URL ?? 'http://localhost:3000';
 
-// https://vitejs.dev/config/
+const isReact = (id: string) =>
+    /[/\\]node_modules[/\\]react(?:[/\\]|$)/.test(id);
+const isReactDOM = (id: string) =>
+    /[/\\]node_modules[/\\]react-dom(?:[/\\]|$)/.test(id);
+
 export default defineConfig({
     plugins: [
         tanstackRouter({ autoCodeSplitting: true }),
-        viteReact({
+        react({
             babel: {
                 plugins: [['babel-plugin-react-compiler', { target: '19' }]]
-            }
+            },
+            jsxImportSource: 'react'
         }),
         tailwindcss()
     ],
@@ -49,16 +53,16 @@ export default defineConfig({
         target: 'esnext',
         rollupOptions: {
             output: {
+                // keep React + TanStack together to avoid load-order/interop issues
                 manualChunks(id) {
-                    // Create a chunk for the Privy vendor files
-                    if (id.includes('@privy-io')) {
-                        return 'privy-vendor';
+                    if (
+                        id.includes('@tanstack') ||
+                        isReact(id) ||
+                        isReactDOM(id)
+                    ) {
+                        return 'react-tanstack';
                     }
-                    // Create a chunk for the TanStack vendor files
-                    if (id.includes('@tanstack')) {
-                        return 'tanstack-vendor';
-                    }
-                    // Create a chunk for the main UI libraries
+                    if (id.includes('@privy-io')) return 'privy-vendor';
                     if (
                         id.includes('@radix-ui') ||
                         id.includes('cmdk') ||
@@ -67,27 +71,12 @@ export default defineConfig({
                     ) {
                         return 'ui-vendor';
                     }
-                    // Create a chunk for charting libraries
-                    if (id.includes('recharts')) {
-                        return 'chart-vendor';
-                    }
-                    // Create a chunk for React itself
-                    if (id.includes('react') || id.includes('react-dom')) {
-                        return 'react-vendor';
-                    }
-                    // All other node_modules go to a general vendor chunk
-                    if (id.includes('node_modules')) {
-                        return 'vendor';
-                    }
+                    if (id.includes('recharts')) return 'chart-vendor';
+                    if (id.includes('node_modules')) return 'vendor';
                 }
             },
             onwarn(warning, warn) {
-                // Suppress all 'INVALID_ANNOTATION' warnings, regardless of the package
-                if (warning.code === 'INVALID_ANNOTATION') {
-                    return;
-                }
-                // Use the default Rollup warner for all other warnings
-                warn(warning);
+                if (warning.code !== 'INVALID_ANNOTATION') warn(warning);
             }
         }
     }
